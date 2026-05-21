@@ -14,5 +14,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // though Supabase will still fail on actual requests.
 export const supabase = createClient(
   supabaseUrl || 'https://grudlgdrksbucmjbghxi.supabase.co',
-  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdydWRsZ2Rya3NidWNtamJnaHhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTkwNjUsImV4cCI6MjA5NDgzNTA2NX0.JlvHr4HBX-oRZIGPMbQgYXZr3xWS-Rl5h5eW3rsgE8M'
+  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdydWRsZ2Rya3NidWNtamJnaHhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNTkwNjUsImV4cCI6MjA5NDgzNTA2NX0.JlvHr4HBX-oRZIGPMbQgYXZr3xWS-Rl5h5eW3rsgE8M',
+  {
+    auth: {
+      storage: localStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  }
 );

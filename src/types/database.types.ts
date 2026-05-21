@@ -75,3 +75,40 @@ export interface ActivityLog {
   details: Json
   created_at: string
 }
+
+export interface Rule {
+  id: string
+  title: string
+  content: string
+  is_pinned: boolean
+  is_visible: boolean
+  priority: number
+  category: string | null
+  created_by: string | null
+  updated_at: string
+}
+
+export interface Reminder {
+  id: string
+  title: string
+  message: string
+  scheduled_at: string | null
+  expires_at: string | null
+  is_important: boolean
+  target_role: string | null
+  target_user_id: string | null
+  created_by: string | null
+  created_at: string
+}
+
+export interface MinecraftVersion {
+  id: string
+  version_string: string
+  is_supported: boolean
+  is_recommended: boolean
+  maintenance_mode: boolean
+  supports_java: boolean
+  supports_bedrock: boolean
+  changelog: string | null
+  updated_at: string
+}

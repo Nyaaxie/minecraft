@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth';
 import { useAuthStore } from './store/useAuthStore';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Toaster } from 'react-hot-toast';
 
 // Lazy load pages for performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -66,6 +67,8 @@ const HomePage = () => (
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
   const { user, profile, loading } = useAuthStore();
   
+  console.log('ProtectedRoute: loading', loading, 'user', !!user);
+
   if (loading) return <LoadingScreen />;
   
   if (!user) return <Navigate to="/login" />;
@@ -80,6 +83,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-strawberry-500 selection:text-white font-sans">
+        <Toaster position="bottom-right" toastOptions={{ style: { background: '#171717', color: '#fff' } }} />
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/" element={<HomePage />} />

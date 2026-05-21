@@ -11,7 +11,6 @@ import {
   LogOut, 
   Menu, 
   X,
-  Gamepad2,
   Map as MapIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

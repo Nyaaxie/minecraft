@@ -17,10 +17,12 @@ const LoginPage = () => {
     setError(null);
 
     try {
+      console.time('login-auth-time');
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+      console.timeEnd('login-auth-time');
 
       if (error) throw error;
       navigate('/dashboard');
