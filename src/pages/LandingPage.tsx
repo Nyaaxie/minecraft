@@ -164,25 +164,28 @@ const TimelineItem = ({ year, title, description, side = 'left' }: { year: strin
   );
 };
 
+// Generate floating hearts configuration once outside the component
+const generateFloatingHearts = () => {
+  const hearts = [];
+  for (let i = 0; i < 6; i++) {
+    hearts.push({
+      x: Math.floor(Math.random() * 100) + '%',
+      y: Math.floor(Math.random() * 100) + '%',
+      duration: 5 + Math.floor(Math.random() * 5),
+      size: 24 + Math.floor(Math.random() * 40)
+    });
+  }
+  return hearts;
+};
+
+const memoizedFloatingHearts = generateFloatingHearts();
+
 const LandingPage = () => {
   const [rules, setRules] = useState<Rule[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [versions, setVersions] = useState<MinecraftVersion[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Memoized floating icons configuration
-  const floatingHearts = React.useMemo(() => {
-    const hearts = [];
-    for (let i = 0; i < 6; i++) {
-      hearts.push({
-        x: Math.floor(Math.random() * 100) + '%',
-        y: Math.floor(Math.random() * 100) + '%',
-        duration: 5 + Math.floor(Math.random() * 5),
-        size: 24 + Math.floor(Math.random() * 40)
-      });
-    }
-    return hearts;
-  }, []);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -303,7 +306,7 @@ const LandingPage = () => {
 
         {/* Floating Icons */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-          {floatingHearts.map((heart, i) => (
+          {memoizedFloatingHearts.map((heart, i) => (
             <motion.div
               key={i}
               className="absolute"

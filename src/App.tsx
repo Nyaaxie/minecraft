@@ -15,6 +15,12 @@ const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const DynaMapPage = lazy(() => import('./pages/DynaMapPage'));
+const PluginsPage = lazy(() => import('./pages/PluginsPage'));
+const AdminPluginsPage = lazy(() => import('./pages/AdminPluginsPage'));
+const ShopsPage = lazy(() => import('./pages/ShopsPage'));
+const ShopDetailPage = lazy(() => import('./pages/ShopDetailPage'));
+const AdminShopPage = lazy(() => import('./pages/AdminShopPage'));
+const AdminShopItemPage = lazy(() => import('./pages/AdminShopItemPage'));
 
 import DashboardLayout from './components/DashboardLayout';
 
@@ -65,6 +71,15 @@ function App() {
             />
             
             <Route path="/dynamap" element={<ProtectedRoute><DashboardLayout><DynaMapPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/plugins" element={<ProtectedRoute><DashboardLayout><PluginsPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/plugins/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/plugins/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/shops" element={<ProtectedRoute><DashboardLayout><ShopsPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/shops/:id" element={<ProtectedRoute><DashboardLayout><ShopDetailPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/shops/new" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/shops/edit/:id" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/shops/:shopId/items/new" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/shops/:shopId/items/edit/:itemId" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/events" element={<ProtectedRoute><DashboardLayout><EventsPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><DashboardLayout><MessagesPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><NotificationsPage /></DashboardLayout></ProtectedRoute>} />

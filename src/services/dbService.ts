@@ -1,7 +1,20 @@
 import { supabase } from './supabase';
-import type { Event, EventRSVP, Profile, Announcement } from '../types/database.types';
+import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem } from '../types/database.types';
 
 export const dbService = {
+  // --- Profiles & Admin ---
+  async getAllProfiles() {
+    const { data, error } = await supabase.from('profiles').select('*').order('username', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  async updateProfile(id: string, updates: Partial<Profile>) {
+    const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+
   // --- Events ---
   async getEvents() {
     const { data, error } = await supabase
@@ -83,19 +96,6 @@ export const dbService = {
     if (error) throw error;
   },
 
-  // --- Profiles & Admin ---
-  async getAllProfiles() {
-    const { data, error } = await supabase.from('profiles').select('*').order('username', { ascending: true });
-    if (error) throw error;
-    return data;
-  },
-
-  async updateProfile(id: string, updates: Partial<Profile>) {
-    const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
-  },
-
   // --- Announcements ---
   async getAnnouncements() {
     const { data, error } = await supabase.from('announcements').select('*, profiles(username)').order('created_at', { ascending: false });
@@ -139,5 +139,118 @@ export const dbService = {
       .order('updated_at', { ascending: false });
     if (error) throw error;
     return data;
-  }
+  },
+
+  // --- Plugins ---
+  async getPlugins() {
+    const { data, error } = await supabase.from('plugins').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async getPluginById(id: string) {
+    const { data, error } = await supabase.from('plugins').select('*').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  },
+  async createPlugin(plugin: Omit<Plugin, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('plugins').insert(plugin).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updatePlugin(id: string, updates: Partial<Plugin>) {
+    const { data, error } = await supabase.from('plugins').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deletePlugin(id: string) {
+    const { error } = await supabase.from('plugins').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // --- Shop Categories ---
+  async getShopCategories() {
+    const { data, error } = await supabase.from('shop_categories').select('*').order('name', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+  async createShopCategory(category: Omit<ShopCategory, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('shop_categories').insert(category).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updateShopCategory(id: string, updates: Partial<ShopCategory>) {
+    const { data, error } = await supabase.from('shop_categories').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deleteShopCategory(id: string) {
+    const { error } = await supabase.from('shop_categories').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // --- Player Shops ---
+  async getPlayerShops() {
+    const { data, error } = await supabase.from('player_shops').select('*, profiles(username, avatar_url)').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async getPlayerShopById(id: string) {
+    const { data, error } = await supabase.from('player_shops').select('*, profiles(username, avatar_url)').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  },
+  async getPlayerShopsByOwner(ownerId: string) {
+    const { data, error } = await supabase.from('player_shops').select('*, profiles(username, avatar_url)').eq('owner_id', ownerId).order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async createPlayerShop(shop: Omit<PlayerShop, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('player_shops').insert(shop).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updatePlayerShop(id: string, updates: Partial<PlayerShop>) {
+    const { data, error } = await supabase.from('player_shops').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deletePlayerShop(id: string) {
+    const { error } = await supabase.from('player_shops').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // --- Shop Items ---
+  async getShopItems() {
+    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), shop_categories(name)').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async getShopItemById(id: string) {
+    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), shop_categories(name)').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  },
+  async getShopItemsByShop(shopId: string) {
+    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), shop_categories(name)').eq('shop_id', shopId).order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async createShopItem(item: Omit<ShopItem, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('shop_items').insert(item).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updateShopItem(id: string, updates: Partial<ShopItem>) {
+    const { data, error } = await supabase.from('shop_items').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deleteShopItem(id: string) {
+    const { error } = await supabase.from('shop_items').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
 };

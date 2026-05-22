@@ -11,7 +11,9 @@ import {
   LogOut, 
   Menu, 
   X,
-  Map as MapIcon
+  Map as MapIcon,
+  Puzzle,
+  Sparkle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -39,6 +41,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Overview', to: '/dashboard' },
     { icon: MapIcon, label: 'DynaMap', to: '/dynamap' },
+    { icon: Puzzle, label: 'Plugins', to: '/plugins' },
+    { icon: Sparkle, label: 'Player Shops', to: '/shops' },
     { icon: Calendar, label: 'Events', to: '/events' },
     { icon: MessageSquare, label: 'Messages', to: '/messages' },
     { icon: Bell, label: 'Notifications', to: '/notifications' },

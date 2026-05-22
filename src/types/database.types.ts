@@ -112,3 +112,57 @@ export interface MinecraftVersion {
   changelog: string | null
   updated_at: string
 }
+
+// For Plugins Showcase System
+export interface Plugin {
+  id: string;
+  name: string;
+  description: string | null;
+  icon_url: string | null;
+  category: string | null;
+  version: string | null;
+  is_visible: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// For Player Shop Categories
+export interface ShopCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  icon_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// For Player Shops
+export interface PlayerShop {
+  id: string;
+  owner_id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// For Shop Items
+export interface ShopItem {
+  id: string;
+  shop_id: string;
+  item_name: string;
+  minecraft_item_id: string; // e.g., "minecraft:diamond_sword"
+  price: number;
+  currency: string; // e.g., "diamond", "emerald", "iron_ingot"
+  quantity: number;
+  description: string | null;
+  availability_status: 'in_stock' | 'out_of_stock' | 'on_order';
+  category_id: string | null;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+  shop_categories?: { name: string } | null; // Joined data
+}
+
