@@ -107,5 +107,37 @@ export const dbService = {
     const { data, error } = await supabase.from('announcements').insert(announcement).select().single();
     if (error) throw error;
     return data;
+  },
+
+  // --- Rules ---
+  async getRules() {
+    const { data, error } = await supabase
+      .from('rules')
+      .select('*')
+      .eq('is_visible', true)
+      .order('priority', { ascending: false })
+      .order('updated_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+
+  // --- Reminders ---
+  async getReminders() {
+    const { data, error } = await supabase
+      .from('reminders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+
+  // --- Minecraft Versions ---
+  async getMinecraftVersions() {
+    const { data, error } = await supabase
+      .from('minecraft_versions')
+      .select('*')
+      .order('updated_at', { ascending: false });
+    if (error) throw error;
+    return data;
   }
 };

@@ -1,13 +1,13 @@
 import React, { Suspense, lazy } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { useAuthStore } from './store/useAuthStore';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 // Lazy load pages for performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const EventsPage = lazy(() => import('./pages/EventsPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
@@ -24,43 +24,6 @@ const LoadingScreen = () => (
       <div className="w-12 h-12 border-4 border-strawberry-600 border-t-transparent rounded-full animate-spin"></div>
       <p className="text-neutral-500 font-bold animate-pulse uppercase tracking-widest text-xs">Loading StrawberrySMP...</p>
     </div>
-  </div>
-);
-
-const HomePage = () => (
-  <div className="flex items-center justify-center h-screen flex-col text-center px-4 bg-neutral-950 overflow-hidden relative">
-    {/* Background Glow */}
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-strawberry-600/20 blur-[120px] rounded-full -z-10" />
-    
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="max-w-2xl relative z-10"
-    >
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="inline-block px-4 py-1.5 mb-6 rounded-full bg-strawberry-600/10 border border-strawberry-600/20 text-strawberry-500 text-sm font-bold tracking-wider uppercase"
-      >
-        Season 4 is Live!
-      </motion.div>
-      <h1 className="text-6xl md:text-8xl font-black text-strawberry-600 tracking-tighter italic uppercase leading-tight">
-        STRAWBERRY<br /><span className="text-white">SMP</span>
-      </h1>
-      <p className="mt-8 text-xl text-neutral-400 leading-relaxed max-w-xl mx-auto">
-        The ultimate management platform for the Strawberry community. 
-        Track events, chat with players, and stay updated with live announcements.
-      </p>
-      <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
-        <Link to="/signup" className="px-10 py-4 bg-strawberry-600 rounded-2xl font-bold hover:bg-strawberry-700 transition-all shadow-xl shadow-strawberry-600/30 text-lg">
-          Join Community
-        </Link>
-        <Link to="/login" className="px-10 py-4 bg-neutral-900 border border-neutral-800 rounded-2xl font-bold hover:bg-neutral-800 transition-all text-lg">
-          Player Login
-        </Link>
-      </div>
-    </motion.div>
   </div>
 );
 
@@ -86,7 +49,7 @@ function App() {
         <Toaster position="bottom-right" toastOptions={{ style: { background: '#171717', color: '#fff' } }} />
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             
