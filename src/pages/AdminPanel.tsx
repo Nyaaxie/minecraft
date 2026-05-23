@@ -6,7 +6,7 @@ import { Modal } from '../components/Modal';
 import { AddVersionModal } from '../components/AddVersionModal';
 import { AnnouncementModal } from '../components/AnnouncementModal';
 import AddEditBadgeModal from '../components/AddEditBadgeModal';
-import AssignBadgesModal from '../components/AssignBadgesModal'; // New Import for AssignBadgesModal
+import AssignBadgesModal from '../components/AssignBadgesModal';
 import { useMinecraftVersions } from '../hooks/useMinecraftVersions';
 import { useAuthStore } from '../store/useAuthStore';
 import type { Profile, Event, Rule, Reminder, MinecraftVersion, Badge } from '../types/database.types';
@@ -421,9 +421,8 @@ const AdminPanel = () => {
       <AnnouncementModal
         isOpen={modal.isOpen && (modal.type === 'announcement' || modal.type === 'edit-announcement')}
         onClose={() => setModal({ isOpen: false, type: '' })}
-        onSaved={(a) => {
-          if (modal.type === 'edit-announcement') setAnnouncements(prev => prev.map(item => item.id === a.id ? a : item));
-          else setAnnouncements(prev => [a, ...prev]);
+        onSaved={() => {
+          fetchData(); // Just re-fetch all data to be safe and keep UI consistent
         }}
         announcement={modal.type === 'edit-announcement' ? modal.data : undefined}
       />
