@@ -422,7 +422,7 @@ const AdminPanel = () => {
         isOpen={modal.isOpen && (modal.type === 'announcement' || modal.type === 'edit-announcement')}
         onClose={() => setModal({ isOpen: false, type: '' })}
         onSaved={() => {
-          fetchData(); // Just re-fetch all data to be safe and keep UI consistent
+          fetchData();
         }}
         announcement={modal.type === 'edit-announcement' ? modal.data : undefined}
       />
