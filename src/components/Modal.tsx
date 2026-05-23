@@ -26,15 +26,15 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl w-full max-w-lg pointer-events-auto overflow-hidden"
+              className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-2xl w-full max-w-lg pointer-events-auto overflow-hidden"
             >
-              <div className="flex items-center justify-between p-6 border-b border-neutral-800">
-                <h3 className="text-xl font-bold">{title}</h3>
-                <button onClick={onClose} className="p-2 text-neutral-500 hover:text-white transition-colors">
+              <div className="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-800">
+                <h3 className="text-xl font-bold text-neutral-900 dark:text-white">{title}</h3>
+                <button onClick={onClose} className="p-2 text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors">
                   <X size={20} />
                 </button>
               </div>
-              <div className="p-6">
+              <div className="p-6 text-neutral-900 dark:text-neutral-300">
                 {children}
               </div>
             </motion.div>

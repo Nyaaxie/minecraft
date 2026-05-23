@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import NotificationCenter from './NotificationCenter';
+import { ThemeToggle } from './ThemeToggle';
 import {
   LayoutDashboard,
   Calendar,
@@ -23,8 +24,8 @@ const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, la
     to={to}
     onClick={onClick}
     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active
-        ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20'
-        : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
+      ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20'
+      : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
       }`}
   >
     <Icon size={20} />
@@ -40,7 +41,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Overview', to: '/dashboard' },
-    { icon: MapIcon, label: 'DynaMap', to: '/dynamap' },
+    { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
     { icon: Puzzle, label: 'Plugins', to: '/plugins' },
     { icon: Sparkle, label: 'Player Shops', to: '/shops' },
     { icon: Calendar, label: 'Events', to: '/events' },
@@ -59,9 +60,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="flex min-h-screen bg-neutral-950 font-sans">
+    <div className="flex min-h-screen bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 font-sans">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-neutral-800 bg-neutral-900/50 backdrop-blur-xl p-4 fixed h-screen overflow-y-auto hide-scrollbar">
+      <aside className="hidden lg:flex w-64 flex-col border-r border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-xl p-4 fixed h-screen overflow-y-auto hide-scrollbar">
         <div className="flex items-center gap-3 px-4 py-6">
           <div className="p-2 bg-strawberry-600 rounded-lg text-white">
             <img src="/logo.png" alt="Logo" className="w-6 h-6" />
@@ -79,23 +80,26 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           ))}
         </nav>
 
-        <div className="mt-auto border-t border-neutral-800 pt-4">
-          <div className="flex items-center gap-3 px-4 py-3 mb-4">
-            <div className="h-10 w-10 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden">
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-              ) : (
-                <User size={20} className="text-neutral-500" />
-              )}
+        <div className="mt-auto border-t border-neutral-200 dark:border-neutral-800 pt-4">
+          <div className="flex items-center gap-3 px-4 py-3 mb-4 justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center overflow-hidden">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <User size={20} className="text-neutral-500" />
+                )}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-semibold truncate">{profile?.username || 'Player'}</span>
+                <span className="text-xs text-neutral-500 capitalize">{profile?.role || 'Player'}</span>
+              </div>
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold truncate">{profile?.username || 'Player'}</span>
-              <span className="text-xs text-neutral-500 capitalize">{profile?.role || 'Player'}</span>
-            </div>
+            <ThemeToggle />
           </div>
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 w-full px-4 py-3 text-neutral-400 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all"
+            className="flex items-center gap-3 w-full px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-400/5 rounded-xl transition-all"
           >
             <LogOut size={20} />
             <span className="font-medium">Sign Out</span>
@@ -104,7 +108,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-neutral-900/80 backdrop-blur-lg border-b border-neutral-800 px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-lg border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-strawberry-600 rounded text-white">
             <img src="/logo.png" alt="Logo" className="w-4.5 h-4.5" />
@@ -113,9 +117,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
         <div className="flex items-center gap-2">
           <NotificationCenter />
+          <ThemeToggle />
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-neutral-400 hover:text-white"
+            className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -138,7 +143,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               initial={{ opacity: 0, x: -100 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
-              className="lg:hidden fixed inset-0 z-40 bg-neutral-950 pt-16 p-4"
+              className="lg:hidden fixed inset-0 z-40 bg-white dark:bg-neutral-950 pt-16 p-4"
             >
               <nav className="space-y-2">
                 {menuItems.map((item) => (
@@ -147,8 +152,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     to={item.to}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all ${location.pathname === item.to
-                        ? 'bg-strawberry-600 text-white'
-                        : 'text-neutral-400'
+                      ? 'bg-strawberry-600 text-white'
+                      : 'text-neutral-400'
                       }`}
                   >
                     <item.icon size={24} />

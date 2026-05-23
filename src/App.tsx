@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { AuthProvider } from './components/AuthProvider';
+import { ThemeProvider } from './components/ThemeProvider';
 import { useAuthStore } from './store/useAuthStore';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -60,52 +61,54 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-strawberry-500 selection:text-white font-sans">
-          <Toaster position="bottom-right" toastOptions={{ style: { background: '#171717', color: '#fff' } }} />
-          <Suspense fallback={<LoadingScreen />}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/verify" element={<VerificationPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />              <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <div className="min-h-screen bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 selection:bg-strawberry-500 selection:text-white font-sans">
+            <Toaster position="bottom-right" toastOptions={{ style: { background: '#171717', color: '#fff' } }} />
+            <Suspense fallback={<LoadingScreen />}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/verify" element={<VerificationPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />              <Route path="/reset-password" element={<ResetPasswordPage />} />
+                
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <DashboardPage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } 
+                />
               
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout>
-                      <DashboardPage />
-                    </DashboardLayout>
-                  </ProtectedRoute>
-                } 
-              />
-            
-            <Route path="/dynamap" element={<ProtectedRoute><DashboardLayout><DynaMapPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/plugins" element={<ProtectedRoute><DashboardLayout><PluginsPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin/plugins/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin/plugins/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/shops" element={<ProtectedRoute><DashboardLayout><ShopsPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/shops/:id" element={<ProtectedRoute><DashboardLayout><ShopDetailPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/shops/new" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/shops/edit/:id" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/shops/:shopId/items/new" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/shops/:shopId/items/edit/:itemId" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/events" element={<ProtectedRoute><DashboardLayout><EventsPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/messages" element={<ProtectedRoute><DashboardLayout><MessagesPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><NotificationsPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfilePage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin/categories/:categoryType" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin/categories/:categoryType/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin/categories/:categoryType/edit/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
-            
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </Suspense>
-      </div>
-    </AuthProvider>
+              <Route path="/dynamap" element={<ProtectedRoute><DashboardLayout><DynaMapPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/plugins" element={<ProtectedRoute><DashboardLayout><PluginsPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/admin/plugins/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/admin/plugins/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops" element={<ProtectedRoute><DashboardLayout><ShopsPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops/:id" element={<ProtectedRoute><DashboardLayout><ShopDetailPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops/new" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops/edit/:id" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops/:shopId/items/new" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops/:shopId/items/edit/:itemId" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/events" element={<ProtectedRoute><DashboardLayout><EventsPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/messages" element={<ProtectedRoute><DashboardLayout><MessagesPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><NotificationsPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfilePage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/admin/categories/:categoryType" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/admin/categories/:categoryType/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/admin/categories/:categoryType/edit/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
+              
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </Suspense>
+        </div>
+      </AuthProvider>
+    </ThemeProvider>
   </Router>
   );
 }

@@ -18,6 +18,7 @@ export interface Profile {
   status: ProfileStatus
   bio: string | null
   is_banned: boolean
+  theme_preference: 'dark' | 'light' | null
   created_at: string
   updated_at: string
 }

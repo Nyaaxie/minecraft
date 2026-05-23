@@ -103,10 +103,10 @@ const MessagesPage = () => {
   );
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden">
+    <div className="flex h-[calc(100vh-12rem)] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden text-neutral-900 dark:text-neutral-100">
       {/* Sidebar */}
-      <div className={`w-full md:w-80 border-r border-neutral-800 flex flex-col ${selectedProfile ? 'hidden md:flex' : 'flex'}`}>
-        <div className="p-4 border-b border-neutral-800">
+      <div className={`w-full md:w-80 border-r border-neutral-200 dark:border-neutral-800 flex flex-col ${selectedProfile ? 'hidden md:flex' : 'flex'}`}>
+        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
           <h2 className="text-xl font-bold mb-4">Messages</h2>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
@@ -115,23 +115,23 @@ const MessagesPage = () => {
               placeholder="Search players..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-strawberry-500 transition-colors"
+              className="w-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-strawberry-500 transition-colors"
             />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {loading ? (
-            [1, 2, 3].map(i => <div key={i} className="h-16 bg-neutral-800/50 rounded-xl animate-pulse" />)
+            [1, 2, 3].map(i => <div key={i} className="h-16 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl animate-pulse" />)
           ) : filteredProfiles.map((p) => (
             <button
               key={p.id}
               onClick={() => setSelectedProfile(p)}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-                selectedProfile?.id === p.id ? 'bg-strawberry-600 text-white' : 'hover:bg-neutral-800 text-neutral-400'
+                selectedProfile?.id === p.id ? 'bg-strawberry-600 text-white' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
               }`}
             >
-              <div className="h-10 w-10 rounded-full bg-neutral-700 flex-shrink-0 flex items-center justify-center overflow-hidden">
+              <div className="h-10 w-10 rounded-full bg-neutral-200 dark:bg-neutral-700 flex-shrink-0 flex items-center justify-center overflow-hidden">
                 {p.avatar_url ? (
                   <img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
                 ) : (
@@ -150,19 +150,19 @@ const MessagesPage = () => {
       </div>
 
       {/* Chat Area */}
-      <div className={`flex-1 flex flex-col bg-neutral-900/50 ${!selectedProfile ? 'hidden md:flex items-center justify-center' : 'flex'}`}>
+      <div className={`flex-1 flex flex-col bg-neutral-50 dark:bg-neutral-900/50 ${!selectedProfile ? 'hidden md:flex items-center justify-center' : 'flex'}`}>
         {selectedProfile ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-neutral-800 flex items-center justify-between bg-neutral-900">
+            <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-white dark:bg-neutral-900">
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setSelectedProfile(null)}
-                  className="md:hidden p-2 text-neutral-400 hover:text-white"
+                  className="md:hidden p-2 text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
                 >
                   <ArrowLeft size={20} />
                 </button>
-                <div className="h-10 w-10 rounded-full bg-neutral-700 flex items-center justify-center overflow-hidden">
+                <div className="h-10 w-10 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center overflow-hidden">
                   {selectedProfile.avatar_url ? (
                     <img src={selectedProfile.avatar_url} alt="" className="h-full w-full object-cover" />
                   ) : (
@@ -170,11 +170,11 @@ const MessagesPage = () => {
                   )}
                 </div>
                 <div>
-                  <p className="font-bold">{selectedProfile.username}</p>
+                  <p className="font-bold text-neutral-900 dark:text-white">{selectedProfile.username}</p>
                   <p className="text-xs text-neutral-500">{selectedProfile.status === 'online' ? 'Online' : 'Offline'}</p>
                 </div>
               </div>
-              <button className="p-2 text-neutral-500 hover:text-white">
+              <button className="p-2 text-neutral-500 hover:text-neutral-900 dark:hover:text-white">
                 <MoreVertical size={20} />
               </button>
             </div>
@@ -189,7 +189,7 @@ const MessagesPage = () => {
                   <div className={`max-w-[80%] md:max-w-[60%] p-3 rounded-2xl text-sm ${
                     msg.sender_id === currentUser?.id 
                       ? 'bg-strawberry-600 text-white rounded-tr-none' 
-                      : 'bg-neutral-800 text-neutral-200 rounded-tl-none'
+                      : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-200 rounded-tl-none'
                   }`}>
                     <p>{msg.content}</p>
                     <p className={`text-[10px] mt-1 opacity-50 ${msg.sender_id === currentUser?.id ? 'text-right' : 'text-left'}`}>
@@ -202,14 +202,14 @@ const MessagesPage = () => {
             </div>
 
             {/* Input Area */}
-            <form onSubmit={handleSend} className="p-4 bg-neutral-900 border-t border-neutral-800">
+            <form onSubmit={handleSend} className="p-4 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800">
               <div className="flex gap-2">
                 <input 
                   type="text"
                   placeholder="Type a message..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  className="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 text-sm focus:border-strawberry-500 transition-colors"
+                  className="flex-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-sm focus:border-strawberry-500 transition-colors"
                 />
                 <button 
                   type="submit"

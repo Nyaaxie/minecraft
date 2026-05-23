@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-strawberry-50: #fff1f2;
   --color-strawberry-100: #ffe4e6;
@@ -17,7 +19,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 html {
@@ -25,7 +27,7 @@ html {
 }
 
 body {
-  @apply bg-neutral-950 text-neutral-100 antialiased;
+  @apply bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 antialiased;
 }
 
 /* Custom Utilities */

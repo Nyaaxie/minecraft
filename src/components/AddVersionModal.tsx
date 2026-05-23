@@ -16,50 +16,60 @@ const addVersionSchema = z.object({
 });
 
 type AddVersionFormData = z.infer<typeof addVersionSchema>;
-
 interface AddVersionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onVersionAdded: (version: MinecraftVersion) => void;
+  version?: MinecraftVersion; // Optional version prop for editing
 }
 
-export const AddVersionModal: React.FC<AddVersionModalProps> = ({ isOpen, onClose, onVersionAdded }) => {
+export const AddVersionModal: React.FC<AddVersionModalProps> = ({ isOpen, onClose, onVersionAdded, version }) => {
+  const isEditing = !!version;
   const { control, handleSubmit, reset, formState: { errors } } = useForm<AddVersionFormData>({
     resolver: zodResolver(addVersionSchema),
     defaultValues: {
-      version_string: '',
-      platform_type: 'java',
-      is_recommended: false,
-      is_supported: true,
+      version_string: version?.version_string || '',
+      platform_type: version?.supports_java ? 'java' : 'bedrock',
+      is_recommended: version?.is_recommended || false,
+      is_supported: version?.is_supported || true,
     },
   });
 
   const onSubmit = async (data: AddVersionFormData) => {
     try {
-      const newVersion = await adminService.createVersion({ 
+      const payload = { 
         version_string: data.version_string, 
         is_supported: data.is_supported, 
         is_recommended: data.is_recommended, 
-        maintenance_mode: false, 
+        maintenance_mode: version?.maintenance_mode || false, 
         supports_java: data.platform_type === 'java',
         supports_bedrock: data.platform_type === 'bedrock',
-        changelog: null 
-      });
-      onVersionAdded(newVersion);
-      toast.success('Version added');
+        changelog: version?.changelog || null 
+      };
+
+      let savedVersion;
+      if (isEditing) {
+        savedVersion = await adminService.updateVersion(version!.id, payload);
+        toast.success('Version updated');
+      } else {
+        savedVersion = await adminService.createVersion(payload);
+        toast.success('Version added');
+      }
+
+      onVersionAdded(savedVersion);
       onClose();
-      reset(); // Reset form after successful submission
+      reset(); 
     } catch (err: any) {
-      console.error('Error creating version:', err);
-      toast.error(`Failed to create version: ${err.message}`);
+      console.error('Error saving version:', err);
+      toast.error(`Failed to save version: ${err.message}`);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add Version">
+    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'Edit Version' : 'Add Version'}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="version_string" className="block text-sm font-medium text-white mb-1">Version String</label>
+          <label htmlFor="version_string" className="block text-sm font-medium text-neutral-900 dark:text-white mb-1">Version String</label>
           <Controller
             name="version_string"
             control={control}
@@ -68,14 +78,14 @@ export const AddVersionModal: React.FC<AddVersionModalProps> = ({ isOpen, onClos
                 {...field}
                 id="version_string"
                 placeholder="e.g. 1.21.1" 
-                className="w-full bg-neutral-800 p-3 rounded-xl border border-neutral-700 text-white" 
+                className="w-full bg-neutral-100 dark:bg-neutral-800 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white" 
               />
             )}
           />
           {errors.version_string && <p className="text-red-500 text-xs mt-1">{errors.version_string.message}</p>}
         </div>
         
-        <div className="space-y-2 text-white">
+        <div className="space-y-2 text-neutral-900 dark:text-neutral-100">
           <p className="text-sm font-medium">Platform Type:</p>
           <Controller
             name="platform_type"
@@ -108,7 +118,7 @@ export const AddVersionModal: React.FC<AddVersionModalProps> = ({ isOpen, onClos
           {errors.platform_type && <p className="text-red-500 text-xs mt-1">{errors.platform_type.message}</p>}
         </div>
 
-        <label className="flex items-center gap-2 text-white">
+        <label className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
           <Controller
             name="is_recommended"
             control={control}
@@ -124,7 +134,7 @@ export const AddVersionModal: React.FC<AddVersionModalProps> = ({ isOpen, onClos
           Recommended Version
         </label>
 
-        <label className="flex items-center gap-2 text-white">
+        <label className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
           <Controller
             name="is_supported"
             control={control}
@@ -140,7 +150,7 @@ export const AddVersionModal: React.FC<AddVersionModalProps> = ({ isOpen, onClos
           Supported Version (compatibility)
         </label>
 
-        <button type="submit" className="w-full bg-strawberry-600 p-3 rounded-xl font-bold hover:bg-strawberry-700">Add Version</button>
+        <button type="submit" className="w-full bg-strawberry-600 p-3 rounded-xl font-bold text-white hover:bg-strawberry-700">{isEditing ? 'Save Changes' : 'Add Version'}</button>
       </form>
     </Modal>
   );

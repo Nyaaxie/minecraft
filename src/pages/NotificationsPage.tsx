@@ -85,17 +85,17 @@ const NotificationsPage = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-8 text-neutral-900 dark:text-neutral-100">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-          <p className="text-neutral-400 mt-1">Stay updated with the latest activity.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">Notifications</h1>
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Stay updated with the latest activity.</p>
         </div>
         {notifications.some(n => !n.is_read) && (
           <button
             type="button"
             onClick={handleMarkAllRead}
-            className="text-sm font-bold text-strawberry-500 hover:text-strawberry-400 transition-colors"
+            className="text-sm font-bold text-strawberry-600 dark:text-strawberry-500 hover:text-strawberry-700 dark:hover:text-strawberry-400 transition-colors"
           >
             Mark all as read
           </button>
@@ -105,7 +105,7 @@ const NotificationsPage = () => {
       <div className="space-y-3">
         {loading ? (
           [1, 2, 3].map(i => (
-            <div key={i} className="h-20 bg-neutral-900 rounded-2xl animate-pulse" />
+            <div key={i} className="h-20 bg-neutral-100 dark:bg-neutral-900 rounded-2xl animate-pulse" />
           ))
         ) : notifications.length > 0 ? (
           notifications.map((notification, i) => (
@@ -118,19 +118,19 @@ const NotificationsPage = () => {
               className={`p-4 rounded-2xl border flex items-start gap-4 transition-all group
                 ${notification.link ? 'cursor-pointer' : 'cursor-default'}
                 ${notification.is_read
-                  ? 'bg-neutral-900/50 border-neutral-800 opacity-60 hover:opacity-80'
-                  : 'bg-neutral-900 border-neutral-800 shadow-lg hover:border-strawberry-500/30 hover:bg-neutral-800/80'
+                  ? 'bg-white dark:bg-neutral-900/50 border-neutral-200 dark:border-neutral-800 opacity-60 hover:opacity-80'
+                  : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 shadow-lg hover:border-strawberry-500/30 hover:bg-neutral-50 dark:hover:bg-neutral-800/80'
                 }`}
             >
-              <div className={`p-2 rounded-xl bg-neutral-800 shrink-0 ${!notification.is_read && 'ring-1 ring-strawberry-500/50'}`}>
+              <div className={`p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 shrink-0 ${!notification.is_read && 'ring-1 ring-strawberry-500/50'}`}>
                 <NotificationIcon type={notification.type} />
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className={`font-bold text-sm ${!notification.is_read ? 'text-white' : 'text-neutral-300'}`}>
+                <h3 className={`font-bold text-sm ${!notification.is_read ? 'text-neutral-900 dark:text-white' : 'text-neutral-600 dark:text-neutral-300'}`}>
                   {notification.title}
                 </h3>
-                <p className="text-sm text-neutral-400 mt-0.5">{notification.message}</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">{notification.message}</p>
                 <div className="flex items-center gap-2 mt-2 text-[10px] text-neutral-500 uppercase font-bold tracking-wider">
                   <Clock size={10} />
                   <span>{new Date(notification.created_at).toLocaleString()}</span>
@@ -142,22 +142,22 @@ const NotificationsPage = () => {
                   <button
                     type="button"
                     onClick={(e) => handleMarkRead(e, notification.id)}
-                    className="p-2 text-neutral-500 hover:text-strawberry-500 hover:bg-strawberry-500/5 rounded-lg transition-all"
+                    className="p-2 text-neutral-500 hover:text-strawberry-600 dark:hover:text-strawberry-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg transition-all"
                     title="Mark as read"
                   >
                     <Check size={18} />
                   </button>
                 )}
                 {notification.link && (
-                  <ChevronRight size={16} className="text-neutral-600 group-hover:text-neutral-400 transition-colors" />
+                  <ChevronRight size={16} className="text-neutral-400 dark:text-neutral-600 group-hover:text-neutral-900 dark:group-hover:text-neutral-400 transition-colors" />
                 )}
               </div>
             </motion.div>
           ))
         ) : (
-          <div className="bg-neutral-900/50 border border-dashed border-neutral-800 p-12 rounded-2xl text-center">
-            <Bell className="mx-auto text-neutral-700 mb-4" size={48} />
-            <p className="text-neutral-500 text-lg">You're all caught up!</p>
+          <div className="bg-neutral-100 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 p-12 rounded-2xl text-center">
+            <Bell className="mx-auto text-neutral-400 dark:text-neutral-700 mb-4" size={48} />
+            <p className="text-neutral-600 dark:text-neutral-500 text-lg">You're all caught up!</p>
           </div>
         )}
       </div>

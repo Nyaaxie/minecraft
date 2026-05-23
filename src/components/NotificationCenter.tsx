@@ -108,9 +108,9 @@ const NotificationCenter = () => {
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(prev => !prev)}
-        className="relative p-2 hover:bg-neutral-800 rounded-full transition-colors"
+        className="relative p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors"
       >
-        <Bell size={20} className="text-neutral-400" />
+        <Bell size={20} className="text-neutral-600 dark:text-neutral-400" />
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 w-4 h-4 bg-strawberry-600 rounded-full text-[10px] flex items-center justify-center text-white font-bold">
             {unreadCount}
@@ -124,38 +124,38 @@ const NotificationCenter = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-80 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden"
+            className="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl overflow-hidden text-neutral-900 dark:text-neutral-100"
             style={{ zIndex: 9999 }}
           >
-            <div className="p-4 border-b border-neutral-800 flex justify-between items-center">
+            <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center text-neutral-900 dark:text-white">
               <h3 className="font-bold">Notifications</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-neutral-500 hover:text-white"
+                className="text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
               >
                 <X size={16} />
               </button>
             </div>
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
-                <p className="p-4 text-center text-sm text-neutral-500">No notifications.</p>
+                <p className="p-4 text-center text-sm text-neutral-500 dark:text-neutral-500">No notifications.</p>
               ) : (
                 notifications.map(n => (
                   <div
                     key={n.id}
                     onClick={() => handleNotificationClick(n)}
-                    className={`p-4 border-b border-neutral-800 cursor-pointer hover:bg-neutral-800 transition-colors ${n.is_read ? 'opacity-50' : ''}`}
+                    className={`p-4 border-b border-neutral-200 dark:border-neutral-800 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors ${n.is_read ? 'opacity-50' : ''}`}
                   >
                     <div className="flex items-start gap-3">
                       {getIcon(n.type)}
-                      <div className="flex-1">
+                      <div className="flex-1 text-neutral-900 dark:text-neutral-100">
                         <p className="font-bold text-sm">{n.title}</p>
-                        <p className="text-xs text-neutral-400">{n.message}</p>
+                        <p className="text-xs text-neutral-600 dark:text-neutral-400">{n.message}</p>
                       </div>
                       {!n.is_read && (
                         <button
                           onClick={(e) => { e.stopPropagation(); markRead(n.id); }}
-                          className="text-strawberry-500 cursor-pointer p-1 hover:bg-neutral-700 rounded-md"
+                          className="text-strawberry-600 dark:text-strawberry-500 cursor-pointer p-1 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md"
                         >
                           <Check size={16} />
                         </button>

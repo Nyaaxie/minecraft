@@ -31,63 +31,63 @@ const AdminPluginForm = ({ plugin, categories, onSubmit, onCancel, isSaving }: {
     <motion.form 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-neutral-900 p-8 rounded-3xl border border-neutral-800 shadow-lg space-y-6"
+      className="bg-white dark:bg-neutral-900 p-8 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-lg space-y-6 text-neutral-900 dark:text-neutral-100"
       onSubmit={handleSubmit}
     >
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-neutral-400 mb-2">Plugin Name</label>
+        <label htmlFor="name" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Plugin Name</label>
         <input
           type="text"
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           required
         />
       </div>
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-neutral-400 mb-2">Description</label>
+        <label htmlFor="description" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Description</label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
         />
       </div>
       <div>
-        <label htmlFor="iconUrl" className="block text-sm font-medium text-neutral-400 mb-2">Icon URL</label>
+        <label htmlFor="iconUrl" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Icon URL</label>
         <input
           type="url"
           id="iconUrl"
           value={iconUrl}
           onChange={(e) => setIconUrl(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
         />
       </div>
       <div>
-        <label htmlFor="category" className="block text-sm font-medium text-neutral-400 mb-2">Category</label>
+        <label htmlFor="category" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Category</label>
         <select
           id="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
         >
           <option value="">Select Category</option>
           {categories.map(cat => (
             <option key={cat.id} value={cat.name}>{cat.name}</option>
           ))}
-          <option value="Other">Other</option> {/* Allow custom category */}
+          <option value="Other">Other</option>
         </select>
       </div>
       <div>
-        <label htmlFor="version" className="block text-sm font-medium text-neutral-400 mb-2">Version</label>
+        <label htmlFor="version" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Version</label>
         <input
           type="text"
           id="version"
           value={version}
           onChange={(e) => setVersion(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
         />
       </div>
       <div className="flex items-center gap-3">
@@ -96,9 +96,9 @@ const AdminPluginForm = ({ plugin, categories, onSubmit, onCancel, isSaving }: {
           id="isVisible"
           checked={isVisible}
           onChange={(e) => setIsVisible(e.target.checked)}
-          className="h-5 w-5 rounded border-neutral-700 bg-neutral-800 text-strawberry-600 focus:ring-strawberry-600"
+          className="h-5 w-5 rounded border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-strawberry-600 focus:ring-strawberry-600"
         />
-        <label htmlFor="isVisible" className="text-sm font-medium text-neutral-400">
+        <label htmlFor="isVisible" className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
           {isVisible ? 'Visible to Players' : 'Hidden from Players'}
         </label>
       </div>
@@ -107,7 +107,7 @@ const AdminPluginForm = ({ plugin, categories, onSubmit, onCancel, isSaving }: {
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl transition-colors"
+          className="px-6 py-2 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-900 dark:text-white rounded-xl transition-colors"
           disabled={isSaving}
         >
           Cancel
@@ -201,7 +201,7 @@ const AdminPluginsPage = () => {
 
   return (
     <div className="container mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-white mb-8">
+      <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-8">
         {plugin ? 'Edit Plugin' : 'Add New Plugin'}
       </h1>
       <AdminPluginForm 

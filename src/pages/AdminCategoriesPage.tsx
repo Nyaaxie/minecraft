@@ -28,38 +28,38 @@ const CategoryForm = ({ category, onSubmit, onCancel, isSaving, type }: {
     <motion.form
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-neutral-900 p-8 rounded-3xl border border-neutral-800 shadow-lg space-y-6"
+      className="bg-white dark:bg-neutral-900 p-8 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-lg space-y-6 text-neutral-900 dark:text-neutral-100"
       onSubmit={handleSubmit}
     >
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-neutral-400 mb-2">Category Name</label>
+        <label htmlFor="name" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Category Name</label>
         <input
           type="text"
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           required
         />
       </div>
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-neutral-400 mb-2">Description (Optional)</label>
+        <label htmlFor="description" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Description (Optional)</label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
         />
       </div>
       <div>
-        <label htmlFor="iconUrl" className="block text-sm font-medium text-neutral-400 mb-2">Icon URL (Optional)</label>
+        <label htmlFor="iconUrl" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Icon URL (Optional)</label>
         <input
           type="url"
           id="iconUrl"
           value={iconUrl}
           onChange={(e) => setIconUrl(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
         />
       </div>
 
@@ -67,7 +67,7 @@ const CategoryForm = ({ category, onSubmit, onCancel, isSaving, type }: {
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl transition-colors"
+          className="px-6 py-2 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-900 dark:text-white rounded-xl transition-colors"
           disabled={isSaving}
         >
           Cancel
@@ -197,7 +197,7 @@ const AdminCategoriesPage = () => {
 
   return (
     <div className="container mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-white mb-8">
+      <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-8">
         {editingCategory ? 'Edit ' : 'Add New '}
         {categoryType === 'plugin' ? 'Plugin' : 'Shop'} Category
       </h1>
@@ -217,7 +217,7 @@ const AdminCategoriesPage = () => {
       {!id && !location.pathname.endsWith('/new') && (
         <div className="mt-12">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-white">
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">
               {categoryType === 'plugin' ? 'Plugin' : 'Shop'} Categories
             </h2>
             <Link to={`/admin/categories/${categoryType}/new`} className="px-4 py-2 bg-strawberry-600 hover:bg-strawberry-700 text-white rounded-xl flex items-center gap-2">
@@ -226,7 +226,7 @@ const AdminCategoriesPage = () => {
           </div>
 
           {categories.length === 0 ? (
-            <div className="bg-neutral-900/50 border border-neutral-800 p-8 rounded-3xl text-center text-neutral-500">
+            <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 p-8 rounded-3xl text-center text-neutral-600 dark:text-neutral-500">
               No {categoryType} categories found.
             </div>
           ) : (
@@ -236,26 +236,26 @@ const AdminCategoriesPage = () => {
                   key={cat.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex items-center justify-between"
+                  className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-lg flex items-center justify-between"
                 >
                   <div className="flex items-center gap-4">
                     {cat.icon_url ? (
                       <img src={cat.icon_url} alt={cat.name} className="w-12 h-12 object-contain rounded-lg" />
                     ) : (
-                      <div className="w-12 h-12 bg-neutral-800 rounded-lg flex items-center justify-center text-neutral-400">
+                      <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center text-neutral-500 dark:text-neutral-400">
                         <Tag size={24} />
                       </div>
                     )}
                     <div>
-                      <h3 className="text-xl font-bold text-white">{cat.name}</h3>
-                      <p className="text-neutral-400 text-sm">{cat.description || 'No description.'}</p>
+                      <h3 className="text-xl font-bold text-neutral-900 dark:text-white">{cat.name}</h3>
+                      <p className="text-neutral-600 dark:text-neutral-400 text-sm">{cat.description || 'No description.'}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link to={`/admin/categories/${categoryType}/edit/${cat.id}`} className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 hover:text-white">
+                    <Link to={`/admin/categories/${categoryType}/edit/${cat.id}`} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
                       <Edit size={18} />
                     </Link>
-                    <button onClick={() => handleDelete(cat.id)} className="p-2 hover:bg-neutral-800 rounded-lg text-red-400 hover:text-red-500">
+                    <button onClick={() => handleDelete(cat.id)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500">
                       <Trash2 size={18} />
                     </button>
                   </div>

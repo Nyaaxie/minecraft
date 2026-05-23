@@ -22,11 +22,11 @@ const ShopItemCard = ({ item, canManage, onEdit, onDelete }: {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col items-start h-full group hover:border-strawberry-500/30 transition-colors"
+      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col items-start h-full group hover:border-strawberry-500/30 transition-colors"
     >
       <div className="flex items-center justify-between w-full mb-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-neutral-800 rounded-xl flex items-center justify-center overflow-hidden border border-neutral-700">
+          <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-neutral-700">
             <img 
               src={itemImageUrl} 
               alt={item.item_name} 
@@ -35,7 +35,7 @@ const ShopItemCard = ({ item, canManage, onEdit, onDelete }: {
             />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white mb-1">{item.item_name}</h3>
+            <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-1">{item.item_name}</h3>
             <p className="text-sm text-neutral-500 flex items-center gap-1">
               <Package size={14} /> Quantity: {item.quantity}
             </p>
@@ -45,14 +45,14 @@ const ShopItemCard = ({ item, canManage, onEdit, onDelete }: {
           <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button 
               onClick={() => onEdit(item.id)}
-              className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 hover:text-white"
+              className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
               title="Edit Item"
             >
               <Edit size={16} />
             </button>
             <button 
               onClick={() => onDelete(item.id)}
-              className="p-2 hover:bg-neutral-800 rounded-lg text-red-400 hover:text-red-500"
+              className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500"
               title="Delete Item"
             >
               <Trash2 size={16} />
@@ -60,12 +60,12 @@ const ShopItemCard = ({ item, canManage, onEdit, onDelete }: {
           </div>
         )}
       </div>
-      <p className="text-neutral-400 text-sm mb-4 flex-grow">{item.description || 'No description provided.'}</p>
+      <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4 flex-grow">{item.description || 'No description provided.'}</p>
       <div className="flex justify-between items-center w-full text-xs text-neutral-500 mt-auto">
-        <span className="flex items-center gap-1 px-2 py-1 bg-strawberry-600/10 text-strawberry-500 rounded-full">
+        <span className="flex items-center gap-1 px-2 py-1 bg-strawberry-600/10 text-strawberry-600 dark:text-strawberry-500 rounded-full">
           <Banknote size={12} /> {item.price} {item.currency}
         </span>
-        <span className="px-2 py-1 bg-neutral-800 rounded-full">
+        <span className="px-2 py-1 bg-neutral-100 dark:bg-neutral-800 rounded-full">
           <Tag size={12} className="inline-block mr-1" /> {categoryName}
         </span>
       </div>
@@ -175,36 +175,36 @@ const ShopDetailPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-6 py-12">
+    <div className="container mx-auto px-6 py-12 text-neutral-900 dark:text-neutral-100">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <Link to="/shops" className="inline-flex items-center gap-2 text-neutral-400 hover:text-white transition-colors mb-6 group">
+        <Link to="/shops" className="inline-flex items-center gap-2 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors mb-6 group">
           <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Back to all shops
         </Link>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-[2rem] bg-neutral-800 flex items-center justify-center overflow-hidden border border-neutral-700 shadow-2xl">
+            <div className="w-24 h-24 rounded-[2rem] bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-neutral-700 shadow-2xl">
               <Store size={48} className="text-strawberry-500" />
             </div>
             <div>
-              <h1 className="text-5xl md:text-6xl font-black text-white mb-2 tracking-tighter italic uppercase">{shop.name}</h1>
-              <div className="flex items-center gap-3 text-lg text-neutral-400 font-medium">
-                <img src={shop.profiles?.avatar_url || '/default-avatar.png'} alt={shop.profiles?.username || 'Unknown Player'} className="w-8 h-8 rounded-full border-2 border-neutral-800" />
+              <h1 className="text-5xl md:text-6xl font-black text-neutral-900 dark:text-white mb-2 tracking-tighter italic uppercase">{shop.name}</h1>
+              <div className="flex items-center gap-3 text-lg text-neutral-600 dark:text-neutral-400 font-medium">
+                <img src={shop.profiles?.avatar_url || '/default-avatar.png'} alt={shop.profiles?.username || 'Unknown Player'} className="w-8 h-8 rounded-full border-2 border-neutral-200 dark:border-neutral-800" />
                 <span>{shop.profiles?.username || 'Unknown Player'}'s Shop</span>
               </div>
             </div>
           </div>
           {canManageShop && (
             <div className="flex gap-3 flex-wrap">
-              <Link to={`/shops/edit/${shop.id}`} className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl flex items-center gap-2 font-bold transition-all border border-neutral-700 hover:border-neutral-600 shadow-lg">
+              <Link to={`/shops/edit/${shop.id}`} className="px-5 py-2.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white rounded-xl flex items-center gap-2 font-bold transition-all border border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 shadow-lg">
                 <Edit size={18} /> Edit Shop
               </Link>
               <button 
                 onClick={handleDeleteShop}
-                className="px-5 py-2.5 bg-red-900/20 hover:bg-red-500 text-red-500 hover:text-white rounded-xl flex items-center gap-2 font-bold transition-all border border-red-500/20 shadow-lg"
+                className="px-5 py-2.5 bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-500 text-red-700 dark:text-red-500 hover:text-red-900 dark:hover:text-white rounded-xl flex items-center gap-2 font-bold transition-all border border-red-200 dark:border-red-500/20 shadow-lg"
               >
                 <Trash2 size={18} /> Delete Shop
               </button>
@@ -214,25 +214,25 @@ const ShopDetailPage = () => {
             </div>
           )}
         </div>
-        <p className="text-neutral-400 text-lg mt-8 leading-relaxed max-w-3xl">
+        <p className="text-neutral-600 dark:text-neutral-400 text-lg mt-8 leading-relaxed max-w-3xl">
           {shop.description || 'Welcome to my shop! Browse through my items below.'}
         </p>
       </motion.div>
 
-      <div className="h-px bg-gradient-to-r from-neutral-800 via-transparent to-transparent my-12" />
+      <div className="h-px bg-gradient-to-r from-neutral-200 dark:from-neutral-800 via-transparent to-transparent my-12" />
 
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-black text-white italic uppercase tracking-tight flex items-center gap-3">
-          <Package className="text-strawberry-500" /> Shop Items
+        <h2 className="text-3xl font-black text-neutral-900 dark:text-white italic uppercase tracking-tight flex items-center gap-3">
+          <Package className="text-strawberry-600 dark:text-strawberry-500" /> Shop Items
         </h2>
-        <span className="px-4 py-1.5 bg-neutral-800 rounded-full text-xs font-bold text-neutral-500 uppercase tracking-widest border border-neutral-700">
+        <span className="px-4 py-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full text-xs font-bold text-neutral-500 uppercase tracking-widest border border-neutral-200 dark:border-neutral-700">
           {shopItems.length} Products
         </span>
       </div>
 
       {shopItems.length === 0 && !loading && (
-        <div className="bg-neutral-900/50 border border-neutral-800 p-16 rounded-[3rem] text-center text-neutral-500">
-          <Package size={48} className="mx-auto mb-6 text-neutral-800" />
+        <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 p-16 rounded-[3rem] text-center text-neutral-600 dark:text-neutral-500">
+          <Package size={48} className="mx-auto mb-6 text-neutral-300 dark:text-neutral-800" />
           <p className="text-lg font-medium mb-8">No items listed in this shop yet.</p>
           {isOwner && (
             <Link to={`/shops/${shop.id}/items/new`} className="inline-flex items-center gap-2 px-8 py-3 bg-strawberry-600 hover:bg-strawberry-700 text-white rounded-2xl font-bold transition-all shadow-xl shadow-strawberry-600/20 active:scale-95">

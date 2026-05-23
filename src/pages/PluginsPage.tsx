@@ -14,27 +14,27 @@ const PluginCard = React.memo(({ plugin, isAdmin, onDelete }: { plugin: Plugin, 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full group hover:border-strawberry-500/30 transition-colors"
+      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full group hover:border-strawberry-500/30 transition-colors"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
           {plugin.icon_url ? (
             <img src={plugin.icon_url} alt={plugin.name} className="w-16 h-16 object-contain rounded-xl" loading="lazy" />
           ) : (
-            <div className="w-16 h-16 bg-neutral-800 rounded-xl flex items-center justify-center text-neutral-400">
+            <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center text-neutral-500 dark:text-neutral-400">
               <Tag size={32} />
             </div>
           )}
           <div>
-            <h3 className="text-xl font-bold text-white mb-1">{plugin.name}</h3>
-            <p className="text-sm text-neutral-500">Version: {plugin.version || 'N/A'}</p>
+            <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-1">{plugin.name}</h3>
+            <p className="text-sm text-neutral-500 dark:text-neutral-500">Version: {plugin.version || 'N/A'}</p>
           </div>
         </div>
         {isAdmin && (
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <Link 
               to={`/admin/plugins/${plugin.id}`}
-              className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 hover:text-white"
+              className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
               title="Edit Plugin"
             >
               <Edit size={16} />
@@ -70,18 +70,18 @@ const PluginCard = React.memo(({ plugin, isAdmin, onDelete }: { plugin: Plugin, 
 });
 
 const PluginCardSkeleton = () => (
-  <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full animate-pulse">
+  <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full animate-pulse">
     <div className="flex items-center gap-4 mb-4">
-      <div className="w-16 h-16 bg-neutral-800 rounded-xl" />
+      <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-xl" />
       <div className="space-y-2">
-        <div className="h-5 w-32 bg-neutral-800 rounded" />
-        <div className="h-4 w-20 bg-neutral-800 rounded" />
+        <div className="h-5 w-32 bg-neutral-100 dark:bg-neutral-800 rounded" />
+        <div className="h-4 w-20 bg-neutral-100 dark:bg-neutral-800 rounded" />
       </div>
     </div>
-    <div className="h-20 w-full bg-neutral-800 rounded-xl mb-4" />
+    <div className="h-20 w-full bg-neutral-100 dark:bg-neutral-800 rounded-xl mb-4" />
     <div className="flex items-center justify-between">
-      <div className="h-4 w-24 bg-neutral-800 rounded" />
-      <div className="h-6 w-16 bg-neutral-800 rounded-full" />
+      <div className="h-4 w-24 bg-neutral-100 dark:bg-neutral-800 rounded" />
+      <div className="h-6 w-16 bg-neutral-100 dark:bg-neutral-800 rounded-full" />
     </div>
   </div>
 );
@@ -151,13 +151,13 @@ const PluginsPage = () => {
   });
 
   return (
-    <div className="container mx-auto px-6 py-12">
+    <div className="container mx-auto px-6 py-12 text-neutral-900 dark:text-neutral-100">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between mb-8"
       >
-        <h1 className="text-4xl font-bold text-white">Plugins Showcase</h1>
+        <h1 className="text-4xl font-bold text-neutral-900 dark:text-white">Plugins Showcase</h1>
         {isAdmin && (
           <Link to="/admin/plugins/new" className="px-4 py-2 bg-strawberry-600 hover:bg-strawberry-700 text-white rounded-xl flex items-center gap-2">
             <Plus size={18} /> Add Plugin
@@ -171,13 +171,13 @@ const PluginsPage = () => {
           <input
             type="text"
             placeholder="Search plugins..."
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-2 pl-10 pr-4 text-white placeholder-neutral-500 focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+            className="w-full bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-xl py-2 pl-10 pr-4 text-neutral-900 dark:text-white placeholder-neutral-500 focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <select
-          className="bg-neutral-800 border border-neutral-700 rounded-xl py-2 px-4 text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-xl py-2 px-4 text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
@@ -188,7 +188,7 @@ const PluginsPage = () => {
         </select>
         <button
           onClick={fetchPlugins}
-          className="px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-neutral-400 hover:text-white hover:border-strawberry-600 transition-colors flex items-center justify-center gap-2"
+          className="px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:border-strawberry-600 transition-colors flex items-center justify-center gap-2"
         >
           <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           Refresh
