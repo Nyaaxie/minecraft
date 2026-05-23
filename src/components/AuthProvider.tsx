@@ -16,91 +16,63 @@ const LoadingScreen = () => (
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { setUser, setProfile, setLoading } = useAuthStore();
   const [initialized, setInitialized] = useState(false);
-  const initializedRef = useRef(false); // Lock for Strict Mode
+  const initializedRef = useRef(false); // Gatekeeper for initialization
 
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
+    // 1. Auth State Change Listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('--- Auth Event Received ---', event);
 
+      // If we haven't finished the initial getSession check, ignore this
+      if (!initializedRef.current) return; 
+
+      if (session) {
+        setUser(session.user);
+        try {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+            if (profile) setProfile(profile as Profile);
+        } catch (err) {
+            console.error('AuthProvider: Listener profile fetch error', err);
+        }
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
+    });
+
+    // 2. Initial Auth Check
     const initializeAuth = async () => {
-      console.log('AuthProvider: Starting initialization...');
-      const startTime = performance.now();
-      
       try {
-        // 1. Get initial session
         const { data: { session } } = await supabase.auth.getSession();
-        
-        console.log(`AuthProvider: Session fetched. Existing session: ${!!session}`);
-        
-        // ONLY update if store is empty or session actually changed
-        if (session) {
-          // If we already have a user in the store (from manual login), skip the setUser call to avoid flicker
-          const currentUser = useAuthStore.getState().user;
-          if (!currentUser || currentUser.id !== session.user.id) {
-            setUser(session.user);
-          }
 
-          const profileStartTime = performance.now();
+        if (session) {
+          setUser(session.user);
           const { data: profile } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
             .single();
-          
-          console.log(`AuthProvider: Profile fetched in ${Math.round(performance.now() - profileStartTime)}ms`);
-          
+
           if (profile) {
             setProfile(profile as Profile);
-            supabase.from('profiles').update({ status: 'online' }).eq('id', session.user.id).then(() => {
-                console.log('AuthProvider: Status updated to online');
-            });
           }
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
       } finally {
+        initializedRef.current = true; // Mark as initialized
         setLoading(false);
         setInitialized(true);
-        console.log(`AuthProvider: Initialization complete. Total time: ${Math.round(performance.now() - startTime)}ms`);
       }
     };
 
     initializeAuth();
-// 2. Auth State Change Listener
-const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-  console.log('--- Auth Event Received ---', event);
-  console.log('Session exists:', !!session);
 
-  if (session) {
-    setUser(session.user);
-    try {
-        console.log('AuthProvider: Fetching profile for...', session.user.id);
-        const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-        if (error) {
-            console.error('AuthProvider: Profile fetch error (Check RLS Policies):', error);
-            // Even on error, we must stop loading to allow the app to handle the state
-            setLoading(false); 
-        } else {
-            console.log('AuthProvider: Profile fetched successfully');
-            setProfile(profile as Profile);
-            setLoading(false);
-        }
-    } catch (err) {
-        console.error('AuthProvider: Critical profile fetch failure', err);
-        setLoading(false);
-    }
-  } else {
-    console.log('AuthProvider: No session, clearing user');
-    setUser(null);
-    setProfile(null);
-    setLoading(false);
-  }
-});    return () => {
+    return () => {
       subscription.unsubscribe();
     };
   }, [setUser, setProfile, setLoading]);
