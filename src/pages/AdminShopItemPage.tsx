@@ -64,29 +64,29 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
     <motion.form 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-neutral-900 p-8 rounded-3xl border border-neutral-800 shadow-lg space-y-6"
+      className="bg-white dark:bg-neutral-900 p-8 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-lg space-y-6"
       onSubmit={handleSubmit}
     >
       <div>
-        <label htmlFor="itemName" className="block text-sm font-medium text-neutral-400 mb-2">Item Name</label>
+        <label htmlFor="itemName" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Item Name</label>
         <input
           type="text"
           id="itemName"
           value={itemName}
           onChange={(e) => setItemName(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           required
         />
       </div>
       <div>
-        <label htmlFor="minecraftItemId" className="block text-sm font-medium text-neutral-400 mb-2">Minecraft Item ID (e.g., diamond_sword, minecraft:grass_block)</label>
+        <label htmlFor="minecraftItemId" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Minecraft Item ID (e.g., diamond_sword, minecraft:grass_block)</label>
         <div className="flex items-center gap-4">
           <input
             type="text"
             id="minecraftItemId"
             value={minecraftItemId}
             onChange={(e) => setMinecraftItemId(e.target.value)}
-            className="flex-grow px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+            className="flex-grow px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
             required
             placeholder="minecraft:diamond_sword"
           />
@@ -102,25 +102,25 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="price" className="block text-sm font-medium text-neutral-400 mb-2">Price</label>
+          <label htmlFor="price" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Price</label>
           <input
             type="number"
             id="price"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+            className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
             required
             min="0"
             step="0.01"
           />
         </div>
         <div>
-          <label htmlFor="currency" className="block text-sm font-medium text-neutral-400 mb-2">Currency</label>
+          <label htmlFor="currency" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Currency</label>
           <select
             id="currency"
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+            className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           >
             {currencyOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -129,35 +129,35 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
         </div>
       </div>
       <div>
-        <label htmlFor="quantity" className="block text-sm font-medium text-neutral-400 mb-2">Quantity</label>
+        <label htmlFor="quantity" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Quantity</label>
         <input
           type="number"
           id="quantity"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           required
           min="1"
         />
       </div>
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-neutral-400 mb-2">Description</label>
+        <label htmlFor="description" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Description</label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="availabilityStatus" className="block text-sm font-medium text-neutral-400 mb-2">Availability Status</label>
+          <label htmlFor="availabilityStatus" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Availability Status</label>
           <select
             id="availabilityStatus"
             value={availabilityStatus}
             onChange={(e) => setAvailabilityStatus(e.target.value as ShopItem['availability_status'])}
-            className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+            className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           >
             {availabilityOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -165,12 +165,12 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
           </select>
         </div>
         <div>
-          <label htmlFor="categoryId" className="block text-sm font-medium text-neutral-400 mb-2">Category</label>
+          <label htmlFor="categoryId" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Category</label>
           <select
             id="categoryId"
             value={categoryId || ''}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+            className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           >
             <option value="">No Category</option>
             {shopCategories.map(cat => (
@@ -185,9 +185,9 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
           id="isVisible"
           checked={isVisible}
           onChange={(e) => setIsVisible(e.target.checked)}
-          className="h-5 w-5 rounded border-neutral-700 bg-neutral-800 text-strawberry-600 focus:ring-strawberry-600"
+          className="h-5 w-5 rounded border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-strawberry-600 focus:ring-strawberry-600"
         />
-        <label htmlFor="isVisible" className="text-sm font-medium text-neutral-400">
+        <label htmlFor="isVisible" className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
           {isVisible ? 'Visible to Players' : 'Hidden from Players'}
         </label>
       </div>
@@ -196,7 +196,7 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl transition-colors"
+          className="px-6 py-2 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-700 dark:text-white rounded-xl transition-colors"
           disabled={isSaving}
         >
           Cancel
@@ -317,7 +317,7 @@ const AdminShopItemPage = () => {
 
   if (error) {
     return (
-      <div className="bg-red-900/20 border border-red-500/30 text-red-300 p-4 rounded-xl text-center">
+      <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-300 p-4 rounded-xl text-center">
         <p>{error}</p>
         <button onClick={() => navigate(`/shops/${shopId}`)} className="mt-4 px-4 py-2 bg-strawberry-600 text-white rounded-xl">
           Back to Shop
@@ -328,7 +328,7 @@ const AdminShopItemPage = () => {
 
   return (
     <div className="container mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-white mb-8">
+      <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-8">
         {item ? 'Edit Shop Item' : 'Add New Shop Item'}
       </h1>
       <AdminShopItemForm 

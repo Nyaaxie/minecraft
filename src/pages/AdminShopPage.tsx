@@ -26,28 +26,28 @@ const AdminShopForm = ({ shop, onSubmit, onCancel, isSaving }: {
     <motion.form 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-neutral-900 p-8 rounded-3xl border border-neutral-800 shadow-lg space-y-6"
+      className="bg-white dark:bg-neutral-900 p-8 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-lg space-y-6"
       onSubmit={handleSubmit}
     >
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-neutral-400 mb-2">Shop Name</label>
+        <label htmlFor="name" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Shop Name</label>
         <input
           type="text"
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           required
         />
       </div>
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-neutral-400 mb-2">Description</label>
+        <label htmlFor="description" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Description</label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
-          className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
         />
       </div>
       <div className="flex items-center gap-3">
@@ -56,9 +56,9 @@ const AdminShopForm = ({ shop, onSubmit, onCancel, isSaving }: {
           id="isActive"
           checked={isActive}
           onChange={(e) => setIsActive(e.target.checked)}
-          className="h-5 w-5 rounded border-neutral-700 bg-neutral-800 text-strawberry-600 focus:ring-strawberry-600"
+          className="h-5 w-5 rounded border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-strawberry-600 focus:ring-strawberry-600"
         />
-        <label htmlFor="isActive" className="text-sm font-medium text-neutral-400">
+        <label htmlFor="isActive" className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
           {isActive ? 'Shop is Active (Visible)' : 'Shop is Inactive (Hidden)'}
         </label>
       </div>
@@ -67,7 +67,7 @@ const AdminShopForm = ({ shop, onSubmit, onCancel, isSaving }: {
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-xl transition-colors"
+          className="px-6 py-2 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-700 dark:text-white rounded-xl transition-colors"
           disabled={isSaving}
         >
           Cancel
@@ -163,7 +163,7 @@ const AdminShopPage = () => {
 
   if (error) {
     return (
-      <div className="bg-red-900/20 border border-red-500/30 text-red-300 p-4 rounded-xl text-center">
+      <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-300 p-4 rounded-xl text-center">
         <p>{error}</p>
       </div>
     );
@@ -171,7 +171,7 @@ const AdminShopPage = () => {
 
   return (
     <div className="container mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-white mb-8">
+      <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-8">
         {shop ? 'Edit Your Shop' : 'Open a New Shop'}
       </h1>
       <AdminShopForm 

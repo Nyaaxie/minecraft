@@ -5,11 +5,10 @@ import { User, Search, Ghost, Blocks, Palette, MonitorPlay, UsersRound, Loader2,
 import BadgeChip from '../components/BadgeChip';
 
 // Define an extended Profile type that includes the joined user_badges
-// Updated to reflect that 'badges' is returned as an array (due to Supabase relationship inference)
 interface ProfileWithBadges extends Profile {
   user_badges: {
     badge_id: string;
-    badges: Badge[]; // Changed from Badge to Badge[]
+    badges: Badge; // It's a single object from Supabase join
   }[];
 }
 
@@ -52,19 +51,25 @@ const MembersPage: React.FC = () => {
 
   const filteredAndSortedProfiles = profiles
     .filter(profile => {
+      const lowerSearch = searchTerm.toLowerCase();
       const matchesSearch =
-        (profile.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          profile.minecraft_username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          profile.bio?.toLowerCase().includes(searchTerm.toLowerCase()));
+        (profile.username?.toLowerCase().includes(lowerSearch) ?? false) ||
+        (profile.minecraft_username?.toLowerCase().includes(lowerSearch) ?? false) ||
+        (profile.bio?.toLowerCase().includes(lowerSearch) ?? false);
 
       const matchesEdition = filterEdition === 'all' || profile.minecraft_edition === filterEdition;
 
       const matchesBadge = filterBadge === 'all' ||
-        profile.user_badges?.some(ub => ub.badges && ub.badges.length > 0 && ub.badges[0].id === filterBadge);
+        profile.user_badges?.some(ub => ub.badges && ub.badges.id === filterBadge);
 
-      const matchesMob = filterMob === '' || profile.favorite_mob?.toLowerCase().includes(filterMob.toLowerCase());
-      const matchesBlock = filterBlock === '' || profile.favorite_block?.toLowerCase().includes(filterBlock.toLowerCase());
-      const matchesColor = filterColor === '' || profile.favorite_color?.toLowerCase().includes(filterColor.toLowerCase());
+      const lowerMob = filterMob.toLowerCase();
+      const matchesMob = filterMob === '' || (profile.favorite_mob?.toLowerCase().includes(lowerMob) ?? false);
+      
+      const lowerBlock = filterBlock.toLowerCase();
+      const matchesBlock = filterBlock === '' || (profile.favorite_block?.toLowerCase().includes(lowerBlock) ?? false);
+      
+      const lowerColor = filterColor.toLowerCase();
+      const matchesColor = filterColor === '' || (profile.favorite_color?.toLowerCase().includes(lowerColor) ?? false);
 
       return matchesSearch && matchesEdition && matchesBadge && matchesMob && matchesBlock && matchesColor;
     })
@@ -229,7 +234,13 @@ const MembersPage: React.FC = () => {
               {/* Badges */}
               {profile.user_badges && profile.user_badges.length > 0 && (
                 <div className="flex flex-wrap justify-center gap-2 mb-4">
-                  {profile.user_badges.map(ub => ub.badges && ub.badges.length > 0 && <BadgeChip key={ub.badge_id} badge={ub.badges[0]} />)}
+                  {[...profile.user_badges]
+                    .sort((a, b) => {
+                      const priorityA = a.badges?.priority ?? 0;
+                      const priorityB = b.badges?.priority ?? 0;
+                      return priorityB - priorityA;
+                    })
+                    .map(ub => ub.badges && <BadgeChip key={ub.badge_id} badge={ub.badges} />)}
                 </div>
               )}
 

@@ -125,13 +125,13 @@ const Navbar = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute top-full left-0 right-0 bg-neutral-900 border-b border-white/5 p-6 flex flex-col gap-4 md:hidden"
+          className="absolute top-full left-0 right-0 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-white/5 p-6 flex flex-col gap-4 md:hidden shadow-xl"
         >
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
-              className="text-lg font-medium text-neutral-300"
+              className="text-lg font-medium text-neutral-600 dark:text-neutral-300 hover:text-strawberry-600 dark:hover:text-strawberry-500 transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {link.name}
@@ -139,7 +139,7 @@ const Navbar = () => {
           ))}
           <Link
             to="/login"
-            className="w-full py-3 bg-strawberry-600 text-center text-white font-bold rounded-xl"
+            className="w-full py-3 bg-strawberry-600 text-center text-white font-bold rounded-xl shadow-lg shadow-strawberry-600/20"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Login
@@ -162,7 +162,7 @@ const SectionHeading = ({ children, subtitle, center = false }: { children: Reac
           {subtitle}
         </span>
       )}
-      <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
+      <h2 className="text-4xl md:text-5xl font-black text-neutral-900 dark:text-white tracking-tighter uppercase italic leading-none">
         {children}
       </h2>
     </motion.div>
@@ -187,15 +187,15 @@ const TimelineItem = ({ year, title, description, side = 'left' }: { year: strin
         animate={isInView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <div className="bg-neutral-900/50 border border-white/5 p-8 rounded-3xl backdrop-blur-sm hover:border-strawberry-500/30 transition-colors group">
+        <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 p-8 rounded-3xl backdrop-blur-sm hover:border-strawberry-500/30 transition-colors group shadow-sm dark:shadow-none">
           <span className="text-strawberry-500 font-black text-xl mb-2 block italic">{year}</span>
-          <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">{title}</h3>
-          <p className="text-neutral-400 leading-relaxed text-sm md:text-base">{description}</p>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
+          <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4 tracking-tight">{title}</h3>
+          <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed text-sm md:text-base">{description}</p>
+          </div>
+          </motion.div>
+          </div>
+          );
+          };
 
 const generateFloatingHearts = () => {
   const hearts = [];
@@ -462,7 +462,7 @@ const LandingPage = () => {
       </section>
 
       {/* --- RULES SECTION --- */}
-      <section id="rules" className="py-32 bg-neutral-900/20 relative overflow-hidden">
+      <section id="rules" className="py-32 bg-neutral-50 dark:bg-neutral-900/20 relative overflow-hidden">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
             <SectionHeading subtitle="Server Laws">
