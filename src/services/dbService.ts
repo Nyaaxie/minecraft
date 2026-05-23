@@ -1,10 +1,23 @@
 import { supabase } from './supabase';
-import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem, PluginCategory, ShopTransaction, Reminder } from '../types/database.types';
+import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem, PluginCategory, ShopTransaction, Reminder, Badge } from '../types/database.types';
 
 export const dbService = {
   // --- Profiles & Admin ---
   async getAllProfiles() {
-    const { data, error } = await supabase.from('profiles').select('*').order('username', { ascending: true });
+    const { data, error } = await supabase
+      .from('profiles')
+      .select(`
+        id, username, minecraft_username, avatar_url, role, status, bio, is_banned,
+        theme_preference, created_at, updated_at, favorite_mob, favorite_block,
+        favorite_color, minecraft_edition,
+        user_badges!user_badges_user_id_fkey (
+          badge_id,
+          badges (
+            id, name, description, color, icon_url, is_visible, priority
+          )
+        )
+      `)
+      .order('username', { ascending: true });
     if (error) throw error;
     return data;
   },
@@ -28,6 +41,62 @@ export const dbService = {
 
     const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
     return data.publicUrl;
+  },
+
+  // --- Badges ---
+  async createBadge(badge: Omit<Badge, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('badges').insert(badge).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async getBadges() {
+    const { data, error } = await supabase.from('badges').select('*').order('priority', { ascending: false }).order('name', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  async getBadgeById(id: string) {
+    const { data, error } = await supabase.from('badges').select('*').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateBadge(id: string, updates: Partial<Badge>) {
+    const { data, error } = await supabase.from('badges').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteBadge(id: string) {
+    const { error } = await supabase.from('badges').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // --- User Badges ---
+  async assignBadgeToUser(userId: string, badgeId: string, assignedBy: string) {
+    const { data, error } = await supabase.from('user_badges').insert({ user_id: userId, badge_id: badgeId, assigned_by: assignedBy }).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async removeBadgeFromUser(userId: string, badgeId: string) {
+    const { error } = await supabase.from('user_badges').delete().eq('user_id', userId).eq('badge_id', badgeId);
+    if (error) throw error;
+    return true;
+  },
+
+  async getUserBadges(userId: string) {
+    const { data, error } = await supabase.from('user_badges').select('*, badges(*)').eq('user_id', userId);
+    if (error) throw error;
+    return data;
+  },
+
+  async getUsersWithBadge(badgeId: string) {
+    const { data, error } = await supabase.from('user_badges').select('*, profiles(username, avatar_url)').eq('badge_id', badgeId);
+    if (error) throw error;
+    return data;
   },
 
   // --- Events ---
@@ -124,18 +193,17 @@ export const dbService = {
 
   async notifyAllUsers(title: string, message: string, type: 'event' | 'announcement' | 'message' | 'system', link?: string) {
     console.log('dbService: [NOTIFY] Starting notifyAllUsers...');
-    
+
     try {
-      // Use a more direct query
       const { data: profiles, error } = await supabase.from('profiles').select('id');
-      
+
       if (error) {
         console.error('dbService: [NOTIFY] Failed to fetch profiles:', error);
         return;
       }
-      
+
       console.log(`dbService: [NOTIFY] Found ${profiles.length} profiles to notify.`);
-      
+
       const notifications = profiles.map(p => ({
         profile_id: p.id,
         title,
@@ -143,7 +211,7 @@ export const dbService = {
         type,
         link
       }));
-      
+
       const { error: insertError } = await supabase.from('notifications').insert(notifications);
       if (insertError) {
         console.error('dbService: [NOTIFY] Bulk insert error:', insertError);

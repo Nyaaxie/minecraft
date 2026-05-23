@@ -26,6 +26,7 @@ const ShopDetailPage = lazy(() => import('./pages/ShopDetailPage'));
 const AdminShopPage = lazy(() => import('./pages/AdminShopPage'));
 const AdminShopItemPage = lazy(() => import('./pages/AdminShopItemPage'));
 const AdminCategoriesPage = lazy(() => import('./pages/AdminCategoriesPage'));
+const MembersPage = lazy(() => import('./pages/MembersPage')); // New Import
 
 import DashboardLayout from './components/DashboardLayout';
 
@@ -86,6 +87,7 @@ function App() {
               
               <Route path="/dynamap" element={<ProtectedRoute><DashboardLayout><DynaMapPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/plugins" element={<ProtectedRoute><DashboardLayout><PluginsPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/members" element={<ProtectedRoute><DashboardLayout><MembersPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/admin/plugins/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/admin/plugins/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/shops" element={<ProtectedRoute><DashboardLayout><ShopsPage /></DashboardLayout></ProtectedRoute>} />

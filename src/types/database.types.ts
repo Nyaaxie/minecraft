@@ -8,6 +8,7 @@ export type Json =
 
 export type UserRole = 'admin' | 'player'
 export type ProfileStatus = 'online' | 'offline'
+export type MinecraftEdition = 'java' | 'bedrock' // New enum
 
 export interface Profile {
   id: string
@@ -21,6 +22,11 @@ export interface Profile {
   theme_preference: 'dark' | 'light' | null
   created_at: string
   updated_at: string
+  // New fields
+  favorite_mob: string | null
+  favorite_block: string | null
+  favorite_color: string | null
+  minecraft_edition: MinecraftEdition | null
 }
 
 export interface Event {
@@ -190,3 +196,173 @@ export interface ShopTransaction {
   transaction_time: string;
 }
 
+// New interfaces for Badges
+export interface Badge {
+  id: string
+  name: string
+  description: string | null
+  color: string
+  icon_url: string | null
+  is_visible: boolean
+  priority: number
+  created_at: string
+  updated_at: string
+  created_by: string | null // UUID of profile
+}
+
+export interface UserBadge {
+  user_id: string // UUID of profile
+  badge_id: string // UUID of badge
+  assigned_at: string
+  assigned_by: string | null // UUID of profile
+  is_active: boolean
+}
+
+// Supabase Database type structure
+export type Tables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Row']
+export type Enums<T extends keyof Database['public']['Enums']> =
+  Database['public']['Enums'][T]
+
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: Profile
+        Insert: Omit<Profile, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<Profile, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<Profile>
+      }
+      events: {
+        Row: Event
+        Insert: Omit<Event, 'id' | 'created_at'> & Partial<Pick<Event, 'id' | 'created_at'>>
+        Update: Partial<Event>
+      }
+      event_rsvps: {
+        Row: EventRSVP
+        Insert: Omit<EventRSVP, 'id' | 'created_at'> & Partial<Pick<EventRSVP, 'id' | 'created_at'>>
+        Update: Partial<EventRSVP>
+      }
+      notifications: {
+        Row: Notification
+        Insert: Omit<Notification, 'id' | 'created_at'> & Partial<Pick<Notification, 'id' | 'created_at'>>
+        Update: Partial<Notification>
+      }
+      announcements: {
+        Row: Announcement
+        Insert: Omit<Announcement, 'id' | 'created_at'> & Partial<Pick<Announcement, 'id' | 'created_at'>>
+        Update: Partial<Announcement>
+      }
+      messages: {
+        Row: Message
+        Insert: Omit<Message, 'id' | 'created_at'> & Partial<Pick<Message, 'id' | 'created_at'>>
+        Update: Partial<Message>
+      }
+      activity_logs: {
+        Row: ActivityLog
+        Insert: Omit<ActivityLog, 'id' | 'created_at'> & Partial<Pick<ActivityLog, 'id' | 'created_at'>>
+        Update: Partial<ActivityLog>
+      }
+      rules: {
+        Row: Rule
+        Insert: Omit<Rule, 'id' | 'updated_at'> & Partial<Pick<Rule, 'id' | 'updated_at'>>
+        Update: Partial<Rule>
+      }
+      reminders: {
+        Row: Reminder
+        Insert: Omit<Reminder, 'id' | 'created_at'> & Partial<Pick<Reminder, 'id' | 'created_at'>>
+        Update: Partial<Reminder>
+      }
+      minecraft_versions: {
+        Row: MinecraftVersion
+        Insert: Omit<MinecraftVersion, 'id' | 'updated_at'> & Partial<Pick<MinecraftVersion, 'id' | 'updated_at'>>
+        Update: Partial<MinecraftVersion>
+      }
+      plugins: {
+        Row: Plugin
+        Insert: Omit<Plugin, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<Plugin, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<Plugin>
+      }
+      shop_categories: {
+        Row: ShopCategory
+        Insert: Omit<ShopCategory, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<ShopCategory, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<ShopCategory>
+      }
+      player_shops: {
+        Row: PlayerShop
+        Insert: Omit<PlayerShop, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<PlayerShop, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<PlayerShop>
+      }
+      shop_items: {
+        Row: ShopItem
+        Insert: Omit<ShopItem, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<ShopItem, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<ShopItem>
+      }
+      plugin_categories: {
+        Row: PluginCategory
+        Insert: Omit<PluginCategory, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<PluginCategory, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<PluginCategory>
+      }
+      shop_transactions: {
+        Row: ShopTransaction
+        Insert: Omit<ShopTransaction, 'id'> & Partial<Pick<ShopTransaction, 'id'>>
+        Update: Partial<ShopTransaction>
+      }
+      reminder_reads: {
+        Row: {
+          reminder_id: string;
+          profile_id: string;
+          is_read: boolean;
+          read_at: string | null;
+        };
+        Insert: {
+          reminder_id: string;
+          profile_id: string;
+          is_read?: boolean;
+          read_at?: string | null;
+        };
+        Update: {
+          reminder_id?: string;
+          profile_id?: string;
+          is_read?: boolean;
+          read_at?: string | null;
+        };
+      }
+      rule_views: {
+        Row: {
+          rule_id: string;
+          profile_id: string;
+          viewed_at: string;
+        };
+        Insert: {
+          rule_id: string;
+          profile_id: string;
+          viewed_at?: string;
+        };
+        Update: {
+          rule_id?: string;
+          profile_id?: string;
+          viewed_at?: string;
+        };
+      }
+      // New tables
+      badges: {
+        Row: Badge
+        Insert: Omit<Badge, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<Badge, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<Badge>
+      }
+      user_badges: {
+        Row: UserBadge
+        Insert: Omit<UserBadge, 'assigned_at'> & Partial<Pick<UserBadge, 'assigned_at'>>
+        Update: Partial<UserBadge>
+      }
+    }
+    Enums: {
+      user_role: UserRole
+      profile_status: ProfileStatus
+      minecraft_edition: MinecraftEdition // New enum
+    }
+    Functions: {
+      // Add any custom functions here if needed
+    }
+  }
+}

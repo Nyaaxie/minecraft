@@ -5,8 +5,12 @@ import { adminService } from '../services/adminService';
 import { Modal } from '../components/Modal';
 import { AddVersionModal } from '../components/AddVersionModal';
 import { AnnouncementModal } from '../components/AnnouncementModal';
+import AddEditBadgeModal from '../components/AddEditBadgeModal';
+import AssignBadgesModal from '../components/AssignBadgesModal'; // New Import for AssignBadgesModal
 import { useMinecraftVersions } from '../hooks/useMinecraftVersions';
-import type { Profile, Event, Rule, Reminder, MinecraftVersion } from '../types/database.types';
+import { useAuthStore } from '../store/useAuthStore';
+import type { Profile, Event, Rule, Reminder, MinecraftVersion, Badge } from '../types/database.types';
+import BadgeChip from '../components/BadgeChip';
 import {
   Users,
   Shield,
@@ -26,6 +30,7 @@ import {
   Pencil,
   Check,
   X,
+  Award, // New icon for badge assignment
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -90,14 +95,16 @@ const PriorityCell = ({
 // AdminPanel
 // ---------------------------------------------------------------------------
 const AdminPanel = () => {
+  const { profile: currentAdminProfile } = useAuthStore(); // Get current admin profile
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [badges, setBadges] = useState<Badge[]>([]); // New state for badges
   const { versions, loading: versionsLoading, refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'announcements' | 'events' | 'rules' | 'reminders' | 'versions' | 'categories'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'announcements' | 'events' | 'rules' | 'reminders' | 'versions' | 'categories' | 'badges'>('users');
   const [modal, setModal] = useState<{ isOpen: boolean; type: string; data?: any }>({ isOpen: false, type: '' });
 
   // -------------------------------------------------------------------------
@@ -106,16 +113,18 @@ const AdminPanel = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [p, e, r, rem] = await Promise.all([
+      const [p, e, r, rem, b] = await Promise.all([
         dbService.getAllProfiles(),
         dbService.getEvents(),
         adminService.getRules(),
         adminService.getReminders(),
+        dbService.getBadges(), // Fetch badges
       ]);
       setProfiles(p);
       setEvents(e);
       setRules(r);
       setReminders(rem);
+      setBadges(b); // Set badges state
     } catch (err) {
       console.error(err);
     } finally {
@@ -124,6 +133,7 @@ const AdminPanel = () => {
   };
 
   useEffect(() => { fetchData(); }, []);
+
 
   // -------------------------------------------------------------------------
   // Users
@@ -294,6 +304,46 @@ const AdminPanel = () => {
   };
 
   // -------------------------------------------------------------------------
+  // Badges (New Section)
+  // -------------------------------------------------------------------------
+  const handleCreateBadge = async (badgeData: Omit<Badge, 'id' | 'created_at' | 'updated_at' | 'created_by'> & { created_by?: string | null }) => {
+    if (!currentAdminProfile?.id) {
+      toast.error('Admin user not identified. Cannot create badge.');
+      return;
+    }
+    try {
+      const newBadge = await dbService.createBadge({ ...badgeData, created_by: currentAdminProfile.id });
+      setBadges(prev => [...prev, newBadge]);
+      toast.success('Badge created successfully!');
+      setModal({ isOpen: false, type: '' });
+    } catch (err: any) {
+      toast.error(`Failed to create badge: ${err.message}`);
+    }
+  };
+
+  const handleUpdateBadge = async (id: string, updates: Partial<Badge>) => {
+    try {
+      const updatedBadge = await dbService.updateBadge(id, updates);
+      setBadges(prev => prev.map(b => b.id === id ? { ...b, ...updatedBadge } : b));
+      toast.success('Badge updated successfully!');
+      setModal({ isOpen: false, type: '' });
+    } catch (err: any) {
+      toast.error(`Failed to update badge: ${err.message}`);
+    }
+  };
+
+  const handleDeleteBadge = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this badge? This action cannot be undone.')) return;
+    try {
+      await dbService.deleteBadge(id);
+      setBadges(prev => prev.filter(b => b.id !== id));
+      toast.success('Badge deleted successfully!');
+    } catch (err: any) {
+      toast.error(`Failed to delete badge: ${err.message}`);
+    }
+  };
+
+  // -------------------------------------------------------------------------
   // Shared styles
   // -------------------------------------------------------------------------
   const inputCls = 'w-full bg-neutral-100 dark:bg-neutral-800 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-strawberry-500/40';
@@ -379,6 +429,35 @@ const AdminPanel = () => {
         announcement={modal.type === 'edit-announcement' ? modal.data : undefined}
       />
 
+      {/* New Badge Modal */}
+      <AddEditBadgeModal
+        isOpen={modal.isOpen && (modal.type === 'badge' || modal.type === 'edit-badge')}
+        onClose={() => setModal({ isOpen: false, type: '' })}
+        onSave={async (badgeData) => {
+          if (modal.type === 'edit-badge' && modal.data) {
+            await handleUpdateBadge(modal.data.id, badgeData);
+          } else {
+            // For new badge, created_by should be the current admin's ID
+            if (currentAdminProfile?.id) {
+              await handleCreateBadge({ ...badgeData, created_by: currentAdminProfile.id });
+            } else {
+              toast.error('Admin user ID not identified. Cannot create badge.');
+            }
+          }
+        }}
+        editingBadge={modal.type === 'edit-badge' ? modal.data : undefined}
+      />
+
+      {/* Assign Badges Modal */}
+      <AssignBadgesModal
+        isOpen={modal.isOpen && modal.type === 'assign-badges'}
+        onClose={() => setModal({ isOpen: false, type: '' })}
+        userProfile={modal.data}
+        // Correctly pass currentAdminProfile.id for assignedBy
+        assignedBy={currentAdminProfile?.id || null}
+        onBadgesUpdated={fetchData} // Re-fetch all data to update profiles list and badges
+      />
+
       {/* ── Page header ── */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">Admin Control Panel</h1>
@@ -387,7 +466,7 @@ const AdminPanel = () => {
 
       {/* ── Tabs ── */}
       <div className="flex gap-2 p-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl w-fit overflow-x-auto">
-        {(['users', 'announcements', 'events', 'rules', 'reminders', 'versions', 'categories'] as const).map(tab => (
+        {(['users', 'announcements', 'events', 'rules', 'reminders', 'versions', 'categories', 'badges'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -462,6 +541,13 @@ const AdminPanel = () => {
                           </button>
                           <button onClick={() => handleBanToggle(p)} className={`p-2 rounded-lg transition-all ${p.is_banned ? 'text-green-500 hover:bg-green-500/5' : 'text-red-500 hover:bg-red-500/5'}`} title={p.is_banned ? 'Unban' : 'Ban'}>
                             <Ban size={18} />
+                          </button>
+                          <button
+                            onClick={() => setModal({ isOpen: true, type: 'assign-badges', data: p })} // Open assign badges modal
+                            className="p-2 text-neutral-500 hover:text-strawberry-500 hover:bg-strawberry-500/5 rounded-lg transition-all"
+                            title="Assign Badges"
+                          >
+                            <Award size={18} />
                           </button>
                         </div>
                       </td>
@@ -785,10 +871,95 @@ const AdminPanel = () => {
             </div>
           )}
 
+          {/* ── BADGES ── */}
+          {activeTab === 'badges' && (
+            <div className="p-8 space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Manage Badges</h3>
+                  <p className="text-xs text-neutral-500 mt-0.5">Create, edit, and assign custom badges to users.</p>
+                </div>
+                <button
+                  onClick={() => setModal({ isOpen: true, type: 'badge', data: undefined })}
+                  className="px-6 py-2 bg-strawberry-600 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20"
+                >
+                  Create Badge
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-neutral-100 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase tracking-wider">
+                      <th className="px-6 py-4">Badge</th>
+                      <th className="px-6 py-4">Description</th>
+                      <th className="px-6 py-4">Visible</th>
+                      <th className="px-6 py-4">Priority</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                    {badges.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-neutral-500">
+                          <AlertCircle className="mx-auto text-neutral-400 dark:text-neutral-700 mb-2" size={32} />
+                          No badges found. Create one above!
+                        </td>
+                      </tr>
+                    ) : badges.map(badge => (
+                      <tr key={badge.id} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
+                        <td className="px-6 py-4">
+                          <BadgeChip badge={badge} />
+                        </td>
+                        <td className="px-6 py-4 text-sm text-neutral-500 max-w-xs truncate">{badge.description || 'N/A'}</td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => handleUpdateBadge(badge.id, { is_visible: !badge.is_visible })}
+                            title={badge.is_visible ? 'Hide badge' : 'Show badge'}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase transition-colors ${badge.is_visible
+                              ? 'bg-green-500/10 text-green-600 dark:text-green-500 hover:bg-green-500/20'
+                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                              }`}
+                          >
+                            {badge.is_visible ? <Eye size={11} /> : <EyeOff size={11} />}
+                            {badge.is_visible ? 'Yes' : 'No'}
+                          </button>
+                        </td>
+                        <td className="px-6 py-4">
+                          <PriorityCell
+                            value={badge.priority ?? 0}
+                            onSave={async (v) => handleUpdateBadge(badge.id, { priority: v })}
+                          />
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setModal({ isOpen: true, type: 'edit-badge', data: badge })}
+                              className="p-2 text-neutral-500 hover:text-strawberry-500 hover:bg-strawberry-500/5 rounded-lg transition-all"
+                              title="Edit Badge"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBadge(badge.id)}
+                              className="p-2 text-neutral-500 hover:text-red-600 dark:hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all"
+                              title="Delete Badge"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
         </motion.div>
       )}
     </div>
   );
 };
 
-export default AdminPanel;  
+export default AdminPanel;

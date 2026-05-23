@@ -15,7 +15,8 @@ import {
   X,
   Map as MapIcon,
   Puzzle,
-  Sparkle
+  Sparkle,
+  UsersRound // Added UsersRound
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -48,6 +49,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { icon: MessageSquare, label: 'Messages', to: '/messages' },
     { icon: Bell, label: 'Notifications', to: '/notifications' },
     { icon: User, label: 'Profile', to: '/profile' },
+    { icon: UsersRound, label: 'Members', to: '/members' }, // New Members link
   ];
 
   if (profile?.role === 'admin') {
