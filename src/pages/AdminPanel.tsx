@@ -100,7 +100,6 @@ const AdminPanel = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [badges, setBadges] = useState<Badge[]>([]); // New state for badges
   const { versions, loading: versionsLoading, refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);

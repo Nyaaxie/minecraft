@@ -8,7 +8,6 @@ import {
   Save,
   Loader2,
   LogOut,
-  Sparkles, // For favorite color/mob/block
   Palette, // For favorite color
   Blocks, // For favorite block
   Ghost, // For favorite mob

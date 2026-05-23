@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { dbService } from '../services/dbService';
 import type { Profile, Badge } from '../types/database.types'; // Import Badge type
-import { User, Search, Filter, SortAsc, LayoutGrid, List, Ghost, Blocks, Palette, MonitorPlay, UsersRound, Loader2, Users } from 'lucide-react'; // Added icons
+import { User, Search, Ghost, Blocks, Palette, MonitorPlay, UsersRound, Loader2, Users } from 'lucide-react'; // Removed unused icons
 import BadgeChip from '../components/BadgeChip';
 
 // Define an extended Profile type that includes the joined user_badges
-// This assumes the structure returned by `select('*, user_badges(badges(*))')`
+// Updated to reflect that 'badges' is returned as an array (due to Supabase relationship inference)
 interface ProfileWithBadges extends Profile {
   user_badges: {
     badge_id: string;
-    badges: Badge;
+    badges: Badge[]; // Changed from Badge to Badge[]
   }[];
 }
 
@@ -37,7 +37,7 @@ const MembersPage: React.FC = () => {
         ]);
 
         // Cast fetchedProfiles to ProfileWithBadges[]
-        setProfiles(fetchedProfiles as ProfileWithBadges[]);
+        setProfiles(fetchedProfiles as unknown as ProfileWithBadges[]);
         setAllBadges(fetchedBadges);
       } catch (err) {
         console.error('Failed to fetch data:', err);
@@ -60,7 +60,7 @@ const MembersPage: React.FC = () => {
       const matchesEdition = filterEdition === 'all' || profile.minecraft_edition === filterEdition;
 
       const matchesBadge = filterBadge === 'all' ||
-        profile.user_badges?.some(ub => ub.badges?.id === filterBadge);
+        profile.user_badges?.some(ub => ub.badges && ub.badges.length > 0 && ub.badges[0].id === filterBadge);
 
       const matchesMob = filterMob === '' || profile.favorite_mob?.toLowerCase().includes(filterMob.toLowerCase());
       const matchesBlock = filterBlock === '' || profile.favorite_block?.toLowerCase().includes(filterBlock.toLowerCase());
@@ -229,7 +229,7 @@ const MembersPage: React.FC = () => {
               {/* Badges */}
               {profile.user_badges && profile.user_badges.length > 0 && (
                 <div className="flex flex-wrap justify-center gap-2 mb-4">
-                  {profile.user_badges.map(ub => ub.badges && <BadgeChip key={ub.badge_id} badge={ub.badges} />)}
+                  {profile.user_badges.map(ub => ub.badges && ub.badges.length > 0 && <BadgeChip key={ub.badge_id} badge={ub.badges[0]} />)}
                 </div>
               )}
 
