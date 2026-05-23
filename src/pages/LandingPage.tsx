@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, useScroll, useSpring, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  Heart, 
-  Users, 
-  ShieldCheck, 
-  Bell, 
-  CheckCircle2, 
-  ChevronRight, 
-  Play, 
+import {
+  Heart,
+  Users,
+  ShieldCheck,
+  Bell,
+  CheckCircle2,
+  ChevronRight,
+  Play,
   Calendar,
   AlertCircle,
   Clock,
@@ -80,7 +80,7 @@ const Navbar = () => {
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-strawberry-600/20 group-hover:scale-110 transition-transform">
-            <img src="/src/assets/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
           </div>
           <span className="text-xl font-black tracking-tighter text-white uppercase italic">
             Strawberry<span className="text-strawberry-500">SMP</span>
@@ -90,16 +90,16 @@ const Navbar = () => {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a 
-              key={link.name} 
+            <a
+              key={link.name}
               href={link.href}
               className="text-sm font-medium text-neutral-400 hover:text-strawberry-500 transition-colors"
             >
               {link.name}
             </a>
           ))}
-          <Link 
-            to="/login" 
+          <Link
+            to="/login"
             className="px-6 py-2 bg-strawberry-600 hover:bg-strawberry-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-strawberry-600/20"
           >
             Login
@@ -107,7 +107,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Toggle */}
-        <button 
+        <button
           className="md:hidden text-white p-2"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
@@ -117,14 +117,14 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="absolute top-full left-0 right-0 bg-neutral-900 border-b border-white/5 p-6 flex flex-col gap-4 md:hidden"
         >
           {navLinks.map((link) => (
-            <a 
-              key={link.name} 
+            <a
+              key={link.name}
               href={link.href}
               className="text-lg font-medium text-neutral-300"
               onClick={() => setIsMobileMenuOpen(false)}
@@ -132,8 +132,8 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
-          <Link 
-            to="/login" 
+          <Link
+            to="/login"
             className="w-full py-3 bg-strawberry-600 text-center text-white font-bold rounded-xl"
             onClick={() => setIsMobileMenuOpen(false)}
           >
@@ -171,13 +171,13 @@ const TimelineItem = ({ year, title, description, side = 'left' }: { year: strin
   return (
     <div ref={ref} className={`relative flex items-center justify-between mb-12 md:mb-24 w-full ${side === 'right' ? 'md:flex-row-reverse' : ''}`}>
       <div className="hidden md:block w-5/12" />
-      
+
       {/* Circle Dot */}
       <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-strawberry-600 shadow-xl shadow-strawberry-600/50 z-10">
         <div className="w-2 h-2 bg-white rounded-full" />
       </div>
 
-      <motion.div 
+      <motion.div
         className="w-full md:w-5/12 pl-12 md:pl-0"
         initial={{ opacity: 0, x: side === 'left' ? -50 : 50 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -290,13 +290,13 @@ const LandingPage = () => {
             </h1>
 
             <p className="text-lg md:text-2xl text-neutral-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-              A private community focused on peaceful gameplay, 
+              A private community focused on peaceful gameplay,
               genuine friendships, and the simple joy of building a home together.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link 
-                to="/signup" 
+              <Link
+                to="/signup"
                 className="group relative px-10 py-5 bg-strawberry-600 text-white font-black rounded-2xl shadow-2xl shadow-strawberry-600/30 overflow-hidden transition-all hover:scale-105 active:scale-95"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
@@ -304,8 +304,8 @@ const LandingPage = () => {
                   Join Community <ChevronRight size={20} />
                 </span>
               </Link>
-              <a 
-                href="#rules" 
+              <a
+                href="#rules"
                 className="px-10 py-5 bg-neutral-900/50 border border-white/10 backdrop-blur-md text-white font-black rounded-2xl hover:bg-neutral-800 transition-all text-lg italic uppercase"
               >
                 View Rules
@@ -315,7 +315,7 @@ const LandingPage = () => {
 
           {/* Version Badge */}
           {currentVersion && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
@@ -344,12 +344,12 @@ const LandingPage = () => {
               key={i}
               className="absolute"
               initial={{ x: heart.x, y: heart.y }}
-              animate={{ 
+              animate={{
                 y: [null, '-20px', '20px', null],
                 rotate: [0, 10, -10, 0]
               }}
-              transition={{ 
-                duration: heart.duration, 
+              transition={{
+                duration: heart.duration,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
@@ -368,7 +368,7 @@ const LandingPage = () => {
               <SectionHeading subtitle="Our Values">
                 Community <span className="text-strawberry-600">Culture</span>
               </SectionHeading>
-              
+
               <div className="space-y-12">
                 <div className="flex gap-6 group">
                   <div className="w-14 h-14 shrink-0 rounded-2xl bg-strawberry-600/10 flex items-center justify-center group-hover:bg-strawberry-600 transition-colors">
@@ -377,7 +377,7 @@ const LandingPage = () => {
                   <div>
                     <h3 className="text-xl font-bold text-white mb-2 italic uppercase tracking-tight">Simplicity over Fame</h3>
                     <p className="text-neutral-400 leading-relaxed">
-                      We value the simple joys of Minecraft. No rushing, no grinding for numbers, 
+                      We value the simple joys of Minecraft. No rushing, no grinding for numbers,
                       and no pressure to be the most active player. We just want to enjoy the game.
                     </p>
                   </div>
@@ -390,7 +390,7 @@ const LandingPage = () => {
                   <div>
                     <h3 className="text-xl font-bold text-white mb-2 italic uppercase tracking-tight">Kindness First</h3>
                     <p className="text-neutral-400 leading-relaxed">
-                      Our community is built on humble, kind, and friendly individuals who see 
+                      Our community is built on humble, kind, and friendly individuals who see
                       Minecraft as their second home and value genuine connections.
                     </p>
                   </div>
@@ -403,7 +403,7 @@ const LandingPage = () => {
                   <div>
                     <h3 className="text-xl font-bold text-white mb-2 italic uppercase tracking-tight">Peaceful Gameplay</h3>
                     <p className="text-neutral-400 leading-relaxed">
-                      A small, private server where peace is prioritized. We focus on building, 
+                      A small, private server where peace is prioritized. We focus on building,
                       sharing, and enjoying the SMP life together at our own pace.
                     </p>
                   </div>
@@ -412,22 +412,22 @@ const LandingPage = () => {
             </div>
 
             <div className="lg:w-1/2 relative">
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 className="relative rounded-[3rem] overflow-hidden border-8 border-neutral-900 shadow-2xl shadow-strawberry-900/20"
               >
-                <img 
-                  src="/cultureimg.jpg" 
-                  alt="Community Culture" 
+                <img
+                  src="/cultureimg.jpg"
+                  alt="Community Culture"
                   className="w-full h-auto grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent opacity-60" />
               </motion.div>
-              
+
               {/* Floating Stat Card */}
-              <motion.div 
+              <motion.div
                 initial={{ x: 50, opacity: 0 }}
                 whileInView={{ x: 0, opacity: 1 }}
                 className="absolute -bottom-10 -right-10 bg-neutral-900 border border-white/5 p-8 rounded-3xl shadow-2xl backdrop-blur-xl hidden md:block"
@@ -457,22 +457,22 @@ const LandingPage = () => {
           <div className="relative pt-12">
             {/* Timeline Line */}
             <div className="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-strawberry-600 via-strawberry-500/50 to-transparent" />
-            
-            <TimelineItem 
+
+            <TimelineItem
               year="Late 2021"
               title="The First Experience"
               description="The journey began on Henosis SMP, where our founders first experienced SMP life. The 'Five Lives' season was a pivotal moment that cemented our love for shared Minecraft stories."
               side="left"
             />
 
-            <TimelineItem 
+            <TimelineItem
               year="July 20, 2022"
               title="Eunoia SMP Born"
               description="Our own path started with Eunoia SMP. We learned the ropes of server management through community support and countless tutorials, focusing on building a respectful environment."
               side="right"
             />
 
-            <TimelineItem 
+            <TimelineItem
               year="Present Day"
               title="StrawberrySMP Evolution"
               description="Eunoia evolved into StrawberrySMP. Today, we stand as a peaceful community centered around friendship, simplicity, and a shared love for the game."
@@ -489,8 +489,8 @@ const LandingPage = () => {
             <SectionHeading subtitle="Server Laws">
               The <span className="text-strawberry-600">Golden Rules</span>
             </SectionHeading>
-            <Link 
-              to="/signup" 
+            <Link
+              to="/signup"
               className="flex items-center gap-2 text-strawberry-500 font-black italic uppercase tracking-tighter hover:gap-4 transition-all mb-16"
             >
               Read full rules <ChevronRight />
@@ -504,7 +504,7 @@ const LandingPage = () => {
               ))
             ) : rules.length > 0 ? (
               rules.map((rule) => (
-                <motion.div 
+                <motion.div
                   key={rule.id}
                   whileHover={{ y: -10 }}
                   className="bg-neutral-900 border border-white/5 p-8 rounded-[2rem] hover:border-strawberry-500/30 transition-all group"
@@ -574,7 +574,7 @@ const LandingPage = () => {
                 <div className="h-96 bg-white/5 rounded-[3rem] animate-pulse" />
               ) : reminders.length > 0 ? (
                 reminders.map((reminder) => (
-                  <motion.div 
+                  <motion.div
                     key={reminder.id}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -622,8 +622,8 @@ const LandingPage = () => {
                   <p className="text-neutral-400 text-sm leading-relaxed">
                     Check our server calendar for upcoming dragon fights, building competitions, and seasonal celebrations.
                   </p>
-                  <Link 
-                    to="/signup" 
+                  <Link
+                    to="/signup"
                     className="w-full py-4 bg-white/5 hover:bg-strawberry-600 border border-white/5 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm uppercase italic"
                   >
                     Login to view events <ChevronRight size={16} />
@@ -637,8 +637,8 @@ const LandingPage = () => {
                 <p className="text-strawberry-200/70 text-sm mb-6 relative z-10 italic font-medium">
                   Ready to start your adventure? Join our family-friendly SMP today.
                 </p>
-                <Link 
-                  to="/signup" 
+                <Link
+                  to="/signup"
                   className="w-full py-4 bg-strawberry-600 text-white font-black rounded-2xl shadow-xl shadow-strawberry-600/20 relative z-10 flex items-center justify-center gap-2 text-sm uppercase italic"
                 >
                   Join Community
@@ -663,7 +663,7 @@ const LandingPage = () => {
               ))
             ) : versions.length > 0 ? (
               versions.map((v) => (
-                <div 
+                <div
                   key={v.id}
                   className={`relative p-10 rounded-[2.5rem] border transition-all ${v.is_recommended ? 'bg-neutral-900 border-strawberry-500/40 shadow-2xl shadow-strawberry-900/10' : 'bg-neutral-900 border-white/5'}`}
                 >
@@ -672,7 +672,7 @@ const LandingPage = () => {
                       Recommended
                     </div>
                   )}
-                  
+
                   <div className="flex items-center gap-4 mb-8">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${v.is_supported ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
                       <Server className={v.is_supported ? 'text-green-500' : 'text-red-500'} />
@@ -732,7 +732,7 @@ const LandingPage = () => {
                 </span>
               </Link>
               <p className="text-neutral-400 max-w-sm leading-relaxed mb-8">
-                A community-driven Minecraft server focused on peaceful, genuine gameplay. 
+                A community-driven Minecraft server focused on peaceful, genuine gameplay.
                 Founded on the principles of kindness, simplicity, and shared creativity.
               </p>
               <div className="flex gap-4">
