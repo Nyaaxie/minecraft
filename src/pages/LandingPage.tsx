@@ -17,12 +17,42 @@ import {
   X,
   Server,
   Globe,
-  Cpu
+  Cpu,
+  Tag
 } from 'lucide-react';
 import { dbService } from '../services/dbService';
-import type { Rule, Reminder, MinecraftVersion } from '../types/database.types';
+import type { Rule, Reminder, MinecraftVersion, Plugin } from '../types/database.types';
 
 // --- Components ---
+
+const PluginLandingCard = ({ plugin }: { plugin: Plugin }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="bg-neutral-900 border border-white/5 p-8 rounded-[2rem] hover:border-strawberry-500/30 transition-all group flex flex-col h-full"
+    >
+      <div className="flex items-center gap-4 mb-6">
+        {plugin.icon_url ? (
+          <img src={plugin.icon_url} alt={plugin.name} className="w-12 h-12 object-contain rounded-xl" loading="lazy" />
+        ) : (
+          <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-neutral-400">
+            <Tag size={24} />
+          </div>
+        )}
+        <h3 className="text-xl font-bold text-white italic tracking-tight">{plugin.name}</h3>
+      </div>
+      <p className="text-neutral-400 text-sm leading-relaxed mb-6 flex-grow line-clamp-3">
+        {plugin.description || 'No description provided.'}
+      </p>
+      <div className="flex items-center justify-between text-xs font-bold text-neutral-500 uppercase tracking-widest mt-auto">
+        <span>{plugin.category || 'Uncategorized'}</span>
+        <span className="text-strawberry-500">v{plugin.version || '1.0'}</span>
+      </div>
+    </motion.div>
+  );
+};
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -40,6 +70,7 @@ const Navbar = () => {
     { name: 'Culture', href: '#culture' },
     { name: 'History', href: '#history' },
     { name: 'Rules', href: '#rules' },
+    { name: 'Plugins', href: '#plugins' },
     { name: 'Updates', href: '#updates' },
     { name: 'Versions', href: '#versions' },
   ];
@@ -184,8 +215,8 @@ const LandingPage = () => {
   const [rules, setRules] = useState<Rule[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [versions, setVersions] = useState<MinecraftVersion[]>([]);
+  const [plugins, setPlugins] = useState<Plugin[]>([]);
   const [loading, setLoading] = useState(true);
-
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -197,14 +228,16 @@ const LandingPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [rulesData, remindersData, versionsData] = await Promise.all([
+        const [rulesData, remindersData, versionsData, pluginsData] = await Promise.all([
           dbService.getRules(),
           dbService.getReminders(),
-          dbService.getMinecraftVersions()
+          dbService.getMinecraftVersions(),
+          dbService.getPlugins()
         ]);
         setRules(rulesData.slice(0, 4));
         setReminders(remindersData.slice(0, 3));
         setVersions(versionsData);
+        setPlugins(pluginsData.filter(p => p.is_visible).slice(0, 6));
       } catch (err) {
         console.error('Error fetching landing page data:', err);
       } finally {
@@ -502,6 +535,31 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* --- PLUGINS SECTION --- */}
+      <section id="plugins" className="py-32">
+        <div className="container mx-auto px-6">
+          <SectionHeading subtitle="Server Enhancements">
+            Featured <span className="text-strawberry-600">Plugins</span>
+          </SectionHeading>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {loading ? (
+              [...Array(3)].map((_, i) => (
+                <div key={i} className="h-64 bg-white/5 rounded-[2rem] animate-pulse" />
+              ))
+            ) : plugins.length > 0 ? (
+              plugins.map((plugin) => (
+                <PluginLandingCard key={plugin.id} plugin={plugin} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-20 bg-white/5 rounded-[3rem]">
+                <p className="text-neutral-500">No plugins featured at the moment.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* --- UPDATES & REMINDERS --- */}
       <section id="updates" className="py-32">
         <div className="container mx-auto px-6">
@@ -693,7 +751,9 @@ const LandingPage = () => {
                 <li><a href="#culture" className="text-neutral-400 hover:text-strawberry-500 transition-colors">Culture</a></li>
                 <li><a href="#history" className="text-neutral-400 hover:text-strawberry-500 transition-colors">History</a></li>
                 <li><a href="#rules" className="text-neutral-400 hover:text-strawberry-500 transition-colors">Rules</a></li>
+                <li><a href="#plugins" className="text-neutral-400 hover:text-strawberry-500 transition-colors">Plugins</a></li>
                 <li><a href="#updates" className="text-neutral-400 hover:text-strawberry-500 transition-colors">Updates</a></li>
+                <li><a href="#versions" className="text-neutral-400 hover:text-strawberry-500 transition-colors">Versions</a></li>
               </ul>
             </div>
 

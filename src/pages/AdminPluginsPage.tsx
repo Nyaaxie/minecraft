@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { dbService } from '../services/dbService';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { Plugin, ShopCategory } from '../types/database.types';
+import type { Plugin, PluginCategory } from '../types/database.types';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -9,7 +9,7 @@ import { useAuthStore } from '../store/useAuthStore'; // Import useAuthStore
 
 const AdminPluginForm = ({ plugin, categories, onSubmit, onCancel, isSaving }: { 
   plugin?: Plugin; 
-  categories: ShopCategory[];
+  categories: PluginCategory[];
   onSubmit: (plugin: Omit<Plugin, 'id' | 'created_at' | 'updated_at' | 'created_by'>) => void; // This form doesn't handle created_by
   onCancel: () => void;
   isSaving: boolean;
@@ -129,7 +129,7 @@ const AdminPluginsPage = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
   const [plugin, setPlugin] = useState<Plugin | undefined>(undefined);
-  const [categories, setCategories] = useState<ShopCategory[]>([]);
+  const [categories, setCategories] = useState<PluginCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -140,7 +140,7 @@ const AdminPluginsPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const fetchedCategories = await dbService.getShopCategories();
+        const fetchedCategories = await dbService.getPluginCategories();
         setCategories(fetchedCategories);
 
         if (id) {

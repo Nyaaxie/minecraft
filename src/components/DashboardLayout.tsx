@@ -1,15 +1,16 @@
 import React from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  MessageSquare, 
-  Bell, 
-  User, 
-  Settings, 
-  LogOut, 
-  Menu, 
+import NotificationCenter from './NotificationCenter';
+import {
+  LayoutDashboard,
+  Calendar,
+  MessageSquare,
+  Bell,
+  User,
+  Settings,
+  LogOut,
+  Menu,
   X,
   Map as MapIcon,
   Puzzle,
@@ -18,14 +19,13 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, label: string, to: string, active: boolean, onClick?: () => void }) => (
-  <Link 
+  <Link
     to={to}
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-      active 
-        ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20' 
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active
+        ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20'
         : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
-    }`}
+      }`}
   >
     <Icon size={20} />
     <span className="font-medium">{label}</span>
@@ -61,7 +61,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen bg-neutral-950 font-sans">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-neutral-800 bg-neutral-900/50 backdrop-blur-xl p-4 fixed h-full">
+      <aside className="hidden lg:flex w-64 flex-col border-r border-neutral-800 bg-neutral-900/50 backdrop-blur-xl p-4 fixed h-screen overflow-y-auto hide-scrollbar">
         <div className="flex items-center gap-3 px-4 py-6">
           <div className="p-2 bg-strawberry-600 rounded-lg text-white">
             <img src="/logo.png" alt="Logo" className="w-6 h-6" />
@@ -71,10 +71,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
         <nav className="flex-1 space-y-2 mt-8">
           {menuItems.map((item) => (
-            <SidebarItem 
-              key={item.to} 
-              {...item} 
-              active={location.pathname === item.to} 
+            <SidebarItem
+              key={item.to}
+              {...item}
+              active={location.pathname === item.to}
             />
           ))}
         </nav>
@@ -93,7 +93,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <span className="text-xs text-neutral-500 capitalize">{profile?.role || 'Player'}</span>
             </div>
           </div>
-          <button 
+          <button
             onClick={handleSignOut}
             className="flex items-center gap-3 w-full px-4 py-3 text-neutral-400 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all"
           >
@@ -111,53 +111,65 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
           <span className="font-bold">Strawberry<span className="text-strawberry-500">SMP</span></span>
         </div>
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 text-neutral-400 hover:text-white"
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="flex items-center gap-2">
+          <NotificationCenter />
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 text-neutral-400 hover:text-white"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: -100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            className="lg:hidden fixed inset-0 z-40 bg-neutral-950 pt-16 p-4"
-          >
-            <nav className="space-y-2">
-              {menuItems.map((item) => (
-                <Link 
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all ${
-                    location.pathname === item.to 
-                      ? 'bg-strawberry-600 text-white' 
-                      : 'text-neutral-400'
-                  }`}
+          <>
+            {/* Backdrop - closes menu when tapped outside */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 z-30 bg-black/50"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              className="lg:hidden fixed inset-0 z-40 bg-neutral-950 pt-16 p-4"
+            >
+              <nav className="space-y-2">
+                {menuItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all ${location.pathname === item.to
+                        ? 'bg-strawberry-600 text-white'
+                        : 'text-neutral-400'
+                      }`}
+                  >
+                    <item.icon size={24} />
+                    <span className="text-lg font-medium">{item.label}</span>
+                  </Link>
+                ))}
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-3 w-full px-4 py-4 text-neutral-400 hover:text-red-400"
                 >
-                  <item.icon size={24} />
-                  <span className="text-lg font-medium">{item.label}</span>
-                </Link>
-              ))}
-              <button 
-                onClick={handleSignOut}
-                className="flex items-center gap-3 w-full px-4 py-4 text-neutral-400 hover:text-red-400"
-              >
-                <LogOut size={24} />
-                <span className="text-lg font-medium">Sign Out</span>
-              </button>
-            </nav>
-          </motion.div>
+                  <LogOut size={24} />
+                  <span className="text-lg font-medium">Sign Out</span>
+                </button>
+              </nav>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 pt-20 lg:pt-0">
+      <main className="flex-1 lg:ml-64 pt-20 lg:pt-0 relative z-10">
         <div className="max-w-7xl mx-auto p-4 md:p-8">
           {children}
         </div>

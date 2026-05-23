@@ -1,13 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { dbService } from '../services/dbService';
 import type { PlayerShop } from '../types/database.types';
-import { Search, Store, RefreshCw, Loader2, Plus, Edit, Trash2 } from 'lucide-react';
+import { Search, Store, RefreshCw, Plus, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
+import { useDebounce } from '../hooks/useDebounce';
 
-const ShopCard = ({ shop, currentUserId, isAdmin, onDelete }: { 
+const ShopCard = React.memo(({ shop, currentUserId, isAdmin, onDelete }: { 
   shop: PlayerShop & { profiles: { username: string; avatar_url: string } | null },
   currentUserId?: string,
   isAdmin: boolean,
@@ -34,7 +35,7 @@ const ShopCard = ({ shop, currentUserId, isAdmin, onDelete }: {
           <div>
             <h3 className="text-xl font-bold text-white mb-1">{shop.name}</h3>
             <div className="flex items-center gap-2 text-sm text-neutral-500">
-              <img src={ownerAvatar} alt={ownerUsername} className="w-5 h-5 rounded-full object-cover" />
+              <img src={ownerAvatar} alt={ownerUsername} className="w-5 h-5 rounded-full object-cover" loading="lazy" />
               <span>{ownerUsername}'s Shop</span>
             </div>
           </div>
@@ -69,13 +70,31 @@ const ShopCard = ({ shop, currentUserId, isAdmin, onDelete }: {
       </Link>
     </motion.div>
   );
-};
+});
+
+const ShopCardSkeleton = () => (
+  <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full animate-pulse">
+    <div className="flex items-center gap-4 mb-4">
+      <div className="w-16 h-16 rounded-xl bg-neutral-800" />
+      <div className="space-y-2">
+        <div className="h-5 w-32 bg-neutral-800 rounded" />
+        <div className="h-4 w-24 bg-neutral-800 rounded" />
+      </div>
+    </div>
+    <div className="h-16 w-full bg-neutral-800 rounded-xl mb-4" />
+    <div className="flex items-center justify-between">
+      <div className="h-6 w-16 bg-neutral-800 rounded-full" />
+      <div className="h-4 w-20 bg-neutral-800 rounded" />
+    </div>
+  </div>
+);
 
 const ShopsPage = () => {
   const [shops, setShops] = useState<(PlayerShop & { profiles: { username: string; avatar_url: string } | null })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const { user, profile } = useAuthStore();
   const isAdmin = profile?.role === 'admin';
@@ -115,9 +134,9 @@ const ShopsPage = () => {
 
   const filteredShops = shops.filter(shop => {
     const ownerUsername = shop.profiles?.username || '';
-    return shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           shop.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           ownerUsername.toLowerCase().includes(searchTerm.toLowerCase());
+    return shop.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+           shop.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+           ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
   });
 
   return (
@@ -156,16 +175,7 @@ const ShopsPage = () => {
       {loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col items-center justify-center h-56"
-            >
-              <Loader2 className="w-10 h-10 text-strawberry-600 animate-spin" />
-              <p className="text-neutral-500 mt-2">Loading shops...</p>
-            </motion.div>
+            <ShopCardSkeleton key={i} />
           ))}
         </div>
       )}

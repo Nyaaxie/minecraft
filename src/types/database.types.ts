@@ -43,13 +43,14 @@ export interface EventRSVP {
 }
 
 export interface Notification {
-  id: string
-  profile_id: string
-  title: string
-  message: string
-  type: 'event' | 'announcement' | 'message' | 'system'
-  is_read: boolean
-  created_at: string
+  id: string;
+  profile_id: string;
+  title: string;
+  message: string;
+  type: 'event' | 'announcement' | 'message' | 'system';
+  is_read: boolean;
+  created_at: string;
+  link?: string | null;
 }
 
 export interface Announcement {

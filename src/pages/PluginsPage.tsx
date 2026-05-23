@@ -1,13 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { dbService } from '../services/dbService';
-import type { Plugin, ShopCategory } from '../types/database.types';
-import { Search, Plus, ListFilter, Eye, EyeOff, Tag, RefreshCw, Loader2, Edit, Trash2 } from 'lucide-react';
+import type { Plugin, PluginCategory } from '../types/database.types';
+import { Search, Plus, ListFilter, Eye, EyeOff, Tag, RefreshCw, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore'; // For admin check
 import toast from 'react-hot-toast';
+import { useDebounce } from '../hooks/useDebounce';
 
-const PluginCard = ({ plugin, isAdmin, onDelete }: { plugin: Plugin, isAdmin: boolean, onDelete: (id: string) => void }) => {
+const PluginCard = React.memo(({ plugin, isAdmin, onDelete }: { plugin: Plugin, isAdmin: boolean, onDelete: (id: string) => void }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -18,7 +19,7 @@ const PluginCard = ({ plugin, isAdmin, onDelete }: { plugin: Plugin, isAdmin: bo
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
           {plugin.icon_url ? (
-            <img src={plugin.icon_url} alt={plugin.name} className="w-16 h-16 object-contain rounded-xl" />
+            <img src={plugin.icon_url} alt={plugin.name} className="w-16 h-16 object-contain rounded-xl" loading="lazy" />
           ) : (
             <div className="w-16 h-16 bg-neutral-800 rounded-xl flex items-center justify-center text-neutral-400">
               <Tag size={32} />
@@ -66,15 +67,33 @@ const PluginCard = ({ plugin, isAdmin, onDelete }: { plugin: Plugin, isAdmin: bo
       </div>
     </motion.div>
   );
-};
+});
+
+const PluginCardSkeleton = () => (
+  <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full animate-pulse">
+    <div className="flex items-center gap-4 mb-4">
+      <div className="w-16 h-16 bg-neutral-800 rounded-xl" />
+      <div className="space-y-2">
+        <div className="h-5 w-32 bg-neutral-800 rounded" />
+        <div className="h-4 w-20 bg-neutral-800 rounded" />
+      </div>
+    </div>
+    <div className="h-20 w-full bg-neutral-800 rounded-xl mb-4" />
+    <div className="flex items-center justify-between">
+      <div className="h-4 w-24 bg-neutral-800 rounded" />
+      <div className="h-6 w-16 bg-neutral-800 rounded-full" />
+    </div>
+  </div>
+);
 
 const PluginsPage = () => {
   const [plugins, setPlugins] = useState<Plugin[]>([]);
-  const [categories, setCategories] = useState<ShopCategory[]>([]);
+  const [categories, setCategories] = useState<PluginCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const { profile } = useAuthStore();
   const isAdmin = profile?.role === 'admin';
@@ -91,16 +110,16 @@ const PluginsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []); // Empty dependency array as these functions don't rely on external props/state that would change.
+  }, []);
 
   const fetchCategories = useCallback(async () => {
     try {
-      const fetchedCategories = await dbService.getShopCategories();
+      const fetchedCategories = await dbService.getPluginCategories();
       setCategories(fetchedCategories);
     } catch (err) {
       console.error('Error fetching categories:', err);
     }
-  }, []); // Empty dependency array as these functions don't rely on external props/state that would change.
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -123,9 +142,9 @@ const PluginsPage = () => {
   };
 
   const filteredPlugins = plugins.filter(plugin => {
-    const matchesSearch = plugin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          plugin.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          plugin.category?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = plugin.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                          plugin.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                          plugin.category?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || plugin.category === selectedCategory;
     const isVisible = isAdmin || plugin.is_visible; // Admins see all, players only visible
     return matchesSearch && matchesCategory && isVisible;
@@ -179,16 +198,7 @@ const PluginsPage = () => {
       {loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <motion.div 
-              key={i} 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ delay: i * 0.1 }}
-              className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col items-center justify-center h-56"
-            >
-              <Loader2 className="w-10 h-10 text-neutral-600 animate-spin" />
-              <p className="text-neutral-500 mt-2">Loading...</p>
-            </motion.div>
+            <PluginCardSkeleton key={i} />
           ))}
         </div>
       )}
@@ -218,6 +228,5 @@ const PluginsPage = () => {
     </div>
   );
 };
-
 
 export default PluginsPage;

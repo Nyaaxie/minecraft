@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { useAuth } from './hooks/useAuth';
+import { AuthProvider } from './components/AuthProvider';
 import { useAuthStore } from './store/useAuthStore';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -7,6 +7,9 @@ import { Toaster } from 'react-hot-toast';
 // Lazy load pages for performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const VerificationPage = lazy(() => import('./pages/VerificationPage'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const EventsPage = lazy(() => import('./pages/EventsPage'));
@@ -37,39 +40,47 @@ const LoadingScreen = () => (
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
   const { user, profile, loading } = useAuthStore();
   
-  console.log('ProtectedRoute: loading', loading, 'user', !!user);
-
+  console.log('ProtectedRoute state:', { hasUser: !!user, hasProfile: !!profile, loading });
+  
+  // 1. Wait for auth to finish loading
   if (loading) return <LoadingScreen />;
   
-  if (!user) return <Navigate to="/login" />;
-  if (adminOnly && profile?.role !== 'admin') return <Navigate to="/dashboard" />;
+  // 2. If no user, definitely go to login
+  if (!user) return <Navigate to="/login" replace />;
+  
+  // 3. If user is logged in, but profile isn't loaded yet, keep loading
+  if (!profile) return <LoadingScreen />;
+  
+  // 4. Now that we have a user and profile, check roles
+  if (adminOnly && profile.role !== 'admin') return <Navigate to="/dashboard" replace />;
   
   return <>{children}</>;
 };
 
 function App() {
-  useAuth();
-
   return (
     <Router>
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-strawberry-500 selection:text-white font-sans">
-        <Toaster position="bottom-right" toastOptions={{ style: { background: '#171717', color: '#fff' } }} />
-        <Suspense fallback={<LoadingScreen />}>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout>
-                    <DashboardPage />
-                  </DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
+      <AuthProvider>
+        <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-strawberry-500 selection:text-white font-sans">
+          <Toaster position="bottom-right" toastOptions={{ style: { background: '#171717', color: '#fff' } }} />
+          <Suspense fallback={<LoadingScreen />}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/verify" element={<VerificationPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <DashboardPage />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
             
             <Route path="/dynamap" element={<ProtectedRoute><DashboardLayout><DynaMapPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/plugins" element={<ProtectedRoute><DashboardLayout><PluginsPage /></DashboardLayout></ProtectedRoute>} />
@@ -94,7 +105,8 @@ function App() {
           </Routes>
         </Suspense>
       </div>
-    </Router>
+    </AuthProvider>
+  </Router>
   );
 }
 

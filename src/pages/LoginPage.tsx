@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { supabase } from '../services/supabase';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { loginSchema } from '../utils/validation';
+import { useAuthStore } from '../store/useAuthStore';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -10,26 +12,52 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const isSubmitting = useRef(false);
+  const { setUser, setProfile } = useAuthStore();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+
     setLoading(true);
     setError(null);
 
+    // Validate input
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      setError(validation.error.issues[0].message);
+      setLoading(false);
+      isSubmitting.current = false;
+      return;
+    }
+
     try {
       console.time('login-auth-time');
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       console.timeEnd('login-auth-time');
 
       if (error) throw error;
-      navigate('/dashboard');
+
+      // FORCE MANUAL UPDATE: Ensure store is updated immediately
+      if (data.user) {
+        setUser(data.user);
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+        if (profile) setProfile(profile);
+      }
+      
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
-    } finally {
       setLoading(false);
+      isSubmitting.current = false;
     }
   };
 
@@ -110,6 +138,11 @@ const LoginPage = () => {
                 'Sign In'
               )}
             </button>
+            <div className="text-center mt-4">
+              <Link to="/forgot-password" className="text-sm text-neutral-400 hover:text-strawberry-500 transition-colors">
+                Forgot password?
+              </Link>
+            </div>
           </div>
         </form>
 
