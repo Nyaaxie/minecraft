@@ -419,7 +419,7 @@ const LandingPage = () => {
                 className="relative rounded-[3rem] overflow-hidden border-8 border-neutral-900 shadow-2xl shadow-strawberry-900/20"
               >
                 <img 
-                  src="/src/assets/cultureimg.jpg" 
+                  src="/cultureimg.jpg" 
                   alt="Community Culture" 
                   className="w-full h-auto grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
                 />
