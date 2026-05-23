@@ -1,5 +1,4 @@
 import { Store } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const DynaMapPage = () => {
   const DYNAMAP_URL = "http://strawberrysmp.mcplay.fun:25709/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442";
