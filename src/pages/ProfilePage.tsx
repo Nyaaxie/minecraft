@@ -145,7 +145,7 @@ const ProfilePage = () => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs p-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl">
                 <span className="text-neutral-500 font-bold uppercase tracking-wider">Rank</span>
-                <span className="text-strawberry-600 dark:text-strawberry-500 font-bold">{profile?.role === 'admin' ? 'STAFF' : 'MEMBER'}</span>
+                <span className="text-strawberry-600 dark:text-strawberry-500 font-bold">{profile?.role === 'admin' ? 'ADMIN' : 'MEMBER'}</span>
               </div>
               <div className="flex items-center justify-between text-xs p-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl">
                 <span className="text-neutral-500 font-bold uppercase tracking-wider">Joined</span>

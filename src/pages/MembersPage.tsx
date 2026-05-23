@@ -206,7 +206,7 @@ const MembersPage: React.FC = () => {
 
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-8 rounded-3xl text-center max-w-md mx-auto">
-          <AlertCircle size={48} className="mx-auto mb-4" size={48} />
+          <AlertCircle size={48} className="mx-auto mb-4" />
           <p className="font-bold text-lg">{error}</p>
         </div>
       )}
@@ -226,8 +226,12 @@ const MembersPage: React.FC = () => {
       {!loading && !error && filteredAndSortedProfiles.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredAndSortedProfiles.map(profile => (
-            <div 
+            <motion.div 
               key={profile.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -8 }}
               className="group relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 transition-all hover:border-strawberry-500/30 overflow-hidden shadow-sm dark:shadow-none"
             >
               {/* Background Accent */}
@@ -258,7 +262,7 @@ const MembersPage: React.FC = () => {
                     </span>
                     <div className="mt-2">
                       <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest italic ${profile.role === 'admin' ? 'bg-strawberry-600 text-white' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500'}`}>
-                        {profile.role === 'admin' ? 'Staff' : 'Member'}
+                        {profile.role === 'admin' ? 'Admin' : 'Member'}
                       </span>
                     </div>
                   </div>
@@ -324,7 +328,7 @@ const MembersPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
