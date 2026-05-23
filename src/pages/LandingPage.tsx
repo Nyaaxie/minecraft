@@ -725,7 +725,7 @@ const LandingPage = () => {
             <div className="md:col-span-2">
               <Link to="/" className="flex items-center gap-2 mb-8">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center">
-                  <img src="/src/assets/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                  <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
                 </div>
                 <span className="text-xl font-black tracking-tighter text-white uppercase italic">
                   Strawberry<span className="text-strawberry-500">SMP</span>
