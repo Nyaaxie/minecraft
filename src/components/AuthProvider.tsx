@@ -69,22 +69,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 // 2. Auth State Change Listener
 const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
   console.log('--- Auth Event Received ---', event);
-  console.log('Session data:', !!session);
-  console.log('Session object:', session); // Log the session object itself to inspect
+  console.log('Session exists:', !!session);
 
-  if (event === 'SIGNED_OUT' || !session) {
-    console.log('AuthProvider: Clearing user/profile due to sign out or no session');
+  if (session) {
+    setUser(session.user);
+    try {
+        console.log('AuthProvider: Fetching profile for...', session.user.id);
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+        if (error) {
+            console.error('AuthProvider: Profile fetch error (Check RLS Policies):', error);
+            // Even on error, we must stop loading to allow the app to handle the state
+            setLoading(false); 
+        } else {
+            console.log('AuthProvider: Profile fetched successfully');
+            setProfile(profile as Profile);
+            setLoading(false);
+        }
+    } catch (err) {
+        console.error('AuthProvider: Critical profile fetch failure', err);
+        setLoading(false);
+    }
+  } else {
+    console.log('AuthProvider: No session, clearing user');
     setUser(null);
     setProfile(null);
-    return;
+    setLoading(false);
   }
-
-  setLoading(true); // START LOADING
-  setUser(session.user);
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-  console.log('Profile fetched in state change:', !!profile);
-  if (profile) setProfile(profile as Profile);
-  setLoading(false); // END LOADING
 });    return () => {
       subscription.unsubscribe();
     };
