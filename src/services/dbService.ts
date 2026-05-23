@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem } from '../types/database.types';
+import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem, PluginCategory, ShopTransaction } from '../types/database.types';
 
 export const dbService = {
   // --- Profiles & Admin ---
@@ -13,6 +13,21 @@ export const dbService = {
     const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single();
     if (error) throw error;
     return data;
+  },
+
+  async uploadAvatar(userId: string, file: File) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}/${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    return data.publicUrl;
   },
 
   // --- Events ---
@@ -168,6 +183,28 @@ export const dbService = {
     return true;
   },
 
+  // --- Plugin Categories ---
+  async getPluginCategories() {
+    const { data, error } = await supabase.from('plugin_categories').select('*').order('name', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+  async createPluginCategory(category: Omit<PluginCategory, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('plugin_categories').insert(category).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updatePluginCategory(id: string, updates: Partial<PluginCategory>) {
+    const { data, error } = await supabase.from('plugin_categories').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deletePluginCategory(id: string) {
+    const { error } = await supabase.from('plugin_categories').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
   // --- Shop Categories ---
   async getShopCategories() {
     const { data, error } = await supabase.from('shop_categories').select('*').order('name', { ascending: true });
@@ -252,5 +289,32 @@ export const dbService = {
     const { error } = await supabase.from('shop_items').delete().eq('id', id);
     if (error) throw error;
     return true;
+  },
+
+  // --- Shop Transactions ---
+  async getShopTransactions() {
+    const { data, error } = await supabase.from('shop_transactions').select('*').order('transaction_time', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async getShopTransactionById(id: string) {
+    const { data, error } = await supabase.from('shop_transactions').select('*').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  },
+  async getShopTransactionsByBuyer(buyerId: string) {
+    const { data, error } = await supabase.from('shop_transactions').select('*').eq('buyer_id', buyerId).order('transaction_time', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async getShopTransactionsBySeller(sellerId: string) {
+    const { data, error } = await supabase.from('shop_transactions').select('*').eq('seller_id', sellerId).order('transaction_time', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async createShopTransaction(transaction: Omit<ShopTransaction, 'id' | 'transaction_time'>) {
+    const { data, error } = await supabase.from('shop_transactions').insert(transaction).select().single();
+    if (error) throw error;
+    return data;
   },
 };

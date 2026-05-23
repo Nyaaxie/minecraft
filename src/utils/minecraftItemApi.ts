@@ -20,7 +20,7 @@ export const getMinecraftItemImageUrl = (
     version?: string;
   }
 ): string => {
-  const base = "https://minecraftitems.xyz/api/item";
+  const base = "https://api.minecraftitems.xyz/api/item";
   const normalizedItemId = itemId.replace(/^minecraft:/, '').toLowerCase();
 
   const params = new URLSearchParams();

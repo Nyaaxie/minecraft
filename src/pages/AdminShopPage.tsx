@@ -92,7 +92,8 @@ const AdminShopPage = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuthStore();
+  const { user, profile } = useAuthStore();
+  const isAdmin = profile?.role === 'admin';
 
   const fetchShopData = useCallback(async () => {
     try {
@@ -100,7 +101,7 @@ const AdminShopPage = () => {
       setError(null);
       if (id) {
         const fetchedShop = await dbService.getPlayerShopById(id);
-        if (fetchedShop && fetchedShop.owner_id === user?.id) { // Ensure current user owns the shop
+        if (fetchedShop && (fetchedShop.owner_id === user?.id || isAdmin)) { // Ensure owner or admin
           setShop(fetchedShop);
         } else {
           setError('Shop not found or you do not have permission to edit this shop.');
@@ -114,7 +115,7 @@ const AdminShopPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, user]); // Dependencies for useCallback
+  }, [id, user, isAdmin]); // Dependencies for useCallback
 
   useEffect(() => {
     const loadData = async () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { dbService } from '../services/dbService';
 import { 
@@ -9,16 +9,36 @@ import {
   Loader2,
   LogOut
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
   const { profile, setProfile, signOut } = useAuthStore();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     username: profile?.username || '',
     minecraft_username: profile?.minecraft_username || '',
     bio: profile?.bio || '',
     avatar_url: profile?.avatar_url || '',
   });
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !profile) return;
+    
+    setUploading(true);
+    try {
+      const file = e.target.files[0];
+      const publicUrl = await dbService.uploadAvatar(profile.id, file);
+      setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      toast.success('Avatar uploaded successfully!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to upload avatar.');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,10 +47,10 @@ const ProfilePage = () => {
     try {
       const updated = await dbService.updateProfile(profile.id, formData);
       setProfile(updated);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err) {
       console.error(err);
-      alert('Failed to update profile');
+      toast.error('Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -49,13 +69,26 @@ const ProfilePage = () => {
           <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 text-center">
             <div className="relative inline-block group">
               <div className="h-32 w-32 rounded-full bg-neutral-800 border-4 border-strawberry-600/20 flex items-center justify-center overflow-hidden mb-4">
-                {formData.avatar_url ? (
+                {uploading ? (
+                  <Loader2 className="animate-spin text-strawberry-600" size={32} />
+                ) : formData.avatar_url ? (
                   <img src={formData.avatar_url} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <User size={48} className="text-neutral-600" />
                 )}
               </div>
-              <button className="absolute bottom-4 right-0 p-2 bg-strawberry-600 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleAvatarChange}
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute bottom-4 right-0 p-2 bg-strawberry-600 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              >
                 <Camera size={16} />
               </button>
             </div>
@@ -121,19 +154,6 @@ const ProfilePage = () => {
                 onChange={e => setFormData({...formData, bio: e.target.value})}
                 className="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-white focus:border-strawberry-500 transition-colors h-32"
                 placeholder="Tell the community about yourself..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-400 flex items-center gap-2">
-                <Camera size={16} /> Avatar URL
-              </label>
-              <input 
-                type="text"
-                value={formData.avatar_url}
-                onChange={e => setFormData({...formData, avatar_url: e.target.value})}
-                className="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-white focus:border-strawberry-500 transition-colors"
-                placeholder="Paste an image URL here"
               />
             </div>
 

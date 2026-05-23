@@ -15,9 +15,13 @@ import {
   Calendar,
   MoreVertical,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Tag,        // Added for categories tab
+  ListFilter  // Added for categories tab
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom'; // Import Link for navigation
+
 
 const AdminPanel = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -26,7 +30,7 @@ const AdminPanel = () => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const { versions, loading: versionsLoading, refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'announcements' | 'events' | 'rules' | 'reminders' | 'versions'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'announcements' | 'events' | 'rules' | 'reminders' | 'versions' | 'categories'>('users');
 
   const [modal, setModal] = useState<{ isOpen: boolean, type: string, data?: any }>({ isOpen: false, type: '' });
 
@@ -200,7 +204,7 @@ const AdminPanel = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 p-1 bg-neutral-900 border border-neutral-800 rounded-2xl w-fit overflow-x-auto">
-        {(['users', 'announcements', 'events', 'rules', 'reminders', 'versions'] as const).map((tab) => (
+        {(['users', 'announcements', 'events', 'rules', 'reminders', 'versions', 'categories'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -530,6 +534,30 @@ const AdminPanel = () => {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+          {/* CATEGORIES TAB */}
+          {activeTab === 'categories' && (
+            <div className="p-8 space-y-4">
+              <h3 className="text-xl font-bold mb-4">Manage Categories</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Link
+                  to="/admin/categories/plugin"
+                  className="bg-neutral-800/50 border border-neutral-800 p-6 rounded-2xl text-center hover:border-strawberry-500/30 transition-colors group"
+                >
+                  <ListFilter size={40} className="mx-auto text-strawberry-500 mb-4 group-hover:scale-110 transition-transform" />
+                  <p className="font-bold text-white text-lg">Plugin Categories</p>
+                  <p className="text-neutral-400 text-sm">Organize server plugins</p>
+                </Link>
+                <Link
+                  to="/admin/categories/shop"
+                  className="bg-neutral-800/50 border border-neutral-800 p-6 rounded-2xl text-center hover:border-strawberry-500/30 transition-colors group"
+                >
+                  <Tag size={40} className="mx-auto text-strawberry-500 mb-4 group-hover:scale-110 transition-transform" />
+                  <p className="font-bold text-white text-lg">Shop Categories</p>
+                  <p className="text-neutral-400 text-sm">Categorize items in player shops</p>
+                </Link>
               </div>
             </div>
           )}

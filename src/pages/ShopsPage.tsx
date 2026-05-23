@@ -1,23 +1,32 @@
 import { useEffect, useState, useCallback } from 'react';
 import { dbService } from '../services/dbService';
 import type { PlayerShop } from '../types/database.types';
-import { Search, Store, RefreshCw, Loader2, Plus } from 'lucide-react';
+import { Search, Store, RefreshCw, Loader2, Plus, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
+import toast from 'react-hot-toast';
 
-const ShopCard = ({ shop }: { shop: PlayerShop & { profiles: { username: string; avatar_url: string } | null } }) => {
+const ShopCard = ({ shop, currentUserId, isAdmin, onDelete }: { 
+  shop: PlayerShop & { profiles: { username: string; avatar_url: string } | null },
+  currentUserId?: string,
+  isAdmin: boolean,
+  onDelete: (id: string) => void
+}) => {
   const ownerUsername = shop.profiles?.username || 'Unknown Player';
   const ownerAvatar = shop.profiles?.avatar_url || '/default-avatar.png'; // Placeholder for default avatar
+  const isOwner = currentUserId === shop.owner_id;
+  const canManage = isOwner || isAdmin;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full hover:border-strawberry-500/50 transition-colors"
+      className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full hover:border-strawberry-500/50 transition-colors group"
     >
-      <Link to={`/shops/${shop.id}`} className="flex flex-col h-full">
-        <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center justify-between mb-4">
+        <Link to={`/shops/${shop.id}`} className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-xl bg-neutral-800 flex items-center justify-center overflow-hidden border border-neutral-700">
             {/* Placeholder for shop icon, or a default store icon */}
             <Store size={32} className="text-neutral-500" />
@@ -29,8 +38,28 @@ const ShopCard = ({ shop }: { shop: PlayerShop & { profiles: { username: string;
               <span>{ownerUsername}'s Shop</span>
             </div>
           </div>
-        </div>
-        <p className="text-neutral-400 text-sm mb-4 flex-grow">{shop.description || 'No description provided.'}</p>
+        </Link>
+        {canManage && (
+          <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Link 
+              to={`/shops/edit/${shop.id}`}
+              className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 hover:text-white"
+              title="Edit Shop"
+            >
+              <Edit size={16} />
+            </Link>
+            <button 
+              onClick={() => onDelete(shop.id)}
+              className="p-2 hover:bg-neutral-800 rounded-lg text-red-400 hover:text-red-500"
+              title="Delete Shop"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        )}
+      </div>
+      <Link to={`/shops/${shop.id}`} className="flex-grow">
+        <p className="text-neutral-400 text-sm mb-4">{shop.description || 'No description provided.'}</p>
         <div className="flex justify-between items-center text-xs text-neutral-500">
           <span className={`px-2 py-1 rounded-full ${shop.is_active ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
             {shop.is_active ? 'Active' : 'Inactive'}
@@ -47,6 +76,9 @@ const ShopsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const { user, profile } = useAuthStore();
+  const isAdmin = profile?.role === 'admin';
 
   const fetchShops = useCallback(async () => {
     try {
@@ -68,6 +100,18 @@ const ShopsPage = () => {
     };
     loadData();
   }, [fetchShops]);
+
+  const handleDeleteShop = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this shop? This will also delete all items in the shop. This action cannot be undone.')) return;
+    try {
+      await dbService.deletePlayerShop(id);
+      toast.success('Shop deleted successfully!');
+      fetchShops();
+    } catch (err) {
+      console.error('Error deleting shop:', err);
+      toast.error('Failed to delete shop.');
+    }
+  };
 
   const filteredShops = shops.filter(shop => {
     const ownerUsername = shop.profiles?.username || '';
@@ -140,7 +184,13 @@ const ShopsPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {!loading && filteredShops.map(shop => (
-          <ShopCard key={shop.id} shop={shop} />
+          <ShopCard 
+            key={shop.id} 
+            shop={shop} 
+            currentUserId={user?.id}
+            isAdmin={isAdmin}
+            onDelete={handleDeleteShop}
+          />
         ))}
       </div>
     </div>

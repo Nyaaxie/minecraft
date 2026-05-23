@@ -1,31 +1,52 @@
 import { useEffect, useState, useCallback } from 'react';
 import { dbService } from '../services/dbService';
 import type { Plugin, ShopCategory } from '../types/database.types';
-import { Search, Plus, ListFilter, Eye, EyeOff, Tag, RefreshCw, Loader2 } from 'lucide-react';
+import { Search, Plus, ListFilter, Eye, EyeOff, Tag, RefreshCw, Loader2, Edit, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore'; // For admin check
+import toast from 'react-hot-toast';
 
-const PluginCard = ({ plugin }: { plugin: Plugin }) => {
+const PluginCard = ({ plugin, isAdmin, onDelete }: { plugin: Plugin, isAdmin: boolean, onDelete: (id: string) => void }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full"
+      className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-lg flex flex-col h-full group hover:border-strawberry-500/30 transition-colors"
     >
-      <div className="flex items-center gap-4 mb-4">
-        {plugin.icon_url ? (
-          <img src={plugin.icon_url} alt={plugin.name} className="w-16 h-16 object-contain rounded-xl" />
-        ) : (
-          <div className="w-16 h-16 bg-neutral-800 rounded-xl flex items-center justify-center text-neutral-400">
-            <Tag size={32} />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          {plugin.icon_url ? (
+            <img src={plugin.icon_url} alt={plugin.name} className="w-16 h-16 object-contain rounded-xl" />
+          ) : (
+            <div className="w-16 h-16 bg-neutral-800 rounded-xl flex items-center justify-center text-neutral-400">
+              <Tag size={32} />
+            </div>
+          )}
+          <div>
+            <h3 className="text-xl font-bold text-white mb-1">{plugin.name}</h3>
+            <p className="text-sm text-neutral-500">Version: {plugin.version || 'N/A'}</p>
+          </div>
+        </div>
+        {isAdmin && (
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Link 
+              to={`/admin/plugins/${plugin.id}`}
+              className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 hover:text-white"
+              title="Edit Plugin"
+            >
+              <Edit size={16} />
+            </Link>
+            <button 
+              onClick={() => onDelete(plugin.id)}
+              className="p-2 hover:bg-neutral-800 rounded-lg text-red-400 hover:text-red-500"
+              title="Delete Plugin"
+            >
+              <Trash2 size={16} />
+            </button>
           </div>
         )}
-        <div>
-          <h3 className="text-xl font-bold text-white mb-1">{plugin.name}</h3>
-          <p className="text-sm text-neutral-500">Version: {plugin.version || 'N/A'}</p>
-        </div>
       </div>
       <p className="text-neutral-400 text-sm mb-4 flex-grow">{plugin.description || 'No description provided.'}</p>
       <div className="flex items-center justify-between text-xs text-neutral-500">
@@ -88,6 +109,18 @@ const PluginsPage = () => {
     };
     loadData();
   }, [fetchPlugins, fetchCategories]);
+
+  const handleDeletePlugin = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this plugin? This action cannot be undone.')) return;
+    try {
+      await dbService.deletePlugin(id);
+      toast.success('Plugin deleted successfully!');
+      fetchPlugins();
+    } catch (err) {
+      console.error('Error deleting plugin:', err);
+      toast.error('Failed to delete plugin.');
+    }
+  };
 
   const filteredPlugins = plugins.filter(plugin => {
     const matchesSearch = plugin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -174,11 +207,17 @@ const PluginsPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {!loading && filteredPlugins.map(plugin => (
-          <PluginCard key={plugin.id} plugin={plugin} />
+          <PluginCard 
+            key={plugin.id} 
+            plugin={plugin} 
+            isAdmin={isAdmin}
+            onDelete={handleDeletePlugin}
+          />
         ))}
       </div>
     </div>
   );
 };
+
 
 export default PluginsPage;

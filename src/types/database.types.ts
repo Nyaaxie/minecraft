@@ -166,3 +166,25 @@ export interface ShopItem {
   shop_categories?: { name: string } | null; // Joined data
 }
 
+// For Plugin Categories
+export interface PluginCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  icon_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// For Shop Transactions
+export interface ShopTransaction {
+  id: string;
+  shop_item_id: string | null;
+  buyer_id: string | null;
+  seller_id: string | null;
+  price: number;
+  currency: string;
+  quantity: number;
+  transaction_time: string;
+}
+

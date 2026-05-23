@@ -222,8 +222,9 @@ const AdminShopItemPage = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuthStore();
-  const [isShopOwner, setIsShopOwner] = useState(false);
+  const { user, profile } = useAuthStore();
+  const isAdmin = profile?.role === 'admin';
+  const [isManageable, setIsManageable] = useState(false);
 
   const fetchItemData = useCallback(async () => {
     try {
@@ -238,14 +239,14 @@ const AdminShopItemPage = () => {
       }
 
       const fetchedShop = await dbService.getPlayerShopById(shopId);
-      if (!fetchedShop || fetchedShop.owner_id !== user?.id) {
+      if (!fetchedShop || (fetchedShop.owner_id !== user?.id && !isAdmin)) { // owner or admin
         setError('You do not have permission to manage items in this shop.');
         toast.error('Unauthorized access to shop.');
         navigate('/shops');
         // setLoading(false); // Controlled by useEffect wrapper
         return;
       }
-      setIsShopOwner(true);
+      setIsManageable(true);
 
       const fetchedCategories = await dbService.getShopCategories();
       setShopCategories(fetchedCategories);
@@ -267,7 +268,7 @@ const AdminShopItemPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [shopId, itemId, user, navigate]); // Dependencies for useCallback
+  }, [shopId, itemId, user, navigate, isAdmin]); // Dependencies for useCallback
 
   useEffect(() => {
     const loadData = async () => {
@@ -285,7 +286,7 @@ const AdminShopItemPage = () => {
   const handleSubmit = async (formData: Omit<ShopItem, 'id' | 'created_at' | 'updated_at' | 'shop_id'>) => {
     setIsSaving(true);
     try {
-      if (!isShopOwner || !shopId) {
+      if (!isManageable || !shopId) {
         toast.error('Unauthorized to perform this action.');
         setIsSaving(false);
         return;

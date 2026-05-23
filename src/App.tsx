@@ -21,6 +21,7 @@ const ShopsPage = lazy(() => import('./pages/ShopsPage'));
 const ShopDetailPage = lazy(() => import('./pages/ShopDetailPage'));
 const AdminShopPage = lazy(() => import('./pages/AdminShopPage'));
 const AdminShopItemPage = lazy(() => import('./pages/AdminShopItemPage'));
+const AdminCategoriesPage = lazy(() => import('./pages/AdminCategoriesPage'));
 
 import DashboardLayout from './components/DashboardLayout';
 
@@ -85,6 +86,9 @@ function App() {
             <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><NotificationsPage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfilePage /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/categories/:categoryType" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/categories/:categoryType/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/categories/:categoryType/edit/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
             
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
