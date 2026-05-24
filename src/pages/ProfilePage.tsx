@@ -22,10 +22,19 @@ import BadgeChip from '../components/BadgeChip';
 
 
 const ProfilePage = () => {
-  const { profile, setProfile, signOut } = useAuthStore();
+  const { profile, setProfile, signOut, loading: authLoading } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 gap-4">
+        <Loader2 className="animate-spin text-strawberry-600" size={64} />
+      </div>
+    );
+  }
+
   const [formData, setFormData] = useState<Partial<Profile>>({
     username: profile?.username || '',
     minecraft_username: profile?.minecraft_username || '',

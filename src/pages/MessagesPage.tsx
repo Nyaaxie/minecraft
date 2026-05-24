@@ -217,8 +217,12 @@ const MessagesPage = () => {
                     : 'hover:bg-neutral-50 dark:hover:bg-white/5'
                     }`}
                 >
-                  <div className="h-11 w-11 rounded-2xl bg-neutral-200 dark:bg-neutral-800 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                    <MessageSquare size={20} className={activeConversationId === conv.id ? 'text-white' : 'text-neutral-400'} />
+                  <div className="h-11 w-11 rounded-2xl bg-neutral-200 dark:bg-neutral-800 flex-shrink-0 flex items-center justify-center overflow-hidden border border-neutral-100 dark:border-neutral-700 shadow-sm">
+                    {conv.avatar_url ? (
+                      <img src={conv.avatar_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <MessageSquare size={20} className={activeConversationId === conv.id ? 'text-white' : 'text-neutral-400'} />
+                    )}
                   </div>
                   <div className="flex-1 text-left min-w-0">
                     <p className="font-black italic uppercase tracking-tight text-sm truncate">{conv.name || 'Private Chat'}</p>

@@ -25,7 +25,7 @@ export const chatService = {
         updated_at,
         conversation_members(
           profile_id,
-          profiles(username)
+          profiles(username, avatar_url)
         )
       `)
       .in('id', convIds)
@@ -34,23 +34,26 @@ export const chatService = {
     if (convError) throw convError;
     if (!convs) return [];
 
-    // 3. Process the data to set the correct display name
+    // 3. Process the data to set the correct display name and avatar
     return convs.map((conv: any) => {
       let displayName = conv.name;
+      let displayAvatar = null;
 
-      // If it's a private chat, set the name to the other participant's username
+      // If it's a private chat, set the name/avatar to the other participant's data
       if (!conv.is_group) {
         const otherMember = conv.conversation_members.find(
           (m: any) => m.profile_id !== profileId
         );
-        if (otherMember?.profiles?.username) {
+        if (otherMember?.profiles) {
           displayName = otherMember.profiles.username;
+          displayAvatar = otherMember.profiles.avatar_url;
         }
       }
       
       return {
         ...conv,
-        name: displayName
+        name: displayName,
+        avatar_url: displayAvatar
       };
     });
   },
@@ -58,8 +61,15 @@ export const chatService = {
 async getMessages(conversationId: string) {
   const { data, error } = await supabase
     .from('messages')
-    // Explicitly specify the foreign key column 'sender_id' for the join
-    .select('*, sender:profiles!sender_id(id, username, avatar_url)')
+    // Ensure the join is robust by explicitly selecting from the profiles table
+    .select(`
+      *,
+      sender:profiles!sender_id(
+        id, 
+        username, 
+        avatar_url
+      )
+    `)
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: true });
 
@@ -68,10 +78,15 @@ async getMessages(conversationId: string) {
     throw error;
   }
 
-  console.log("Supabase Data in getMessages:", data);
-  return data || [];
-},
+  // Ensure sender is not null or undefined for the UI
+  const mappedData = data?.map(msg => ({
+      ...msg,
+      sender: Array.isArray(msg.sender) ? msg.sender[0] : msg.sender
+  })) || [];
 
+  console.log("Supabase Data in getMessages:", mappedData);
+  return mappedData;
+},
   async sendMessage(conversationId: string, senderId: string, content: string) {
     const { data, error } = await supabase
       .from('messages')
