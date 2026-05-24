@@ -476,7 +476,7 @@ const MessagesPage = () => {
                         transition={{ duration: 0.15, ease: 'easeOut' }}
                         className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} group ${isGrouped ? 'mt-0.5' : 'mt-3'}`}
                       >
-                        <div className={`flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <div className={`flex items-center gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
 
                           {/* Avatar — only for received messages, invisible spacer when grouped */}
                           {!isOwn && (
@@ -490,7 +490,7 @@ const MessagesPage = () => {
                           )}
 
                           <div
-                            className={`px-4 py-2.5 rounded-2xl max-w-[72%] sm:max-w-[60%] relative text-sm font-medium break-words whitespace-pre-wrap
+                            className={`px-4 py-2.5 rounded-2xl max-w-[90%] md:max-w-md relative text-sm font-medium break-words whitespace-pre-wrap
                               ${isOwn
                                 ? `bg-strawberry-600 text-white ${isGrouped ? 'rounded-tr-md' : 'rounded-tr-2xl'} rounded-tl-2xl rounded-bl-2xl rounded-br-md`
                                 : `bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white ${isGrouped ? 'rounded-tl-md' : 'rounded-tl-2xl'} rounded-tr-2xl rounded-br-2xl rounded-bl-md shadow-sm border border-neutral-100 dark:border-neutral-700`
@@ -500,7 +500,7 @@ const MessagesPage = () => {
                           >
                             {/* Sender name — only for received, only first in group */}
                             {!isOwn && !isGrouped && senderName && (
-                              <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-neutral-400 dark:text-neutral-500">
+                              <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-neutral-400 dark:text-neutral-500 whitespace-nowrap">
                                 {senderName}
                               </p>
                             )}
