@@ -24,13 +24,13 @@ const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, la
   <Link
     to={to}
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active
-      ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20'
-      : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
+    className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group ${active
+      ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30 scale-[1.02]'
+      : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white'
       }`}
   >
-    <Icon size={20} />
-    <span className="font-medium">{label}</span>
+    <Icon size={22} className={`${active ? 'text-white' : 'group-hover:text-strawberry-500'} transition-colors`} />
+    <span className="font-bold text-sm tracking-tight">{label}</span>
   </Link>
 );
 
@@ -49,7 +49,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { icon: MessageSquare, label: 'Messages', to: '/messages' },
     { icon: Bell, label: 'Notifications', to: '/notifications' },
     { icon: User, label: 'Profile', to: '/profile' },
-    { icon: UsersRound, label: 'Members', to: '/members' }, // New Members link
+    { icon: UsersRound, label: 'Members', to: '/members' },
   ];
 
   if (profile?.role === 'admin') {
@@ -62,17 +62,22 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 font-sans">
+    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans selection:bg-strawberry-500/30">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-xl p-4 fixed h-screen overflow-y-auto hide-scrollbar">
-        <div className="flex items-center gap-3 px-4 py-6">
-          <div className="p-2 bg-strawberry-600 rounded-lg text-white">
-            <img src="/logo.png" alt="Logo" className="w-6 h-6" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">Strawberry<span className="text-strawberry-500">SMP</span></span>
+      <aside className="hidden lg:flex w-72 flex-col border-r border-neutral-200 dark:border-white/5 bg-white/80 dark:bg-neutral-900/50 backdrop-blur-xl p-6 fixed h-screen z-50 transition-all duration-300">
+        <div className="flex items-center gap-4 px-2 py-4 mb-8">
+          <motion.div
+            whileHover={{ rotate: 15 }}
+            className="p-2.5 bg-strawberry-600 rounded-2xl text-white shadow-lg shadow-strawberry-600/30 flex items-center justify-center"
+          >
+            <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+          </motion.div>
+          <span className="text-2xl font-black tracking-tighter italic uppercase">
+            Strawberry<span className="text-strawberry-600 font-black">SMP</span>
+          </span>
         </div>
 
-        <nav className="flex-1 space-y-2 mt-8">
+        <nav className="flex-1 space-y-1 overflow-y-auto pr-2 -mr-2 hide-scrollbar">
           {menuItems.map((item) => (
             <SidebarItem
               key={item.to}
@@ -82,102 +87,129 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           ))}
         </nav>
 
-        <div className="mt-auto border-t border-neutral-200 dark:border-neutral-800 pt-4">
-          <div className="flex items-center gap-3 px-4 py-3 mb-4 justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center overflow-hidden">
+        <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-white/5">
+          <div className="flex items-center gap-4 p-4 mb-4 bg-neutral-100 dark:bg-white/5 rounded-[2rem] border border-transparent dark:hover:border-white/10 transition-all group">
+            <div className="relative">
+              <div className="h-12 w-12 rounded-2xl bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-900 flex items-center justify-center overflow-hidden shadow-md group-hover:scale-105 transition-transform">
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
                 ) : (
-                  <User size={20} className="text-neutral-500" />
+                  <User size={24} className="text-neutral-500" />
                 )}
               </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-semibold truncate">{profile?.username || 'Player'}</span>
-                <span className="text-xs text-neutral-500 capitalize">{profile?.role || 'Player'}</span>
-              </div>
+              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-neutral-900 shadow-sm" />
+            </div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-sm font-black italic uppercase tracking-tight truncate">{profile?.username || 'Player'}</span>
+              <span className="text-[10px] font-bold text-strawberry-600 uppercase tracking-widest">{profile?.role || 'Member'}</span>
             </div>
             <ThemeToggle />
           </div>
+
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 w-full px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-400/5 rounded-xl transition-all"
+            className="flex items-center justify-center gap-3 w-full px-4 py-4 text-neutral-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/5 rounded-2xl transition-all font-bold text-sm uppercase tracking-widest italic"
           >
-            <LogOut size={20} />
-            <span className="font-medium">Sign Out</span>
+            <LogOut size={18} />
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-lg border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-strawberry-600 rounded text-white">
-            <img src="/logo.png" alt="Logo" className="w-4.5 h-4.5" />
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-[60] bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-200 dark:border-white/5 px-4 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-strawberry-600 rounded-xl text-white shadow-lg shadow-strawberry-600/20">
+            <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
           </div>
-          <span className="font-bold">Strawberry<span className="text-strawberry-500">SMP</span></span>
+          <span className="font-black italic uppercase tracking-tighter text-lg">Strawberry<span className="text-strawberry-600">SMP</span></span>
         </div>
         <div className="flex items-center gap-2">
           <NotificationCenter />
           <ThemeToggle />
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+            className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-600 dark:text-neutral-400 active:scale-95 transition-transform"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Backdrop - closes menu when tapped outside */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 z-30 bg-black/50"
+              className="lg:hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm"
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.div
-              initial={{ opacity: 0, x: -100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              className="lg:hidden fixed inset-0 z-40 bg-white dark:bg-neutral-950 pt-16 p-4"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="lg:hidden fixed left-0 top-0 bottom-0 w-[85%] max-w-xs z-[80] bg-white dark:bg-neutral-900 flex flex-col p-6 shadow-2xl border-r border-neutral-200 dark:border-white/5"
             >
-              <nav className="space-y-2">
+              <div className="flex items-center gap-4 mb-10 pt-4">
+                <div className="p-2.5 bg-strawberry-600 rounded-2xl text-white shadow-lg shadow-strawberry-600/30">
+                  <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+                </div>
+                <span className="text-2xl font-black tracking-tighter italic uppercase text-neutral-900 dark:text-white">
+                  Strawberry<span className="text-strawberry-600">SMP</span>
+                </span>
+              </div>
+
+              <nav className="flex-1 space-y-1 overflow-y-auto hide-scrollbar">
                 {menuItems.map((item) => (
                   <Link
                     key={item.to}
                     to={item.to}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all ${location.pathname === item.to
-                      ? 'bg-strawberry-600 text-white'
-                      : 'text-neutral-400'
+                    className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${location.pathname === item.to
+                      ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5'
                       }`}
                   >
-                    <item.icon size={24} />
-                    <span className="text-lg font-medium">{item.label}</span>
+                    <item.icon size={22} />
+                    <span className="text-sm font-bold tracking-tight uppercase italic">{item.label}</span>
                   </Link>
                 ))}
+              </nav>
+
+              <div className="mt-auto pt-6 border-t border-neutral-100 dark:border-white/5 space-y-4">
+                <div className="flex items-center gap-4 p-4 bg-neutral-50 dark:bg-white/5 rounded-3xl">
+                  <div className="h-12 w-12 rounded-2xl bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-900 flex items-center justify-center overflow-hidden shadow-md">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                    ) : (
+                      <User size={24} className="text-neutral-500" />
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-sm font-black italic uppercase tracking-tight truncate dark:text-white">{profile?.username || 'Player'}</span>
+                    <span className="text-[10px] font-bold text-strawberry-600 uppercase tracking-widest">{profile?.role || 'Member'}</span>
+                  </div>
+                </div>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-3 w-full px-4 py-4 text-neutral-400 hover:text-red-400"
+                  className="flex items-center justify-center gap-3 w-full px-4 py-4 text-red-500 bg-red-50 dark:bg-red-500/10 rounded-2xl transition-all font-bold text-sm uppercase tracking-widest italic"
                 >
-                  <LogOut size={24} />
-                  <span className="text-lg font-medium">Sign Out</span>
+                  <LogOut size={18} />
+                  <span>Sign Out</span>
                 </button>
-              </nav>
+              </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 pt-20 lg:pt-0 relative z-10">
-        <div className="max-w-7xl mx-auto p-4 md:p-8">
+      <main className="flex-1 lg:ml-72 pt-24 lg:pt-0 relative z-10 transition-all duration-300">
+        <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-8 lg:p-12">
           {children}
         </div>
       </main>

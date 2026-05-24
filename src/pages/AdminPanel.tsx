@@ -30,7 +30,7 @@ import {
   Pencil,
   Check,
   X,
-  Award, // New icon for badge assignment
+  Award,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -95,12 +95,12 @@ const PriorityCell = ({
 // AdminPanel
 // ---------------------------------------------------------------------------
 const AdminPanel = () => {
-  const { profile: currentAdminProfile } = useAuthStore(); // Get current admin profile
+  const { profile: currentAdminProfile } = useAuthStore();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [badges, setBadges] = useState<Badge[]>([]); // New state for badges
+  const [badges, setBadges] = useState<Badge[]>([]);
   const { versions, loading: versionsLoading, refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'users' | 'announcements' | 'events' | 'rules' | 'reminders' | 'versions' | 'categories' | 'badges'>('users');
@@ -117,13 +117,13 @@ const AdminPanel = () => {
         dbService.getEvents(),
         adminService.getRules(),
         adminService.getReminders(),
-        dbService.getBadges(), // Fetch badges
+        dbService.getBadges(),
       ]);
       setProfiles(p);
       setEvents(e);
       setRules(r);
       setReminders(rem);
-      setBadges(b); // Set badges state
+      setBadges(b);
     } catch (err) {
       console.error(err);
     } finally {
@@ -132,7 +132,6 @@ const AdminPanel = () => {
   };
 
   useEffect(() => { fetchData(); }, []);
-
 
   // -------------------------------------------------------------------------
   // Users
@@ -175,8 +174,6 @@ const AdminPanel = () => {
   // -------------------------------------------------------------------------
   // Rules
   // -------------------------------------------------------------------------
-
-  // Used by inline priority cell + visible/pinned toggle buttons in the table
   const handleUpdateRule = async (id: string, updates: Partial<Rule>) => {
     try {
       const updated = await adminService.updateRule(id, updates);
@@ -197,7 +194,6 @@ const AdminPanel = () => {
     }
   };
 
-  // Used by the create/edit modal form
   const handleCreateOrUpdateRule = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -303,7 +299,7 @@ const AdminPanel = () => {
   };
 
   // -------------------------------------------------------------------------
-  // Badges (New Section)
+  // Badges
   // -------------------------------------------------------------------------
   const handleCreateBadge = async (badgeData: Omit<Badge, 'id' | 'created_at' | 'updated_at' | 'created_by'> & { created_by?: string | null }) => {
     if (!currentAdminProfile?.id) {
@@ -345,14 +341,15 @@ const AdminPanel = () => {
   // -------------------------------------------------------------------------
   // Shared styles
   // -------------------------------------------------------------------------
-  const inputCls = 'w-full bg-neutral-100 dark:bg-neutral-800 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-strawberry-500/40';
-  const checkboxRowCls = 'flex items-center gap-3 p-3 bg-neutral-100 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 cursor-pointer select-none';
+  const inputCls = 'w-full bg-neutral-100 dark:bg-neutral-800 p-4 rounded-2xl border border-transparent focus:border-strawberry-500/30 text-neutral-900 dark:text-white focus:outline-none transition-all outline-none';
+  const checkboxRowCls = 'flex items-center gap-4 p-4 bg-neutral-50 dark:bg-white/5 rounded-2xl border border-transparent hover:border-white/5 cursor-pointer select-none transition-all';
+  const cardCls = 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] shadow-xl shadow-neutral-900/5';
 
   // =========================================================================
   // Render
   // =========================================================================
   return (
-    <div className="space-y-8 text-neutral-900 dark:text-neutral-100">
+    <div className="max-w-7xl mx-auto space-y-10 pb-20">
 
       {/* ── Modals ── */}
 
@@ -362,30 +359,27 @@ const AdminPanel = () => {
         onClose={() => setModal({ isOpen: false, type: '' })}
         title={modal.type === 'edit-rule' ? 'Edit Rule' : 'Create Rule'}
       >
-        <form onSubmit={handleCreateOrUpdateRule} className="space-y-4">
+        <form onSubmit={handleCreateOrUpdateRule} className="space-y-6">
           <input name="title" placeholder="Rule Title" defaultValue={modal.data?.title || ''} required className={inputCls} />
-          <textarea name="content" placeholder="Rule Content" defaultValue={modal.data?.content || ''} required className={`${inputCls} h-32`} />
-          <div>
-            <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1">Priority</label>
-            <input name="priority" type="number" defaultValue={modal.data?.priority ?? 0} className={inputCls} />
-            <p className="text-xs text-neutral-500 mt-1">Higher number = shown first.</p>
+          <textarea name="content" placeholder="Rule Content" defaultValue={modal.data?.content || ''} required className={`${inputCls} h-40 resize-none`} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2 px-1">Priority</label>
+              <input name="priority" type="number" defaultValue={modal.data?.priority ?? 0} className={inputCls} />
+            </div>
+            <div className="flex items-center gap-4 mt-6">
+              <label className={checkboxRowCls + ' flex-1'}>
+                <input name="is_visible" type="checkbox" defaultChecked={modal.data?.is_visible ?? true} className="accent-strawberry-600 w-5 h-5" />
+                <span className="text-sm font-bold uppercase italic">Visible</span>
+              </label>
+              <label className={checkboxRowCls + ' flex-1'}>
+                <input name="is_pinned" type="checkbox" defaultChecked={modal.data?.is_pinned ?? false} className="accent-strawberry-600 w-5 h-5" />
+                <span className="text-sm font-bold uppercase italic">Pinned</span>
+              </label>
+            </div>
           </div>
-          <label className={checkboxRowCls}>
-            <input name="is_visible" type="checkbox" defaultChecked={modal.data?.is_visible ?? true} className="accent-strawberry-600 w-4 h-4" />
-            <div>
-              <p className="text-sm font-bold text-neutral-900 dark:text-white">Visible to players</p>
-              <p className="text-xs text-neutral-500">Show this rule on the rules page.</p>
-            </div>
-          </label>
-          <label className={checkboxRowCls}>
-            <input name="is_pinned" type="checkbox" defaultChecked={modal.data?.is_pinned ?? false} className="accent-strawberry-600 w-4 h-4" />
-            <div>
-              <p className="text-sm font-bold text-neutral-900 dark:text-white">Pin rule</p>
-              <p className="text-xs text-neutral-500">Pinned rules appear at the top.</p>
-            </div>
-          </label>
-          <button type="submit" className="w-full bg-strawberry-600 p-3 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-colors">
-            {modal.type === 'edit-rule' ? 'Save Changes' : 'Create Rule'}
+          <button type="submit" className="w-full bg-strawberry-600 p-4 rounded-2xl font-black uppercase italic tracking-widest text-white hover:bg-strawberry-700 transition-all shadow-xl shadow-strawberry-600/20">
+            {modal.type === 'edit-rule' ? 'Save Changes' : 'Publish Rule'}
           </button>
         </form>
       </Modal>
@@ -396,17 +390,17 @@ const AdminPanel = () => {
         onClose={() => setModal({ isOpen: false, type: '' })}
         title={modal.type === 'edit-reminder' ? 'Edit Reminder' : 'Create Reminder'}
       >
-        <form onSubmit={handleCreateOrUpdateReminder} className="space-y-4">
+        <form onSubmit={handleCreateOrUpdateReminder} className="space-y-6">
           <input name="title" placeholder="Reminder Title" defaultValue={modal.data?.title || ''} required className={inputCls} />
-          <textarea name="message" placeholder="Reminder Message" defaultValue={modal.data?.message || ''} required className={`${inputCls} h-32`} />
+          <textarea name="message" placeholder="Reminder Message" defaultValue={modal.data?.message || ''} required className={`${inputCls} h-40 resize-none`} />
           <label className={checkboxRowCls}>
-            <input name="is_important" type="checkbox" defaultChecked={modal.data?.is_important ?? false} className="accent-amber-500 w-4 h-4" />
+            <input name="is_important" type="checkbox" defaultChecked={modal.data?.is_important ?? false} className="accent-amber-500 w-5 h-5" />
             <div>
-              <p className="text-sm font-bold text-neutral-900 dark:text-white">Mark as important</p>
+              <p className="text-sm font-bold uppercase italic">Mark as Important</p>
               <p className="text-xs text-neutral-500">Highlights this reminder with an amber badge.</p>
             </div>
           </label>
-          <button type="submit" className="w-full bg-strawberry-600 p-3 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-colors">
+          <button type="submit" className="w-full bg-strawberry-600 p-4 rounded-2xl font-black uppercase italic tracking-widest text-white hover:bg-strawberry-700 transition-all shadow-xl shadow-strawberry-600/20">
             {modal.type === 'edit-reminder' ? 'Save Changes' : 'Create Reminder'}
           </button>
         </form>
@@ -418,16 +412,14 @@ const AdminPanel = () => {
         onVersionAdded={refetchVersions}
         version={modal.type === 'edit-version' ? modal.data : undefined}
       />
+
       <AnnouncementModal
         isOpen={modal.isOpen && (modal.type === 'announcement' || modal.type === 'edit-announcement')}
         onClose={() => setModal({ isOpen: false, type: '' })}
-        onSaved={() => {
-          fetchData();
-        }}
+        onSaved={() => { fetchData(); }}
         announcement={modal.type === 'edit-announcement' ? modal.data : undefined}
       />
 
-      {/* New Badge Modal */}
       <AddEditBadgeModal
         isOpen={modal.isOpen && (modal.type === 'badge' || modal.type === 'edit-badge')}
         onClose={() => setModal({ isOpen: false, type: '' })}
@@ -435,7 +427,6 @@ const AdminPanel = () => {
           if (modal.type === 'edit-badge' && modal.data) {
             await handleUpdateBadge(modal.data.id, badgeData);
           } else {
-            // For new badge, created_by should be the current admin's ID
             if (currentAdminProfile?.id) {
               await handleCreateBadge({ ...badgeData, created_by: currentAdminProfile.id });
             } else {
@@ -446,123 +437,111 @@ const AdminPanel = () => {
         editingBadge={modal.type === 'edit-badge' ? modal.data : undefined}
       />
 
-      {/* Assign Badges Modal */}
       <AssignBadgesModal
         isOpen={modal.isOpen && modal.type === 'assign-badges'}
         onClose={() => setModal({ isOpen: false, type: '' })}
         userProfile={modal.data}
-        // Correctly pass currentAdminProfile.id for assignedBy
         assignedBy={currentAdminProfile?.id || null}
-        onBadgesUpdated={fetchData} // Re-fetch all data to update profiles list and badges
+        onBadgesUpdated={fetchData}
       />
 
-      {/* ── Page header ── */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">Admin Control Panel</h1>
-        <p className="text-neutral-600 dark:text-neutral-400 mt-1">Manage users, broadcast announcements, and oversee events.</p>
-      </div>
-
-      {/* ── Tabs ── */}
-      <div className="flex gap-2 p-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl w-fit overflow-x-auto">
-        {(['users', 'announcements', 'events', 'rules', 'reminders', 'versions', 'categories', 'badges'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2 rounded-xl text-sm font-bold transition-all capitalize whitespace-nowrap ${activeTab === tab
-              ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20'
-              : 'text-neutral-600 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
-              }`}
-          >
-            {tab}
-          </button>
-        ))}
+      {/* ── Page Header ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4">
+        <div>
+          <h1 className="text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
+            Admin<span className="text-strawberry-600">Panel</span>
+          </h1>
+          <p className="text-neutral-500 mt-2 font-medium uppercase tracking-tight text-sm">
+            System oversight, user management, and community moderation.
+          </p>
+        </div>
+        <div className="flex gap-2 p-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl w-full md:w-fit overflow-x-auto">
+          {(['users', 'announcements', 'events', 'rules', 'reminders', 'versions', 'categories', 'badges'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab
+                ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20'
+                : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+                }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading || versionsLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="animate-spin text-strawberry-600 dark:text-strawberry-500" size={48} />
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <Loader2 className="animate-spin text-strawberry-600" size={64} />
+          <p className="text-neutral-500 font-black uppercase tracking-widest animate-pulse">Loading...</p>
         </div>
       ) : (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl overflow-hidden"
+          className="px-4"
         >
 
           {/* ── USERS ── */}
           {activeTab === 'users' && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-neutral-100 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase tracking-wider">
-                    <th className="px-6 py-4">Player</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Role</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                  {profiles.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="p-8 text-center text-neutral-500">
-                        <Users className="mx-auto text-neutral-700 mb-2" size={32} />
-                        No profiles found.
-                      </td>
-                    </tr>
-                  ) : profiles.map(p => (
-                    <tr key={p.id} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-neutral-800 flex items-center justify-center overflow-hidden border border-neutral-700">
-                            {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-full w-full object-cover" /> : <Users size={20} />}
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm">{p.username}</p>
-                            <p className="text-xs text-neutral-500">{p.minecraft_username || 'No MC linked'}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase ${p.is_banned ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
-                          {p.is_banned ? 'Banned' : 'Active'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${p.role === 'admin' ? 'bg-strawberry-500/10 text-strawberry-500' : 'bg-neutral-800 text-neutral-400'}`}>
-                          {p.role}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => handleRoleToggle(p)} className="p-2 text-neutral-500 hover:text-strawberry-500 hover:bg-strawberry-500/5 rounded-lg transition-all" title="Toggle Role">
-                            <Shield size={18} />
-                          </button>
-                          <button onClick={() => handleBanToggle(p)} className={`p-2 rounded-lg transition-all ${p.is_banned ? 'text-green-500 hover:bg-green-500/5' : 'text-red-500 hover:bg-red-500/5'}`} title={p.is_banned ? 'Unban' : 'Ban'}>
-                            <Ban size={18} />
-                          </button>
-                          <button
-                            onClick={() => setModal({ isOpen: true, type: 'assign-badges', data: p })} // Open assign badges modal
-                            className="p-2 text-neutral-500 hover:text-strawberry-500 hover:bg-strawberry-500/5 rounded-lg transition-all"
-                            title="Assign Badges"
-                          >
-                            <Award size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {profiles.length === 0 ? (
+                <div className={`${cardCls} p-12 text-center col-span-full`}>
+                  <Users className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No profiles found.</p>
+                </div>
+              ) : profiles.map(p => (
+                <div key={p.id} className={`${cardCls} p-6 transition-all hover:border-strawberry-500/30 group`}>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="h-14 w-14 rounded-2xl bg-neutral-100 dark:bg-neutral-800 border-2 border-white dark:border-neutral-900 shadow-md overflow-hidden group-hover:scale-105 transition-transform">
+                        {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-full w-full object-cover" /> : <Users size={24} className="m-auto mt-3 text-neutral-400" />}
+                      </div>
+                      <div>
+                        <p className="font-black italic uppercase tracking-tighter text-lg">{p.username}</p>
+                        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{p.minecraft_username || 'No MC linked'}</p>
+                      </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest italic ${p.is_banned ? 'bg-red-500 text-white' : 'bg-green-500/10 text-green-500'}`}>
+                      {p.is_banned ? 'Banned' : 'Active'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-6 border-t border-neutral-100 dark:border-white/5">
+                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest italic ${p.role === 'admin' ? 'bg-strawberry-600 text-white' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
+                      {p.role}
+                    </span>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleRoleToggle(p)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-500 transition-all" title="Toggle Role">
+                        <Shield size={18} />
+                      </button>
+                      <button onClick={() => handleBanToggle(p)} className={`p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl transition-all ${p.is_banned ? 'text-green-500' : 'text-red-500'}`} title={p.is_banned ? 'Unban' : 'Ban'}>
+                        <Ban size={18} />
+                      </button>
+                      <button onClick={() => setModal({ isOpen: true, type: 'assign-badges', data: p })} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-500 transition-all" title="Assign Badges">
+                        <Award size={18} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
           {/* ── ANNOUNCEMENTS ── */}
           {activeTab === 'announcements' && (
-            <div className="p-8 text-center space-y-4">
-              <Megaphone className="mx-auto text-neutral-400 dark:text-neutral-700" size={48} />
-              <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Broadcast System</h3>
-              <p className="text-neutral-600 dark:text-neutral-500 max-w-sm mx-auto">Send announcements to all players.</p>
-              <button onClick={() => toast('New announcement feature pending UI integration.')} className="px-6 py-2 bg-strawberry-600 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20">
+            <div className={`${cardCls} p-12 text-center`}>
+              <div className="w-20 h-20 rounded-[2rem] bg-strawberry-500/10 mx-auto mb-8 flex items-center justify-center">
+                <Megaphone size={40} className="text-strawberry-600" />
+              </div>
+              <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Broadcast System</h3>
+              <p className="text-neutral-500 max-w-sm mx-auto text-xs font-bold uppercase tracking-tight leading-relaxed mb-8">
+                Send announcements to all players on the server.
+              </p>
+              <button
+                onClick={() => setModal({ isOpen: true, type: 'announcement' })}
+                className="px-8 py-3 bg-strawberry-600 rounded-2xl font-black uppercase tracking-widest italic text-[10px] text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20"
+              >
                 New Announcement
               </button>
             </div>
@@ -570,300 +549,215 @@ const AdminPanel = () => {
 
           {/* ── EVENTS ── */}
           {activeTab === 'events' && (
-            <div className="p-8 space-y-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Manage Events</h3>
-                <span className="text-sm text-neutral-500">{events.length} Events Total</span>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black italic uppercase tracking-tighter">Manage Events</h3>
+                <span className="text-xs font-black uppercase tracking-widest text-neutral-400">{events.length} Total</span>
               </div>
-              <div className="space-y-3">
-                {events.length === 0 ? (
-                  <div className="bg-neutral-50 dark:bg-neutral-900/50 border border-dashed border-neutral-200 dark:border-neutral-800 p-8 rounded-2xl text-center">
-                    <Calendar className="mx-auto text-neutral-400 dark:text-neutral-700 mb-2" size={32} />
-                    <p className="text-neutral-600 dark:text-neutral-500">No events found.</p>
-                  </div>
-                ) : events.map(ev => (
-                  <div key={ev.id} className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-800">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-xl text-strawberry-600 dark:text-strawberry-500">
-                        <Calendar size={20} />
+              {events.length === 0 ? (
+                <div className={`${cardCls} p-12 text-center`}>
+                  <Calendar className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No events found.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {events.map(ev => (
+                    <div key={ev.id} className={`${cardCls} p-6 flex items-center justify-between`}>
+                      <div className="flex items-center gap-4">
+                        <div className="p-4 bg-strawberry-500/10 rounded-2xl">
+                          <Calendar size={22} className="text-strawberry-600" />
+                        </div>
+                        <div>
+                          <p className="font-black italic uppercase tracking-tighter">{ev.title}</p>
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{new Date(ev.start_time).toLocaleDateString()}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-neutral-900 dark:text-white">{ev.title}</p>
-                        <p className="text-xs text-neutral-500">{new Date(ev.start_time).toLocaleDateString()}</p>
+                      <div className="flex gap-2">
+                        <button onClick={() => handleDeleteEvent(ev.id)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-500 transition-all">
+                          <Trash2 size={16} />
+                        </button>
+                        <button className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-all">
+                          <MoreVertical size={16} />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => handleDeleteEvent(ev.id)} className="p-2 text-neutral-500 hover:text-red-600 dark:hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all" title="Delete Event">
-                        <Trash2 size={18} />
-                      </button>
-                      <button className="p-2 text-neutral-500 hover:text-neutral-900 dark:hover:text-white">
-                        <MoreVertical size={20} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* ── RULES ── */}
           {activeTab === 'rules' && (
-            <div className="p-8 space-y-4">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Manage Rules</h3>
-                  <p className="text-xs text-neutral-500 mt-0.5">Click priority numbers to edit inline. Toggle visibility and pin with the badges.</p>
-                </div>
-                <button onClick={() => setModal({ isOpen: true, type: 'rule', data: undefined })} className="px-6 py-2 bg-strawberry-600 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black italic uppercase tracking-tighter">System Rules</h3>
+                <button onClick={() => setModal({ isOpen: true, type: 'rule' })} className="px-6 py-2.5 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-strawberry-600/20 active:scale-95 transition-all">
                   Create Rule
                 </button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-neutral-100 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase tracking-wider">
-                      <th className="px-6 py-4">Title</th>
-                      <th className="px-6 py-4">Priority ✎</th>
-                      <th className="px-6 py-4">Visible</th>
-                      <th className="px-6 py-4">Pinned</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                    {rules.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="p-8 text-center text-neutral-500">
-                          <AlertCircle className="mx-auto text-neutral-400 dark:text-neutral-700 mb-2" size={32} />
-                          No rules found. Create one above!
-                        </td>
-                      </tr>
-                    ) : rules.map(rule => (
-                      <tr key={rule.id} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4 font-bold text-neutral-900 dark:text-white max-w-xs truncate">{rule.title}</td>
-
-                        {/* Inline-editable priority */}
-                        <td className="px-6 py-4">
-                          <PriorityCell
-                            value={rule.priority ?? 0}
-                            onSave={async (v) => handleUpdateRule(rule.id, { priority: v })}
-                          />
-                        </td>
-
-                        {/* Visibility toggle */}
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleUpdateRule(rule.id, { is_visible: !rule.is_visible })}
-                            title={rule.is_visible ? 'Hide rule' : 'Show rule'}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase transition-colors ${rule.is_visible
-                              ? 'bg-green-500/10 text-green-600 dark:text-green-500 hover:bg-green-500/20'
-                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                              }`}
-                          >
-                            {rule.is_visible ? <Eye size={11} /> : <EyeOff size={11} />}
-                            {rule.is_visible ? 'Yes' : 'No'}
-                          </button>
-                        </td>
-
-                        {/* Pin toggle */}
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleUpdateRule(rule.id, { is_pinned: !rule.is_pinned })}
-                            title={rule.is_pinned ? 'Unpin' : 'Pin'}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase transition-colors ${rule.is_pinned
-                              ? 'bg-strawberry-500/10 text-strawberry-600 dark:text-strawberry-500 hover:bg-strawberry-500/20'
-                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                              }`}
-                          >
-                            {rule.is_pinned ? <Star size={11} /> : <StarOff size={11} />}
-                            {rule.is_pinned ? 'Yes' : 'No'}
-                          </button>
-                        </td>
-
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+              {rules.length === 0 ? (
+                <div className={`${cardCls} p-12 text-center`}>
+                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No rules yet. Create one above!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {rules.map(rule => (
+                    <div key={rule.id} className={`${cardCls} p-8 group relative overflow-hidden`}>
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-strawberry-500/5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2" />
+                      <div className="relative z-10">
+                        <div className="flex items-start justify-between mb-4">
+                          <h4 className="text-xl font-black italic uppercase tracking-tighter max-w-xs">{rule.title}</h4>
+                          <div className="flex gap-2 shrink-0">
+                            {rule.is_pinned && <Star size={16} className="text-strawberry-600 fill-strawberry-600" />}
+                            {!rule.is_visible && <EyeOff size={16} className="text-neutral-400" />}
+                          </div>
+                        </div>
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 italic mb-8">"{rule.content}"</p>
+                        <div className="flex items-center justify-between pt-6 border-t border-neutral-100 dark:border-white/5">
+                          <div className="flex items-center gap-4">
+                            <div className="flex flex-col">
+                              <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400 mb-1">Priority</span>
+                              <PriorityCell value={rule.priority ?? 0} onSave={async (v) => handleUpdateRule(rule.id, { priority: v })} />
+                            </div>
                             <button
-                              onClick={() => setModal({ isOpen: true, type: 'edit-rule', data: rule })}
-                              className="p-2 text-neutral-500 hover:text-strawberry-500 hover:bg-strawberry-500/5 rounded-lg transition-all"
-                              title="Edit Rule"
+                              onClick={() => handleUpdateRule(rule.id, { is_visible: !rule.is_visible })}
+                              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${rule.is_visible ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
                             >
-                              <Pencil size={16} />
+                              {rule.is_visible ? <Eye size={10} /> : <EyeOff size={10} />}
+                              {rule.is_visible ? 'Visible' : 'Hidden'}
                             </button>
                             <button
-                              onClick={() => handleDeleteRule(rule.id)}
-                              className="p-2 text-neutral-500 hover:text-red-600 dark:hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all"
-                              title="Delete Rule"
+                              onClick={() => handleUpdateRule(rule.id, { is_pinned: !rule.is_pinned })}
+                              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${rule.is_pinned ? 'bg-strawberry-500/10 text-strawberry-600 dark:text-strawberry-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
                             >
-                              <Trash2 size={18} />
+                              {rule.is_pinned ? <Star size={10} /> : <StarOff size={10} />}
+                              {rule.is_pinned ? 'Pinned' : 'Pin'}
                             </button>
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          <div className="flex gap-2">
+                            <button onClick={() => setModal({ isOpen: true, type: 'edit-rule', data: rule })} className="p-3 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-600 transition-all">
+                              <Pencil size={16} />
+                            </button>
+                            <button onClick={() => handleDeleteRule(rule.id)} className="p-3 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-600 transition-all">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* ── REMINDERS ── */}
           {activeTab === 'reminders' && (
-            <div className="p-8 space-y-4">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Manage Reminders</h3>
-                  <p className="text-xs text-neutral-500 mt-0.5">Click the star badge to toggle importance instantly.</p>
-                </div>
-                <button onClick={() => setModal({ isOpen: true, type: 'reminder', data: undefined })} className="px-6 py-2 bg-strawberry-600 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black italic uppercase tracking-tighter">Reminders</h3>
+                <button onClick={() => setModal({ isOpen: true, type: 'reminder' })} className="px-6 py-2.5 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-strawberry-600/20 active:scale-95 transition-all">
                   Create Reminder
                 </button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-neutral-100 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase tracking-wider">
-                      <th className="px-6 py-4">Title</th>
-                      <th className="px-6 py-4">Message</th>
-                      <th className="px-6 py-4">Important</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                    {reminders.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="p-8 text-center text-neutral-500">
-                          <AlertCircle className="mx-auto text-neutral-400 dark:text-neutral-700 mb-2" size={32} />
-                          No reminders found. Create one above!
-                        </td>
-                      </tr>
-                    ) : reminders.map(rem => (
-                      <tr key={rem.id} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4 font-bold text-neutral-900 dark:text-white">{rem.title}</td>
-                        <td className="px-6 py-4 text-sm text-neutral-500 max-w-xs truncate">{rem.message}</td>
-
-                        {/* Clickable importance badge */}
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleToggleReminderImportant(rem)}
-                            title={rem.is_important ? 'Mark as not important' : 'Mark as important'}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase transition-colors ${rem.is_important
-                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20'
-                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                              }`}
-                          >
-                            {rem.is_important ? <Star size={11} /> : <StarOff size={11} />}
-                            {rem.is_important ? 'Yes' : 'No'}
-                          </button>
-                        </td>
-
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => setModal({ isOpen: true, type: 'edit-reminder', data: rem })}
-                              className="p-2 text-neutral-500 hover:text-strawberry-500 hover:bg-strawberry-500/5 rounded-lg transition-all"
-                              title="Edit Reminder"
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteReminder(rem.id)}
-                              className="p-2 text-neutral-500 hover:text-red-600 dark:hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all"
-                              title="Delete Reminder"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {reminders.length === 0 ? (
+                <div className={`${cardCls} p-12 text-center`}>
+                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No reminders yet. Create one above!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {reminders.map(rem => (
+                    <div key={rem.id} className={`${cardCls} p-6`}>
+                      <div className="flex items-start justify-between mb-3">
+                        <p className="font-black italic uppercase tracking-tighter text-lg">{rem.title}</p>
+                        <button
+                          onClick={() => handleToggleReminderImportant(rem)}
+                          className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shrink-0 ${rem.is_important ? 'bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
+                        >
+                          {rem.is_important ? <Star size={10} /> : <StarOff size={10} />}
+                          {rem.is_important ? 'Important' : 'Normal'}
+                        </button>
+                      </div>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 mb-6">{rem.message}</p>
+                      <div className="flex justify-end gap-2 pt-4 border-t border-neutral-100 dark:border-white/5">
+                        <button onClick={() => setModal({ isOpen: true, type: 'edit-reminder', data: rem })} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-600 transition-all">
+                          <Pencil size={16} />
+                        </button>
+                        <button onClick={() => handleDeleteReminder(rem.id)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-600 transition-all">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* ── VERSIONS ── */}
           {activeTab === 'versions' && (
-            <div className="p-8 space-y-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Manage Versions</h3>
-                <button onClick={() => setModal({ isOpen: true, type: 'version' })} className="px-6 py-2 bg-strawberry-600 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black italic uppercase tracking-tighter">Minecraft Versions</h3>
+                <button onClick={() => setModal({ isOpen: true, type: 'version' })} className="px-6 py-2.5 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-strawberry-600/20 active:scale-95 transition-all">
                   Add Version
                 </button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-neutral-100 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase tracking-wider">
-                      <th className="px-6 py-4">Version</th>
-                      <th className="px-6 py-4">Supported</th>
-                      <th className="px-6 py-4 text-right">Maintenance</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                    {versions.length === 0 ? (
-                      <tr>
-                        <td colSpan={3} className="p-8 text-center text-neutral-500">
-                          <AlertCircle className="mx-auto text-neutral-400 dark:text-neutral-700 mb-2" size={32} />
-                          No Minecraft versions found. Add one above!
-                        </td>
-                      </tr>
-                    ) : versions.map(v => (
-                      <tr key={v.id} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4 font-bold text-neutral-900 dark:text-white">{v.version_string}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase ${v.is_supported ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500'}`}>
-                            {v.is_supported ? 'Yes' : 'No'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 flex-wrap">
-                            <button
-                              onClick={() => handleToggleMaintenance(v)}
-                              className={`px-2 py-1 rounded-full text-[10px] font-black uppercase transition-colors ${v.maintenance_mode
-                                ? 'bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-500/20'
-                                : 'bg-green-500/10 text-green-600 dark:text-green-500 hover:bg-green-500/20'
-                                }`}
-                            >
-                              {v.maintenance_mode ? 'Enabled' : 'Disabled'}
-                            </button>
-                            <button
-                              onClick={() => setModal({ isOpen: true, type: 'edit-version', data: v })}
-                              className="p-2 text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
-                              title="Edit"
-                            >
-                              <Pencil size={18} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteVersion(v.id)}
-                              className="p-2 text-neutral-500 hover:text-red-600 dark:hover:text-red-500"
-                              title="Delete"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {versions.length === 0 ? (
+                <div className={`${cardCls} p-12 text-center`}>
+                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No versions found. Add one above!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {versions.map(v => (
+                    <div key={v.id} className={`${cardCls} p-6`}>
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="font-black italic uppercase tracking-tighter text-xl">{v.version_string}</p>
+                        <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${v.is_supported ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
+                          {v.is_supported ? 'Supported' : 'Unsupported'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-white/5">
+                        <button
+                          onClick={() => handleToggleMaintenance(v)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors ${v.maintenance_mode ? 'bg-red-500/10 text-red-600 dark:text-red-500' : 'bg-green-500/10 text-green-600 dark:text-green-500'}`}
+                        >
+                          {v.maintenance_mode ? 'Maintenance ON' : 'Maintenance OFF'}
+                        </button>
+                        <div className="flex gap-2">
+                          <button onClick={() => setModal({ isOpen: true, type: 'edit-version', data: v })} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-500 transition-all">
+                            <Pencil size={16} />
+                          </button>
+                          <button onClick={() => handleDeleteVersion(v.id)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-500 transition-all">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* ── CATEGORIES ── */}
           {activeTab === 'categories' && (
-            <div className="p-8 space-y-4">
-              <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">Manage Categories</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Link to="/admin/categories/plugin" className="bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-800 p-6 rounded-2xl text-center hover:border-strawberry-500/30 transition-colors group">
-                  <ListFilter size={40} className="mx-auto text-strawberry-600 dark:text-strawberry-500 mb-4 group-hover:scale-110 transition-transform" />
-                  <p className="font-bold text-neutral-900 dark:text-white text-lg">Plugin Categories</p>
-                  <p className="text-neutral-600 dark:text-neutral-400 text-sm">Organize server plugins</p>
+            <div className="space-y-6">
+              <h3 className="text-xl font-black italic uppercase tracking-tighter">Manage Categories</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Link to="/admin/categories/plugin" className={`${cardCls} p-10 text-center hover:border-strawberry-500/30 transition-colors group`}>
+                  <ListFilter size={40} className="mx-auto text-strawberry-600 mb-4 group-hover:scale-110 transition-transform" />
+                  <p className="font-black italic uppercase tracking-tighter text-lg">Plugin Categories</p>
+                  <p className="text-neutral-500 text-xs font-bold uppercase tracking-tight mt-1">Organize server plugins</p>
                 </Link>
-                <Link to="/admin/categories/shop" className="bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-800 p-6 rounded-2xl text-center hover:border-strawberry-500/30 transition-colors group">
-                  <Tag size={40} className="mx-auto text-strawberry-600 dark:text-strawberry-500 mb-4 group-hover:scale-110 transition-transform" />
-                  <p className="font-bold text-neutral-900 dark:text-white text-lg">Shop Categories</p>
-                  <p className="text-neutral-600 dark:text-neutral-400 text-sm">Categorize items in player shops</p>
+                <Link to="/admin/categories/shop" className={`${cardCls} p-10 text-center hover:border-strawberry-500/30 transition-colors group`}>
+                  <Tag size={40} className="mx-auto text-strawberry-600 mb-4 group-hover:scale-110 transition-transform" />
+                  <p className="font-black italic uppercase tracking-tighter text-lg">Shop Categories</p>
+                  <p className="text-neutral-500 text-xs font-bold uppercase tracking-tight mt-1">Categorize items in player shops</p>
                 </Link>
               </div>
             </div>
@@ -871,86 +765,47 @@ const AdminPanel = () => {
 
           {/* ── BADGES ── */}
           {activeTab === 'badges' && (
-            <div className="p-8 space-y-4">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-neutral-900 dark:text-white">Manage Badges</h3>
-                  <p className="text-xs text-neutral-500 mt-0.5">Create, edit, and assign custom badges to users.</p>
-                </div>
-                <button
-                  onClick={() => setModal({ isOpen: true, type: 'badge', data: undefined })}
-                  className="px-6 py-2 bg-strawberry-600 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20"
-                >
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black italic uppercase tracking-tighter">Manage Badges</h3>
+                <button onClick={() => setModal({ isOpen: true, type: 'badge' })} className="px-6 py-2.5 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-strawberry-600/20 active:scale-95 transition-all">
                   Create Badge
                 </button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-neutral-100 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 text-xs font-bold uppercase tracking-wider">
-                      <th className="px-6 py-4">Badge</th>
-                      <th className="px-6 py-4">Description</th>
-                      <th className="px-6 py-4">Visible</th>
-                      <th className="px-6 py-4">Priority</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                    {badges.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="p-8 text-center text-neutral-500">
-                          <AlertCircle className="mx-auto text-neutral-400 dark:text-neutral-700 mb-2" size={32} />
-                          No badges found. Create one above!
-                        </td>
-                      </tr>
-                    ) : badges.map(badge => (
-                      <tr key={badge.id} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4">
-                          <BadgeChip badge={badge} />
-                        </td>
-                        <td className="px-6 py-4 text-sm text-neutral-500 max-w-xs truncate">{badge.description || 'N/A'}</td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleUpdateBadge(badge.id, { is_visible: !badge.is_visible })}
-                            title={badge.is_visible ? 'Hide badge' : 'Show badge'}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase transition-colors ${badge.is_visible
-                              ? 'bg-green-500/10 text-green-600 dark:text-green-500 hover:bg-green-500/20'
-                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700'
-                              }`}
-                          >
-                            {badge.is_visible ? <Eye size={11} /> : <EyeOff size={11} />}
-                            {badge.is_visible ? 'Yes' : 'No'}
+              {badges.length === 0 ? (
+                <div className={`${cardCls} p-12 text-center`}>
+                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No badges yet. Create one above!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {badges.map(badge => (
+                    <div key={badge.id} className={`${cardCls} p-6`}>
+                      <div className="mb-4">
+                        <BadgeChip badge={badge} />
+                      </div>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 mb-6">{badge.description || 'No description.'}</p>
+                      <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-white/5">
+                        <button
+                          onClick={() => handleUpdateBadge(badge.id, { is_visible: !badge.is_visible })}
+                          className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${badge.is_visible ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
+                        >
+                          {badge.is_visible ? <Eye size={10} /> : <EyeOff size={10} />}
+                          {badge.is_visible ? 'Visible' : 'Hidden'}
+                        </button>
+                        <div className="flex gap-2">
+                          <button onClick={() => setModal({ isOpen: true, type: 'edit-badge', data: badge })} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-500 transition-all">
+                            <Pencil size={16} />
                           </button>
-                        </td>
-                        <td className="px-6 py-4">
-                          <PriorityCell
-                            value={badge.priority ?? 0}
-                            onSave={async (v) => handleUpdateBadge(badge.id, { priority: v })}
-                          />
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => setModal({ isOpen: true, type: 'edit-badge', data: badge })}
-                              className="p-2 text-neutral-500 hover:text-strawberry-500 hover:bg-strawberry-500/5 rounded-lg transition-all"
-                              title="Edit Badge"
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteBadge(badge.id)}
-                              className="p-2 text-neutral-500 hover:text-red-600 dark:hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all"
-                              title="Delete Badge"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          <button onClick={() => handleDeleteBadge(badge.id)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-500 transition-all">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

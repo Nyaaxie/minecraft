@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useEvents } from '../hooks/useEvents';
 import { dbService } from '../services/dbService';
 import { useAuthStore } from '../store/useAuthStore';
-import { 
-  Calendar, 
-  MapPin, 
-  Clock, 
-  Plus, 
-  Users, 
+import {
+  Calendar,
+  MapPin,
+  Clock,
   X,
   Loader2,
   Trash2
@@ -43,7 +42,7 @@ const EventsPage = () => {
       refetch();
     } catch (err) {
       console.error(err);
-      alert('Failed to create event');
+      toast.error('Failed to create event');
     } finally {
       setIsCreating(false);
     }
@@ -57,7 +56,7 @@ const EventsPage = () => {
       refetch();
     } catch (err) {
       console.error(err);
-      alert('Failed to delete event');
+      toast.error('Failed to delete event');
     } finally {
       setDeletingId(null);
     }
@@ -67,183 +66,187 @@ const EventsPage = () => {
     if (!profile) return;
     try {
       await dbService.upsertRSVP(eventId, profile.id, status);
-      alert('RSVP updated!');
+      toast.success('RSVP updated!');
     } catch (err) {
       console.error(err);
-      alert('Failed to update RSVP');
+      toast.error('Failed to update RSVP');
     }
   };
 
   return (
-    <div className="space-y-8 text-neutral-900 dark:text-neutral-100">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">Community Events</h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Tournaments, events, and gatherings on StrawberrySMP.</p>
+    <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6 space-y-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2">
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
+            Community<span className="text-strawberry-600">Events</span>
+          </h1>
+          <p className="text-neutral-500 max-w-xl font-medium uppercase tracking-tight text-sm italic leading-relaxed">Tournaments, gatherings, and server-wide celebrations on StrawberrySMP.</p>
         </div>
         {profile?.role === 'admin' && (
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-strawberry-600 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20"
+            className="px-8 py-4 bg-strawberry-600 text-white rounded-[1.5rem] font-black italic uppercase tracking-widest text-xs shadow-xl shadow-strawberry-600/30 hover:bg-strawberry-700 transition-all active:scale-95 text-center"
           >
-            <Plus size={20} />
             Create Event
           </button>
         )}
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[1, 2, 3, 4].map(i => <div key={i} className="h-48 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl animate-pulse" />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[1, 2, 3].map(i => <div key={i} className="h-80 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] animate-pulse" />)}
         </div>
       ) : events.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
-            <motion.div 
+            <motion.div
               key={event.id}
               layout
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden flex flex-col shadow-xl shadow-neutral-900/5 hover:border-strawberry-500/30 transition-all"
             >
-              <div className="p-6 flex-1 space-y-4">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-xl font-bold text-neutral-900 dark:text-white">{event.title}</h3>
-                  <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                    event.status === 'upcoming' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-500' :
-                    event.status === 'ongoing' ? 'bg-green-500/10 text-green-600 dark:text-green-500' :
-                    'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
-                  }`}>
+              <div className="p-8 flex-1 space-y-6">
+                <div className="flex justify-between items-start gap-4">
+                  <h3 className="text-xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white leading-tight">{event.title}</h3>
+                  <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest italic shrink-0 ${event.status === 'upcoming' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-500' :
+                      event.status === 'ongoing' ? 'bg-green-500/10 text-green-600 dark:text-green-500' :
+                        'bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-400'
+                    }`}>
                     {event.status}
                   </span>
                 </div>
-                
-                <p className="text-neutral-600 dark:text-neutral-400 text-sm line-clamp-2">{event.description || 'No description provided.'}</p>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
-                    <Clock size={16} className="text-strawberry-600 dark:text-strawberry-500" />
-                    <span>{new Date(event.start_time).toLocaleString()}</span>
+
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 italic line-clamp-3 leading-relaxed">"{event.description || 'Accessing mission brief...'}"</p>
+
+                <div className="space-y-3 pt-4 border-t border-neutral-100 dark:border-white/5">
+                  <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
+                    <Clock size={16} className="text-strawberry-600" />
+                    <span>{new Date(event.start_time).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                   {event.location && (
-                    <div className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
-                      <MapPin size={16} className="text-strawberry-600 dark:text-strawberry-500" />
+                    <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
+                      <MapPin size={16} className="text-strawberry-600" />
                       <span>{event.location}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="bg-neutral-50 dark:bg-neutral-800/50 p-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+              <div className="bg-neutral-50 dark:bg-white/5 p-6 border-t border-neutral-100 dark:border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <button 
+                  <button
                     onClick={() => handleRSVP(event.id, 'joined')}
-                    className="px-4 py-1.5 bg-strawberry-600 rounded-lg text-xs font-bold text-white hover:bg-strawberry-700 transition-colors"
+                    className="px-5 py-2.5 bg-strawberry-600 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-strawberry-700 transition-all active:scale-95 shadow-lg shadow-strawberry-600/20"
                   >
                     Join
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleRSVP(event.id, 'maybe')}
-                    className="px-4 py-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-lg text-xs font-bold text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+                    className="px-5 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all active:scale-95"
                   >
                     Maybe
                   </button>
                 </div>
                 <div className="flex items-center gap-3">
                   {profile?.role === 'admin' && (
-                    <button 
+                    <button
                       onClick={() => handleDelete(event.id)}
                       disabled={deletingId === event.id}
-                      className="p-1.5 text-neutral-500 hover:text-red-600 dark:hover:text-red-500 transition-colors"
+                      className="p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl text-neutral-500 hover:text-red-600 dark:hover:text-red-500 transition-all active:scale-90"
                     >
                       {deletingId === event.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
                     </button>
                   )}
-                  <div className="flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
-                    <Users size={14} />
-                    <span>RSVP now</span>
-                  </div>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
       ) : (
-        <div className="bg-white dark:bg-neutral-900/50 border border-dashed border-neutral-200 dark:border-neutral-800 p-12 rounded-2xl text-center">
-          <Calendar className="mx-auto text-neutral-400 dark:text-neutral-700 mb-4" size={48} />
-          <p className="text-neutral-600 dark:text-neutral-500 text-lg">No events scheduled yet.</p>
+        <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 p-20 rounded-[3rem] text-center backdrop-blur-sm">
+          <Calendar className="mx-auto text-neutral-300 mb-8" size={64} />
+          <p className="text-2xl font-black italic uppercase tracking-tighter">No events scheduled.</p>
         </div>
       )}
 
       {/* Create Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl w-full max-w-lg p-6 relative text-neutral-900 dark:text-neutral-100"
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsModalOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+              className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] w-full max-w-lg p-8 relative z-10 shadow-2xl shadow-neutral-900/20"
             >
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+                className="absolute top-6 right-6 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
               >
                 <X size={24} />
               </button>
-              
-              <h2 className="text-2xl font-bold mb-6">Create New Event</h2>
-              
-              <form onSubmit={handleCreate} className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Event Title</label>
-                  <input 
+
+              <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">Initiate New Event</h2>
+
+              <form onSubmit={handleCreate} className="space-y-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 px-1">Event Title</label>
+                  <input
                     required
                     type="text"
                     value={formData.title}
-                    onChange={e => setFormData({...formData, title: e.target.value})}
-                    className="w-full mt-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-3 text-neutral-900 dark:text-white focus:border-strawberry-500 transition-colors"
-                    placeholder="E.g. Survival Games Tournament"
+                    onChange={e => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full bg-neutral-100 dark:bg-neutral-800 border border-transparent focus:border-strawberry-500/30 rounded-2xl p-4 text-sm font-medium outline-none transition-all"
+                    placeholder="E.g. Survival Games"
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Description</label>
-                  <textarea 
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 px-1">Description</label>
+                  <textarea
                     value={formData.description}
-                    onChange={e => setFormData({...formData, description: e.target.value})}
-                    className="w-full mt-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-3 text-neutral-900 dark:text-white focus:border-strawberry-500 transition-colors h-24"
-                    placeholder="Tell players what this event is about..."
+                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-neutral-100 dark:bg-neutral-800 border border-transparent focus:border-strawberry-500/30 rounded-2xl p-4 text-sm font-medium outline-none transition-all h-32 italic"
+                    placeholder="Details about the mission..."
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Start Time</label>
-                    <input 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 px-1">Start Time</label>
+                    <input
                       required
                       type="datetime-local"
                       value={formData.start_time}
-                      onChange={e => setFormData({...formData, start_time: e.target.value})}
-                      className="w-full mt-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-3 text-neutral-900 dark:text-white focus:border-strawberry-500 transition-colors"
+                      onChange={e => setFormData({ ...formData, start_time: e.target.value })}
+                      className="w-full bg-neutral-100 dark:bg-neutral-800 border border-transparent focus:border-strawberry-500/30 rounded-2xl p-4 text-sm font-bold uppercase outline-none transition-all"
                     />
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Location</label>
-                    <input 
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 px-1">Location</label>
+                    <input
                       type="text"
                       value={formData.location}
-                      onChange={e => setFormData({...formData, location: e.target.value})}
-                      className="w-full mt-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-3 text-neutral-900 dark:text-white focus:border-strawberry-500 transition-colors"
-                      placeholder="E.g. War Arena"
+                      onChange={e => setFormData({ ...formData, location: e.target.value })}
+                      className="w-full bg-neutral-100 dark:bg-neutral-800 border border-transparent focus:border-strawberry-500/30 rounded-2xl p-4 text-sm font-medium outline-none transition-all"
+                      placeholder="War Arena"
                     />
                   </div>
                 </div>
 
-                <button 
+                <button
                   disabled={isCreating}
                   type="submit"
-                  className="w-full mt-6 py-3 bg-strawberry-600 rounded-xl font-bold text-white hover:bg-strawberry-700 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-strawberry-600 rounded-2xl font-black italic uppercase tracking-widest text-white hover:bg-strawberry-700 transition-all shadow-xl shadow-strawberry-600/20 active:scale-95 mt-4"
                 >
-                  {isCreating ? <Loader2 className="animate-spin" size={20} /> : 'Create Event'}
+                  {isCreating ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Initiate Operation'}
                 </button>
               </form>
             </motion.div>
