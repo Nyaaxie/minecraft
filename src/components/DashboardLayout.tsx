@@ -16,7 +16,7 @@ import {
   Map as MapIcon,
   Puzzle,
   Sparkle,
-  UsersRound // Added UsersRound
+  UsersRound
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -208,8 +208,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-72 pt-24 lg:pt-0 relative z-10 transition-all duration-300">
-        <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-8 lg:p-12">
+      <main className="flex-1 lg:ml-72 pt-20 lg:pt-0 relative z-10 transition-all duration-300 min-w-0 overflow-x-hidden">
+        <div className="max-w-[1400px] mx-auto p-3 sm:p-6 lg:p-12">
           {children}
         </div>
       </main>

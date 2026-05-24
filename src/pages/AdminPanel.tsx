@@ -339,17 +339,21 @@ const AdminPanel = () => {
   };
 
   // -------------------------------------------------------------------------
-  // Shared styles
+  // Shared styles — mobile-first compact design
   // -------------------------------------------------------------------------
   const inputCls = 'w-full bg-neutral-100 dark:bg-neutral-800 p-4 rounded-2xl border border-transparent focus:border-strawberry-500/30 text-neutral-900 dark:text-white focus:outline-none transition-all outline-none';
   const checkboxRowCls = 'flex items-center gap-4 p-4 bg-neutral-50 dark:bg-white/5 rounded-2xl border border-transparent hover:border-white/5 cursor-pointer select-none transition-all';
-  const cardCls = 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] shadow-xl shadow-neutral-900/5';
+  const cardCls = 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm';
+
+  // Group profiles by role for the users tab
+  const adminProfiles = profiles.filter(p => p.role === 'admin');
+  const playerProfiles = profiles.filter(p => p.role !== 'admin');
 
   // =========================================================================
   // Render
   // =========================================================================
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-20">
+    <div className="max-w-7xl mx-auto space-y-4 pb-20 px-3 sm:px-6 overflow-x-hidden">
 
       {/* ── Modals ── */}
 
@@ -367,7 +371,7 @@ const AdminPanel = () => {
               <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2 px-1">Priority</label>
               <input name="priority" type="number" defaultValue={modal.data?.priority ?? 0} className={inputCls} />
             </div>
-            <div className="flex items-center gap-4 mt-6">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-2 sm:mt-6">
               <label className={checkboxRowCls + ' flex-1'}>
                 <input name="is_visible" type="checkbox" defaultChecked={modal.data?.is_visible ?? true} className="accent-strawberry-600 w-5 h-5" />
                 <span className="text-sm font-bold uppercase italic">Visible</span>
@@ -446,22 +450,24 @@ const AdminPanel = () => {
       />
 
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4">
-        <div>
-          <h1 className="text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
-            Admin<span className="text-strawberry-600">Panel</span>
-          </h1>
-          <p className="text-neutral-500 mt-2 font-medium uppercase tracking-tight text-sm">
-            System oversight, user management, and community moderation.
-          </p>
-        </div>
-        <div className="flex gap-2 p-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl w-full md:w-fit overflow-x-auto">
+      <div className="pt-2">
+        <h1 className="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white leading-none">
+          Admin<span className="text-strawberry-600">Panel</span>
+        </h1>
+        <p className="text-neutral-500 mt-1 font-bold uppercase tracking-widest text-[10px]">
+          System oversight & community moderation.
+        </p>
+      </div>
+
+      {/* ── Tab bar ── */}
+      <div className="w-full">
+        <div className="flex gap-1.5 p-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {(['users', 'announcements', 'events', 'rules', 'reminders', 'versions', 'categories', 'badges'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab
-                ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20'
+              className={`px-3 py-2 rounded-xl text-[9px] font-black italic uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab
+                ? 'bg-strawberry-600 text-white shadow-md shadow-strawberry-600/25'
                 : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                 }`}
             >
@@ -472,75 +478,131 @@ const AdminPanel = () => {
       </div>
 
       {loading || versionsLoading ? (
-        <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <Loader2 className="animate-spin text-strawberry-600" size={64} />
-          <p className="text-neutral-500 font-black uppercase tracking-widest animate-pulse">Loading...</p>
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <Loader2 className="animate-spin text-strawberry-600" size={48} />
+          <p className="text-neutral-500 font-black uppercase tracking-widest text-xs animate-pulse">Loading...</p>
         </div>
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="px-4"
         >
 
           {/* ── USERS ── */}
           {activeTab === 'users' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
               {profiles.length === 0 ? (
-                <div className={`${cardCls} p-12 text-center col-span-full`}>
-                  <Users className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
+                <div className={`${cardCls} p-12 text-center`}>
+                  <Users className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={40} />
                   <p className="font-black uppercase italic tracking-tighter text-neutral-400">No profiles found.</p>
                 </div>
-              ) : profiles.map(p => (
-                <div key={p.id} className={`${cardCls} p-6 transition-all hover:border-strawberry-500/30 group`}>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-2xl bg-neutral-100 dark:bg-neutral-800 border-2 border-white dark:border-neutral-900 shadow-md overflow-hidden group-hover:scale-105 transition-transform">
-                        {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-full w-full object-cover" /> : <Users size={24} className="m-auto mt-3 text-neutral-400" />}
+              ) : (
+                <>
+                  {/* Admins group */}
+                  {adminProfiles.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2 px-1 pt-1">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400">Admins · {adminProfiles.length}</span>
+                        <div className="flex-1 h-px bg-neutral-100 dark:bg-white/5" />
                       </div>
-                      <div>
-                        <p className="font-black italic uppercase tracking-tighter text-lg">{p.username}</p>
-                        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{p.minecraft_username || 'No MC linked'}</p>
+                      {adminProfiles.map(p => (
+                        <div key={p.id} className={`${cardCls} p-3 transition-all hover:border-strawberry-500/30 overflow-hidden`}>
+                          {/* Row 1: avatar + name + status */}
+                          <div className="flex items-center gap-2 w-full">
+                            <div className="h-9 w-9 shrink-0 rounded-xl bg-neutral-100 dark:bg-neutral-800 overflow-hidden flex items-center justify-center">
+                              {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-full w-full object-cover" /> : <Users size={16} className="text-neutral-400" />}
+                            </div>
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <p className="font-black italic uppercase tracking-tighter text-sm truncate text-neutral-900 dark:text-white leading-tight">{p.username}</p>
+                              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest truncate leading-tight">{p.minecraft_username || 'No MC linked'}</p>
+                            </div>
+                            <span className={`shrink-0 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${p.is_banned ? 'bg-red-500/10 text-red-600 dark:text-red-400' : 'bg-green-500/10 text-green-600 dark:text-green-500'}`}>
+                              {p.is_banned ? 'Banned' : 'Active'}
+                            </span>
+                          </div>
+                          {/* Row 2: role pill + action buttons */}
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-neutral-100 dark:border-white/5">
+                            <span className="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-strawberry-600 text-white">
+                              {p.role}
+                            </span>
+                            <div className="flex items-center gap-0.5">
+                              <button onClick={() => handleRoleToggle(p)} className="p-1.5 rounded-lg text-neutral-400 hover:text-strawberry-500 active:scale-95 transition-all" title="Toggle Role">
+                                <Shield size={14} />
+                              </button>
+                              <button onClick={() => handleBanToggle(p)} className={`p-1.5 rounded-lg active:scale-95 transition-all ${p.is_banned ? 'text-green-500' : 'text-red-500'}`} title={p.is_banned ? 'Unban' : 'Ban'}>
+                                <Ban size={14} />
+                              </button>
+                              <button onClick={() => setModal({ isOpen: true, type: 'assign-badges', data: p })} className="p-1.5 rounded-lg text-neutral-400 hover:text-strawberry-500 active:scale-95 transition-all" title="Assign Badges">
+                                <Award size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {/* Players group */}
+                  {playerProfiles.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2 px-1 pt-2">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400">Players · {playerProfiles.length}</span>
+                        <div className="flex-1 h-px bg-neutral-100 dark:bg-white/5" />
                       </div>
-                    </div>
-                    <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest italic ${p.is_banned ? 'bg-red-500 text-white' : 'bg-green-500/10 text-green-500'}`}>
-                      {p.is_banned ? 'Banned' : 'Active'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between pt-6 border-t border-neutral-100 dark:border-white/5">
-                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest italic ${p.role === 'admin' ? 'bg-strawberry-600 text-white' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
-                      {p.role}
-                    </span>
-                    <div className="flex gap-2">
-                      <button onClick={() => handleRoleToggle(p)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-500 transition-all" title="Toggle Role">
-                        <Shield size={18} />
-                      </button>
-                      <button onClick={() => handleBanToggle(p)} className={`p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl transition-all ${p.is_banned ? 'text-green-500' : 'text-red-500'}`} title={p.is_banned ? 'Unban' : 'Ban'}>
-                        <Ban size={18} />
-                      </button>
-                      <button onClick={() => setModal({ isOpen: true, type: 'assign-badges', data: p })} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-500 transition-all" title="Assign Badges">
-                        <Award size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      {playerProfiles.map(p => (
+                        <div key={p.id} className={`${cardCls} p-3 transition-all hover:border-strawberry-500/30 overflow-hidden`}>
+                          {/* Row 1: avatar + name + status */}
+                          <div className="flex items-center gap-2 w-full">
+                            <div className="h-9 w-9 shrink-0 rounded-xl bg-neutral-100 dark:bg-neutral-800 overflow-hidden flex items-center justify-center">
+                              {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-full w-full object-cover" /> : <Users size={16} className="text-neutral-400" />}
+                            </div>
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <p className="font-black italic uppercase tracking-tighter text-sm truncate text-neutral-900 dark:text-white leading-tight">{p.username}</p>
+                              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest truncate leading-tight">{p.minecraft_username || 'No MC linked'}</p>
+                            </div>
+                            <span className={`shrink-0 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${p.is_banned ? 'bg-red-500/10 text-red-600 dark:text-red-400' : 'bg-green-500/10 text-green-600 dark:text-green-500'}`}>
+                              {p.is_banned ? 'Banned' : 'Active'}
+                            </span>
+                          </div>
+                          {/* Row 2: role pill + action buttons */}
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-neutral-100 dark:border-white/5">
+                            <span className="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-neutral-100 dark:bg-white/5 text-neutral-400">
+                              {p.role}
+                            </span>
+                            <div className="flex items-center gap-0.5">
+                              <button onClick={() => handleRoleToggle(p)} className="p-1.5 rounded-lg text-neutral-400 hover:text-strawberry-500 active:scale-95 transition-all" title="Toggle Role">
+                                <Shield size={14} />
+                              </button>
+                              <button onClick={() => handleBanToggle(p)} className={`p-1.5 rounded-lg active:scale-95 transition-all ${p.is_banned ? 'text-green-500' : 'text-red-500'}`} title={p.is_banned ? 'Unban' : 'Ban'}>
+                                <Ban size={14} />
+                              </button>
+                              <button onClick={() => setModal({ isOpen: true, type: 'assign-badges', data: p })} className="p-1.5 rounded-lg text-neutral-400 hover:text-strawberry-500 active:scale-95 transition-all" title="Assign Badges">
+                                <Award size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </>
+              )}
             </div>
           )}
 
           {/* ── ANNOUNCEMENTS ── */}
           {activeTab === 'announcements' && (
-            <div className={`${cardCls} p-12 text-center`}>
-              <div className="w-20 h-20 rounded-[2rem] bg-strawberry-500/10 mx-auto mb-8 flex items-center justify-center">
-                <Megaphone size={40} className="text-strawberry-600" />
+            <div className={`${cardCls} p-8 text-center`}>
+              <div className="w-14 h-14 rounded-2xl bg-strawberry-500/10 mx-auto mb-5 flex items-center justify-center">
+                <Megaphone size={28} className="text-strawberry-600" />
               </div>
-              <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Broadcast System</h3>
-              <p className="text-neutral-500 max-w-sm mx-auto text-xs font-bold uppercase tracking-tight leading-relaxed mb-8">
+              <h3 className="text-lg font-black italic uppercase tracking-tighter mb-2">Broadcast System</h3>
+              <p className="text-neutral-500 max-w-xs mx-auto text-[10px] font-bold uppercase tracking-widest leading-relaxed mb-6">
                 Send announcements to all players on the server.
               </p>
               <button
                 onClick={() => setModal({ isOpen: true, type: 'announcement' })}
-                className="px-8 py-3 bg-strawberry-600 rounded-2xl font-black uppercase tracking-widest italic text-[10px] text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20"
+                className="w-full px-8 py-3 bg-strawberry-600 rounded-2xl font-black uppercase tracking-widest italic text-[10px] text-white hover:bg-strawberry-700 transition-all shadow-lg shadow-strawberry-600/20"
               >
                 New Announcement
               </button>
@@ -549,35 +611,35 @@ const AdminPanel = () => {
 
           {/* ── EVENTS ── */}
           {activeTab === 'events' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black italic uppercase tracking-tighter">Manage Events</h3>
-                <span className="text-xs font-black uppercase tracking-widest text-neutral-400">{events.length} Total</span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-4 px-1">
+                <h3 className="text-base font-black italic uppercase tracking-tighter">Manage Events</h3>
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 shrink-0">{events.length} Total</span>
               </div>
               {events.length === 0 ? (
-                <div className={`${cardCls} p-12 text-center`}>
-                  <Calendar className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
-                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No events found.</p>
+                <div className={`${cardCls} p-10 text-center`}>
+                  <Calendar className="mx-auto text-neutral-300 dark:text-neutral-700 mb-3" size={36} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400 text-sm">No events found.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   {events.map(ev => (
-                    <div key={ev.id} className={`${cardCls} p-6 flex items-center justify-between`}>
-                      <div className="flex items-center gap-4">
-                        <div className="p-4 bg-strawberry-500/10 rounded-2xl">
-                          <Calendar size={22} className="text-strawberry-600" />
+                    <div key={ev.id} className={`${cardCls} p-3 flex items-center justify-between gap-3`}>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="p-2.5 bg-strawberry-500/10 rounded-xl shrink-0">
+                          <Calendar size={16} className="text-strawberry-600" />
                         </div>
-                        <div>
-                          <p className="font-black italic uppercase tracking-tighter">{ev.title}</p>
-                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{new Date(ev.start_time).toLocaleDateString()}</p>
+                        <div className="min-w-0">
+                          <p className="font-black italic uppercase tracking-tighter text-sm truncate">{ev.title}</p>
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest truncate">{new Date(ev.start_time).toLocaleDateString()}</p>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => handleDeleteEvent(ev.id)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-500 transition-all">
-                          <Trash2 size={16} />
+                      <div className="flex gap-1.5 shrink-0">
+                        <button onClick={() => handleDeleteEvent(ev.id)} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-red-500 transition-all">
+                          <Trash2 size={14} />
                         </button>
-                        <button className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-all">
-                          <MoreVertical size={16} />
+                        <button className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-all">
+                          <MoreVertical size={14} />
                         </button>
                       </div>
                     </div>
@@ -589,59 +651,59 @@ const AdminPanel = () => {
 
           {/* ── RULES ── */}
           {activeTab === 'rules' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black italic uppercase tracking-tighter">System Rules</h3>
-                <button onClick={() => setModal({ isOpen: true, type: 'rule' })} className="px-6 py-2.5 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-strawberry-600/20 active:scale-95 transition-all">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3 px-1">
+                <h3 className="text-base font-black italic uppercase tracking-tighter">System Rules</h3>
+                <button onClick={() => setModal({ isOpen: true, type: 'rule' })} className="px-4 py-2 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[9px] shadow-md shadow-strawberry-600/20 active:scale-95 transition-all whitespace-nowrap">
                   Create Rule
                 </button>
               </div>
               {rules.length === 0 ? (
-                <div className={`${cardCls} p-12 text-center`}>
-                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
-                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No rules yet. Create one above!</p>
+                <div className={`${cardCls} p-10 text-center`}>
+                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-3" size={36} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400 text-sm">No rules yet. Create one above!</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   {rules.map(rule => (
-                    <div key={rule.id} className={`${cardCls} p-8 group relative overflow-hidden`}>
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-strawberry-500/5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <div key={rule.id} className={`${cardCls} p-4 relative overflow-hidden`}>
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-strawberry-500/5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                       <div className="relative z-10">
-                        <div className="flex items-start justify-between mb-4">
-                          <h4 className="text-xl font-black italic uppercase tracking-tighter max-w-xs">{rule.title}</h4>
-                          <div className="flex gap-2 shrink-0">
-                            {rule.is_pinned && <Star size={16} className="text-strawberry-600 fill-strawberry-600" />}
-                            {!rule.is_visible && <EyeOff size={16} className="text-neutral-400" />}
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <h4 className="text-sm font-black italic uppercase tracking-tighter min-w-0 flex-1 break-words">{rule.title}</h4>
+                          <div className="flex gap-1.5 shrink-0 pt-0.5">
+                            {rule.is_pinned && <Star size={14} className="text-strawberry-600 fill-strawberry-600" />}
+                            {!rule.is_visible && <EyeOff size={14} className="text-neutral-400" />}
                           </div>
                         </div>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 italic mb-8">"{rule.content}"</p>
-                        <div className="flex items-center justify-between pt-6 border-t border-neutral-100 dark:border-white/5">
-                          <div className="flex items-center gap-4">
-                            <div className="flex flex-col">
-                              <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400 mb-1">Priority</span>
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400 italic mb-4 break-words">"{rule.content}"</p>
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-neutral-100 dark:border-white/5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400">Priority</span>
                               <PriorityCell value={rule.priority ?? 0} onSave={async (v) => handleUpdateRule(rule.id, { priority: v })} />
                             </div>
                             <button
                               onClick={() => handleUpdateRule(rule.id, { is_visible: !rule.is_visible })}
-                              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${rule.is_visible ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
+                              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${rule.is_visible ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
                             >
                               {rule.is_visible ? <Eye size={10} /> : <EyeOff size={10} />}
                               {rule.is_visible ? 'Visible' : 'Hidden'}
                             </button>
                             <button
                               onClick={() => handleUpdateRule(rule.id, { is_pinned: !rule.is_pinned })}
-                              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${rule.is_pinned ? 'bg-strawberry-500/10 text-strawberry-600 dark:text-strawberry-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
+                              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${rule.is_pinned ? 'bg-strawberry-500/10 text-strawberry-600 dark:text-strawberry-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
                             >
                               {rule.is_pinned ? <Star size={10} /> : <StarOff size={10} />}
                               {rule.is_pinned ? 'Pinned' : 'Pin'}
                             </button>
                           </div>
-                          <div className="flex gap-2">
-                            <button onClick={() => setModal({ isOpen: true, type: 'edit-rule', data: rule })} className="p-3 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-600 transition-all">
-                              <Pencil size={16} />
+                          <div className="flex gap-1.5 shrink-0">
+                            <button onClick={() => setModal({ isOpen: true, type: 'edit-rule', data: rule })} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-strawberry-600 transition-all">
+                              <Pencil size={14} />
                             </button>
-                            <button onClick={() => handleDeleteRule(rule.id)} className="p-3 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-600 transition-all">
-                              <Trash2 size={16} />
+                            <button onClick={() => handleDeleteRule(rule.id)} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-red-600 transition-all">
+                              <Trash2 size={14} />
                             </button>
                           </div>
                         </div>
@@ -655,39 +717,39 @@ const AdminPanel = () => {
 
           {/* ── REMINDERS ── */}
           {activeTab === 'reminders' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black italic uppercase tracking-tighter">Reminders</h3>
-                <button onClick={() => setModal({ isOpen: true, type: 'reminder' })} className="px-6 py-2.5 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-strawberry-600/20 active:scale-95 transition-all">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3 px-1">
+                <h3 className="text-base font-black italic uppercase tracking-tighter">Reminders</h3>
+                <button onClick={() => setModal({ isOpen: true, type: 'reminder' })} className="px-4 py-2 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[9px] shadow-md shadow-strawberry-600/20 active:scale-95 transition-all whitespace-nowrap">
                   Create Reminder
                 </button>
               </div>
               {reminders.length === 0 ? (
-                <div className={`${cardCls} p-12 text-center`}>
-                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
-                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No reminders yet. Create one above!</p>
+                <div className={`${cardCls} p-10 text-center`}>
+                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-3" size={36} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400 text-sm">No reminders yet. Create one above!</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   {reminders.map(rem => (
-                    <div key={rem.id} className={`${cardCls} p-6`}>
-                      <div className="flex items-start justify-between mb-3">
-                        <p className="font-black italic uppercase tracking-tighter text-lg">{rem.title}</p>
+                    <div key={rem.id} className={`${cardCls} p-4`}>
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <p className="font-black italic uppercase tracking-tighter text-sm break-all">{rem.title}</p>
                         <button
                           onClick={() => handleToggleReminderImportant(rem)}
-                          className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shrink-0 ${rem.is_important ? 'bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
+                          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shrink-0 ${rem.is_important ? 'bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
                         >
                           {rem.is_important ? <Star size={10} /> : <StarOff size={10} />}
                           {rem.is_important ? 'Important' : 'Normal'}
                         </button>
                       </div>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 mb-6">{rem.message}</p>
-                      <div className="flex justify-end gap-2 pt-4 border-t border-neutral-100 dark:border-white/5">
-                        <button onClick={() => setModal({ isOpen: true, type: 'edit-reminder', data: rem })} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-600 transition-all">
-                          <Pencil size={16} />
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4 break-words">{rem.message}</p>
+                      <div className="flex justify-end gap-1.5 pt-3 border-t border-neutral-100 dark:border-white/5">
+                        <button onClick={() => setModal({ isOpen: true, type: 'edit-reminder', data: rem })} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-strawberry-600 transition-all">
+                          <Pencil size={14} />
                         </button>
-                        <button onClick={() => handleDeleteReminder(rem.id)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-600 transition-all">
-                          <Trash2 size={16} />
+                        <button onClick={() => handleDeleteReminder(rem.id)} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-red-600 transition-all">
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
@@ -699,41 +761,41 @@ const AdminPanel = () => {
 
           {/* ── VERSIONS ── */}
           {activeTab === 'versions' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black italic uppercase tracking-tighter">Minecraft Versions</h3>
-                <button onClick={() => setModal({ isOpen: true, type: 'version' })} className="px-6 py-2.5 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-strawberry-600/20 active:scale-95 transition-all">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3 px-1">
+                <h3 className="text-base font-black italic uppercase tracking-tighter">Minecraft Versions</h3>
+                <button onClick={() => setModal({ isOpen: true, type: 'version' })} className="px-4 py-2 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[9px] shadow-md shadow-strawberry-600/20 active:scale-95 transition-all whitespace-nowrap">
                   Add Version
                 </button>
               </div>
               {versions.length === 0 ? (
-                <div className={`${cardCls} p-12 text-center`}>
-                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
-                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No versions found. Add one above!</p>
+                <div className={`${cardCls} p-10 text-center`}>
+                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-3" size={36} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400 text-sm">No versions found. Add one above!</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-2">
                   {versions.map(v => (
-                    <div key={v.id} className={`${cardCls} p-6`}>
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="font-black italic uppercase tracking-tighter text-xl">{v.version_string}</p>
-                        <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${v.is_supported ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
+                    <div key={v.id} className={`${cardCls} p-4`}>
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <p className="font-black italic uppercase tracking-tighter text-base truncate">{v.version_string}</p>
+                        <span className={`shrink-0 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest ${v.is_supported ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
                           {v.is_supported ? 'Supported' : 'Unsupported'}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-white/5">
+                      <div className="flex items-center justify-between gap-3 pt-3 border-t border-neutral-100 dark:border-white/5">
                         <button
                           onClick={() => handleToggleMaintenance(v)}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors ${v.maintenance_mode ? 'bg-red-500/10 text-red-600 dark:text-red-500' : 'bg-green-500/10 text-green-600 dark:text-green-500'}`}
                         >
                           {v.maintenance_mode ? 'Maintenance ON' : 'Maintenance OFF'}
                         </button>
-                        <div className="flex gap-2">
-                          <button onClick={() => setModal({ isOpen: true, type: 'edit-version', data: v })} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-500 transition-all">
-                            <Pencil size={16} />
+                        <div className="flex gap-1.5">
+                          <button onClick={() => setModal({ isOpen: true, type: 'edit-version', data: v })} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-strawberry-500 transition-all">
+                            <Pencil size={14} />
                           </button>
-                          <button onClick={() => handleDeleteVersion(v.id)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-500 transition-all">
-                            <Trash2 size={16} />
+                          <button onClick={() => handleDeleteVersion(v.id)} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-red-500 transition-all">
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </div>
@@ -746,18 +808,18 @@ const AdminPanel = () => {
 
           {/* ── CATEGORIES ── */}
           {activeTab === 'categories' && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-black italic uppercase tracking-tighter">Manage Categories</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Link to="/admin/categories/plugin" className={`${cardCls} p-10 text-center hover:border-strawberry-500/30 transition-colors group`}>
-                  <ListFilter size={40} className="mx-auto text-strawberry-600 mb-4 group-hover:scale-110 transition-transform" />
-                  <p className="font-black italic uppercase tracking-tighter text-lg">Plugin Categories</p>
-                  <p className="text-neutral-500 text-xs font-bold uppercase tracking-tight mt-1">Organize server plugins</p>
+            <div className="space-y-3">
+              <h3 className="text-base font-black italic uppercase tracking-tighter px-1">Manage Categories</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <Link to="/admin/categories/plugin" className={`${cardCls} p-5 text-center hover:border-strawberry-500/30 transition-colors group block`}>
+                  <ListFilter size={28} className="mx-auto text-strawberry-600 mb-3 group-hover:scale-110 transition-transform" />
+                  <p className="font-black italic uppercase tracking-tighter text-sm leading-tight">Plugin Categories</p>
+                  <p className="text-neutral-500 text-[9px] font-bold uppercase tracking-tight mt-1">Organize server plugins</p>
                 </Link>
-                <Link to="/admin/categories/shop" className={`${cardCls} p-10 text-center hover:border-strawberry-500/30 transition-colors group`}>
-                  <Tag size={40} className="mx-auto text-strawberry-600 mb-4 group-hover:scale-110 transition-transform" />
-                  <p className="font-black italic uppercase tracking-tighter text-lg">Shop Categories</p>
-                  <p className="text-neutral-500 text-xs font-bold uppercase tracking-tight mt-1">Categorize items in player shops</p>
+                <Link to="/admin/categories/shop" className={`${cardCls} p-5 text-center hover:border-strawberry-500/30 transition-colors group block`}>
+                  <Tag size={28} className="mx-auto text-strawberry-600 mb-3 group-hover:scale-110 transition-transform" />
+                  <p className="font-black italic uppercase tracking-tighter text-sm leading-tight">Shop Categories</p>
+                  <p className="text-neutral-500 text-[9px] font-bold uppercase tracking-tight mt-1">Categorize shop items</p>
                 </Link>
               </div>
             </div>
@@ -765,40 +827,40 @@ const AdminPanel = () => {
 
           {/* ── BADGES ── */}
           {activeTab === 'badges' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black italic uppercase tracking-tighter">Manage Badges</h3>
-                <button onClick={() => setModal({ isOpen: true, type: 'badge' })} className="px-6 py-2.5 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[10px] shadow-lg shadow-strawberry-600/20 active:scale-95 transition-all">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3 px-1">
+                <h3 className="text-base font-black italic uppercase tracking-tighter">Manage Badges</h3>
+                <button onClick={() => setModal({ isOpen: true, type: 'badge' })} className="px-4 py-2 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[9px] shadow-md shadow-strawberry-600/20 active:scale-95 transition-all whitespace-nowrap">
                   Create Badge
                 </button>
               </div>
               {badges.length === 0 ? (
-                <div className={`${cardCls} p-12 text-center`}>
-                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-4" size={48} />
-                  <p className="font-black uppercase italic tracking-tighter text-neutral-400">No badges yet. Create one above!</p>
+                <div className={`${cardCls} p-10 text-center`}>
+                  <AlertCircle className="mx-auto text-neutral-300 dark:text-neutral-700 mb-3" size={36} />
+                  <p className="font-black uppercase italic tracking-tighter text-neutral-400 text-sm">No badges yet. Create one above!</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-2">
                   {badges.map(badge => (
-                    <div key={badge.id} className={`${cardCls} p-6`}>
-                      <div className="mb-4">
+                    <div key={badge.id} className={`${cardCls} p-4`}>
+                      <div className="mb-3 overflow-hidden">
                         <BadgeChip badge={badge} />
                       </div>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 mb-6">{badge.description || 'No description.'}</p>
-                      <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-white/5">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4 break-words">{badge.description || 'No description.'}</p>
+                      <div className="flex items-center justify-between gap-3 pt-3 border-t border-neutral-100 dark:border-white/5">
                         <button
                           onClick={() => handleUpdateBadge(badge.id, { is_visible: !badge.is_visible })}
-                          className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${badge.is_visible ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
+                          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors ${badge.is_visible ? 'bg-green-500/10 text-green-600 dark:text-green-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}
                         >
                           {badge.is_visible ? <Eye size={10} /> : <EyeOff size={10} />}
                           {badge.is_visible ? 'Visible' : 'Hidden'}
                         </button>
-                        <div className="flex gap-2">
-                          <button onClick={() => setModal({ isOpen: true, type: 'edit-badge', data: badge })} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-500 transition-all">
-                            <Pencil size={16} />
+                        <div className="flex gap-1.5 shrink-0">
+                          <button onClick={() => setModal({ isOpen: true, type: 'edit-badge', data: badge })} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-strawberry-500 transition-all">
+                            <Pencil size={14} />
                           </button>
-                          <button onClick={() => handleDeleteBadge(badge.id)} className="p-2.5 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-500 transition-all">
-                            <Trash2 size={16} />
+                          <button onClick={() => handleDeleteBadge(badge.id)} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-red-500 transition-all">
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </div>
@@ -815,4 +877,4 @@ const AdminPanel = () => {
   );
 };
 
-export default AdminPanel;
+export default AdminPanel;  

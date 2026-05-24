@@ -8,7 +8,7 @@ export type Json =
 
 export type UserRole = 'admin' | 'player'
 export type ProfileStatus = 'online' | 'offline'
-export type MinecraftEdition = 'java' | 'bedrock' // New enum
+export type MinecraftEdition = 'java' | 'bedrock'
 
 export interface Profile {
   id: string
@@ -22,7 +22,6 @@ export interface Profile {
   theme_preference: 'dark' | 'light' | null
   created_at: string
   updated_at: string
-  // New fields
   favorite_mob: string | null
   favorite_block: string | null
   favorite_color: string | null
@@ -68,12 +67,28 @@ export interface Announcement {
   created_at: string
 }
 
+// Updated Message interface — supports conversation-based messaging
 export interface Message {
   id: string
+  conversation_id: string
   sender_id: string
-  receiver_id: string
   content: string
   created_at: string
+  updated_at?: string
+  sender?: {
+    id: string
+    username: string
+    avatar_url: string | null
+  }
+}
+
+// New Conversation interface
+export interface Conversation {
+  id: string
+  name: string | null
+  is_group: boolean
+  created_at: string
+  updated_at: string
 }
 
 export interface ActivityLog {
@@ -121,7 +136,6 @@ export interface MinecraftVersion {
   updated_at: string
 }
 
-// For Plugins Showcase System
 export interface Plugin {
   id: string;
   name: string;
@@ -135,7 +149,6 @@ export interface Plugin {
   updated_at: string;
 }
 
-// For Player Shop Categories
 export interface ShopCategory {
   id: string;
   name: string;
@@ -145,7 +158,6 @@ export interface ShopCategory {
   updated_at: string;
 }
 
-// For Player Shops
 export interface PlayerShop {
   id: string;
   owner_id: string;
@@ -156,14 +168,13 @@ export interface PlayerShop {
   updated_at: string;
 }
 
-// For Shop Items
 export interface ShopItem {
   id: string;
   shop_id: string;
   item_name: string;
-  minecraft_item_id: string; // e.g., "minecraft:diamond_sword"
+  minecraft_item_id: string;
   price: number;
-  currency: string; // e.g., "diamond", "emerald", "iron_ingot"
+  currency: string;
   quantity: number;
   description: string | null;
   availability_status: 'in_stock' | 'out_of_stock' | 'on_order';
@@ -171,10 +182,9 @@ export interface ShopItem {
   is_visible: boolean;
   created_at: string;
   updated_at: string;
-  shop_categories?: { name: string } | null; // Joined data
+  shop_categories?: { name: string } | null;
 }
 
-// For Plugin Categories
 export interface PluginCategory {
   id: string;
   name: string;
@@ -184,7 +194,6 @@ export interface PluginCategory {
   updated_at: string;
 }
 
-// For Shop Transactions
 export interface ShopTransaction {
   id: string;
   shop_item_id: string | null;
@@ -196,7 +205,6 @@ export interface ShopTransaction {
   transaction_time: string;
 }
 
-// New interfaces for Badges
 export interface Badge {
   id: string
   name: string
@@ -207,18 +215,17 @@ export interface Badge {
   priority: number
   created_at: string
   updated_at: string
-  created_by: string | null // UUID of profile
+  created_by: string | null
 }
 
 export interface UserBadge {
-  user_id: string // UUID of profile
-  badge_id: string // UUID of badge
+  user_id: string
+  badge_id: string
   assigned_at: string
-  assigned_by: string | null // UUID of profile
+  assigned_by: string | null
   is_active: boolean
 }
 
-// Supabase Database type structure
 export type Tables<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Row']
 export type Enums<T extends keyof Database['public']['Enums']> =
@@ -256,6 +263,11 @@ export interface Database {
         Row: Message
         Insert: Omit<Message, 'id' | 'created_at'> & Partial<Pick<Message, 'id' | 'created_at'>>
         Update: Partial<Message>
+      }
+      conversations: {
+        Row: Conversation
+        Insert: Omit<Conversation, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<Conversation, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<Conversation>
       }
       activity_logs: {
         Row: ActivityLog
@@ -344,7 +356,6 @@ export interface Database {
           viewed_at?: string;
         };
       }
-      // New tables
       badges: {
         Row: Badge
         Insert: Omit<Badge, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<Badge, 'id' | 'created_at' | 'updated_at'>>
@@ -359,10 +370,8 @@ export interface Database {
     Enums: {
       user_role: UserRole
       profile_status: ProfileStatus
-      minecraft_edition: MinecraftEdition // New enum
+      minecraft_edition: MinecraftEdition
     }
-    Functions: {
-      // Add any custom functions here if needed
-    }
+    Functions: {}
   }
 }

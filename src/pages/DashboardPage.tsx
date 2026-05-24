@@ -134,7 +134,7 @@ const DashboardPage = () => {
       {/* Header */}
       <div className="space-y-4">
         <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
-          System<span className="text-strawberry-600">Hub</span>
+          Overview<span className="text-strawberry-600"></span>
         </h1>
         <p className="text-neutral-500 max-w-2xl font-medium uppercase tracking-tight text-sm">Welcome, <span className="text-strawberry-600 font-bold">{profile?.username || 'Player'}</span>. Oversight and community metrics active.</p>
       </div>
