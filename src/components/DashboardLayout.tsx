@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useChatStore } from '../store/useChatStore';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import NotificationCenter from './NotificationCenter';
 import { ThemeToggle } from './ThemeToggle';
@@ -20,7 +21,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, label: string, to: string, active: boolean, onClick?: () => void }) => (
+const SidebarItem = ({ icon: Icon, label, to, active, onClick, unreadCount }: { icon: any, label: string, to: string, active: boolean, onClick?: () => void, unreadCount?: number }) => (
   <Link
     to={to}
     onClick={onClick}
@@ -29,16 +30,30 @@ const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, la
       : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white'
       }`}
   >
-    <Icon size={22} className={`${active ? 'text-white' : 'group-hover:text-strawberry-500'} transition-colors`} />
+    <div className="relative">
+      <Icon size={22} className={`${active ? 'text-white' : 'group-hover:text-strawberry-500'} transition-colors`} />
+      {unreadCount && unreadCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-neutral-900">
+          {unreadCount > 9 ? '9+' : unreadCount}
+        </span>
+      )}
+    </div>
     <span className="font-bold text-sm tracking-tight">{label}</span>
   </Link>
 );
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { profile, signOut } = useAuthStore();
+  // Using a selector to ensure the component re-renders when unreadCounts changes
+  const unreadCounts = useChatStore((state) => state.unreadCounts);
+  
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+  // Calculate total unread messages
+  const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
+  console.log('DashboardLayout: totalUnread =', totalUnread, 'unreadCounts =', unreadCounts);
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Overview', to: '/dashboard' },
@@ -46,7 +61,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { icon: Puzzle, label: 'Plugins', to: '/plugins' },
     { icon: Sparkle, label: 'Player Shops', to: '/shops' },
     { icon: Calendar, label: 'Events', to: '/events' },
-    { icon: MessageSquare, label: 'Messages', to: '/messages' },
+    { icon: MessageSquare, label: 'Messages', to: '/messages', unreadCount: totalUnread },
     { icon: Bell, label: 'Notifications', to: '/notifications' },
     { icon: User, label: 'Profile', to: '/profile' },
     { icon: UsersRound, label: 'Members', to: '/members' },

@@ -31,16 +31,31 @@ const MessagesPage = () => {
     if (!currentUser) return;
     const init = async () => {
       try {
-        const convs = await chatService.getConversations(currentUser.id);
+        // Clear active conversation on page load
+        setActiveConversationId(null);
+        
+        const [convs, counts] = await Promise.all([
+            chatService.getConversations(currentUser.id),
+            chatService.getUnreadCounts(currentUser.id)
+        ]);
+        console.log('MessagesPage: Loaded conversations:', convs);
+        console.log('MessagesPage: Loaded unread counts:', counts);
         setConversations(convs);
+        
+        // Initialize unread counts in the store
+        Object.entries(counts).forEach(([convId, count]) => {
+            console.log(`MessagesPage: Setting unread count for ${convId} to ${count}`);
+            (useChatStore.getState() as any).setUnreadCount(convId, count);
+        });
       } catch (err) {
+        console.error('Failed to load conversations:', err);
         toast.error('Failed to load conversations');
       } finally {
         setLoading(false);
       }
     };
     init();
-  }, [currentUser, setConversations]);
+  }, [currentUser, setConversations, setActiveConversationId]);
 
   // Load all profiles for new chat
   useEffect(() => {
@@ -64,6 +79,14 @@ const MessagesPage = () => {
       try {
         const msgs = await chatService.getMessages(activeConversationId);
         setMessages(msgs);
+        
+        // Mark all messages as read
+        if (currentUser) {
+          msgs.forEach(async (msg: any) => {
+            await chatService.markMessageAsRead(msg.id, currentUser.id);
+          });
+        }
+
         setTimeout(scrollToBottom, 100);
       } catch (err) {
         toast.error('Failed to load messages');
@@ -73,13 +96,24 @@ const MessagesPage = () => {
 
     const msgSubscription = chatService.subscribeToMessages(activeConversationId, (msg) => {
       if (!msg.conversation_id) return;
-      if (msg.sender_id !== currentUser.id && activeConversationId !== msg.conversation_id) {
-        incrementUnreadCount(msg.conversation_id);
-        const convName = conversations.find(c => c.id === msg.conversation_id)?.name || 'Chat';
-        toast.success(`New message in ${convName}`);
-      } else if (activeConversationId === msg.conversation_id) {
-        addMessage(msg);
-        scrollToBottom();
+      if (msg.sender_id !== currentUser.id) {
+        if (activeConversationId !== msg.conversation_id) {
+          incrementUnreadCount(msg.conversation_id);
+          const convName = conversations.find(c => c.id === msg.conversation_id)?.name || 'Chat';
+          toast.success(`New message in ${convName}`);
+          
+          // Trigger browser notification if document is hidden
+          if (document.visibilityState === 'hidden') {
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification(`New message in ${convName}`, { body: msg.content || 'New message' });
+            } else if ('Notification' in window && Notification.permission !== 'denied') {
+              Notification.requestPermission();
+            }
+          }
+        } else {
+          addMessage(msg);
+          scrollToBottom();
+        }
       }
     });
 
@@ -137,11 +171,23 @@ const MessagesPage = () => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !activeConversationId || !currentUser || sending) return;
+    if (!newMessage.trim() || !activeConversationId || !currentUser || sending || !activeConv) return;
+    
+    // Find the receiver: any conversation member that is not the current user
+    const receiver = activeConv.conversation_members.find(
+      (m: any) => m.profile_id !== currentUser.id
+    );
+    const receiverId = receiver?.profile_id;
+
+    if (!receiverId) {
+      toast.error('Could not determine message recipient.');
+      return;
+    }
+
     setSending(true);
     chatService.broadcastTyping(activeConversationId, currentUser.username || 'Someone', false);
     try {
-      const msg = await chatService.sendMessage(activeConversationId, currentUser.id, newMessage.trim());
+      const msg = await chatService.sendMessage(activeConversationId, currentUser.id, receiverId, newMessage.trim());
       addMessage(msg);
       setNewMessage('');
       scrollToBottom();

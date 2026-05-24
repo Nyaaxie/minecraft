@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../services/supabase';
+import { chatService } from '../services/chatService';
 import { useAuthStore } from '../store/useAuthStore';
+import { useChatStore } from '../store/useChatStore';
 import type { Profile } from '../types/database.types';
 
 // Importing LoadingScreen to prevent blank screen
@@ -14,7 +16,8 @@ const LoadingScreen = () => (
 );
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { setUser, setProfile, setLoading } = useAuthStore();
+  const { setUser, setProfile, setLoading, user } = useAuthStore();
+  const { incrementUnreadCount } = useChatStore();
   const [initialized, setInitialized] = useState(false);
   const initializedRef = useRef(false); // Gatekeeper for initialization
 
@@ -76,6 +79,56 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       subscription.unsubscribe();
     };
   }, [setUser, setProfile, setLoading]);
+
+  // Global chat notification listener
+  useEffect(() => {
+    if (!user) return;
+
+    // Request permission immediately if it's default
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    const sub = chatService.subscribeToAllMessages(async (msg) => {
+      console.log('AuthProvider: GLOBAL LISTENER - Received message object:', msg);
+      
+      if (!user) return;
+
+      // Extract details. Note: payload structure might vary
+      const conversationId = msg.conversation_id;
+      const senderId = msg.sender_id;
+      const receiverId = msg.receiver_id;
+
+      console.log('AuthProvider: Extracted IDs:', { conversationId, senderId, receiverId, currentUserId: user.id });
+
+      if (!conversationId) {
+        console.warn('AuthProvider: Message received but conversation_id is missing!');
+      }
+
+      // Verify membership
+      const { data: members } = await supabase
+        .from('conversation_members')
+        .select('conversation_id')
+        .eq('conversation_id', conversationId)
+        .eq('profile_id', user.id);
+
+      const isMember = members && members.length > 0;
+      const isSender = senderId === user.id;
+
+      if (isMember && !isSender) {
+        console.log('AuthProvider: Global notification trigger!');
+        incrementUnreadCount(conversationId);
+        
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('New Message', { body: msg.content || 'You have a new message' });
+        }
+      }
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [user, incrementUnreadCount]);
 
   if (!initialized) return <LoadingScreen />;
 

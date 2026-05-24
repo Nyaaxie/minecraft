@@ -87,10 +87,10 @@ async getMessages(conversationId: string) {
   console.log("Supabase Data in getMessages:", mappedData);
   return mappedData;
 },
-  async sendMessage(conversationId: string, senderId: string, content: string) {
+  async sendMessage(conversationId: string, senderId: string, receiverId: string, content: string) {
     const { data, error } = await supabase
       .from('messages')
-      .insert({ conversation_id: conversationId, sender_id: senderId, content })
+      .insert({ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content })
       .select()
       .single();
 
@@ -148,6 +148,46 @@ async getMessages(conversationId: string) {
     return conv;
   },
 
+  async getUnreadCounts(profileId: string) {
+    // 1. Get all messages where this user is the receiver
+    const { data: messages, error: msgError } = await supabase
+      .from('messages')
+      .select('conversation_id, id')
+      .eq('receiver_id', profileId);
+
+    if (msgError) throw msgError;
+
+    // 2. Get all messages already read by this user
+    const { data: readMessages, error: readError } = await supabase
+      .from('message_reads')
+      .select('message_id')
+      .eq('profile_id', profileId);
+
+    if (readError) throw readError;
+
+    const readIds = new Set(readMessages?.map(r => r.message_id) || []);
+
+    // 3. Filter in memory
+    const counts: Record<string, number> = {};
+    messages?.forEach(msg => {
+      if (!readIds.has(msg.id)) {
+        counts[msg.conversation_id] = (counts[msg.conversation_id] || 0) + 1;
+      }
+    });
+    
+    return counts;
+  },
+
+  async markMessageAsRead(messageId: string, profileId: string) {
+    const { error } = await supabase
+      .from('message_reads')
+      .upsert({ message_id: messageId, profile_id: profileId });
+
+    if (error) {
+      throw error;
+    }
+  },
+
   subscribeToMessages(conversationId: string, onMessage: (message: Message) => void) {
     return supabase
       .channel(`chat:${conversationId}`)
@@ -185,5 +225,24 @@ async getMessages(conversationId: string) {
       .channel(`chat:typing:${conversationId}`)
       .on('broadcast', { event: 'typing' }, (payload) => onTyping(payload.payload))
       .subscribe();
+  },
+
+  subscribeToAllMessages(onMessage: (message: Message) => void) {
+    console.log('chatService: Subscribing to all messages...');
+    return supabase
+      .channel('schema-db-changes')
+      .on('postgres_changes', {
+        event: '*', 
+        schema: 'public',
+        table: 'messages'
+      }, (payload) => {
+        console.log('chatService: Realtime event received:', payload);
+        if (payload.eventType === 'INSERT') {
+          onMessage(payload.new as Message);
+        }
+      })
+      .subscribe((status) => {
+        console.log('chatService: Subscription status:', status);
+      });
   },
 };
