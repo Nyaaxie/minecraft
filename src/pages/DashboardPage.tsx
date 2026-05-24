@@ -141,10 +141,10 @@ const DashboardPage = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard label="Database Berries" value={stats.totalPlayers} icon={Users} color="strawberry" />
-        <StatCard label="Live Connection" value={stats.onlinePlayers} icon={TrendingUp} color="green" />
+        <StatCard label="Users" value={stats.totalPlayers} icon={Users} color="strawberry" />
+        <StatCard label="Online" value={stats.onlinePlayers} icon={TrendingUp} color="green" />
         <StatCard label="Pending Events" value={events.filter(e => e.status === 'upcoming').length} icon={Calendar} color="blue" />
-        <StatCard label="Node Status" value="Active" icon={Clock} color="amber" />
+        <StatCard label="Server Status" value="Active" icon={Clock} color="amber" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
