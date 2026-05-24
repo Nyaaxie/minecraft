@@ -9,7 +9,8 @@ import {
   Clock,
   X,
   Loader2,
-  Trash2
+  Trash2,
+  Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -121,18 +122,23 @@ const EventsPage = () => {
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 italic line-clamp-3 leading-relaxed">"{event.description || 'Accessing mission brief...'}"</p>
 
                 <div className="space-y-3 pt-4 border-t border-neutral-100 dark:border-white/5">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
                     <Clock size={16} className="text-strawberry-600" />
                     <span>{new Date(event.start_time).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
-                  {event.location && (
-                    <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
-                      <MapPin size={16} className="text-strawberry-600" />
-                      <span>{event.location}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
+                    <Users size={16} className="text-strawberry-600" />
+                    <span>{(event as any).rsvpCount} Joined</span>
+                  </div>
                 </div>
-              </div>
+                {event.location && (
+                  <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
+                    <MapPin size={16} className="text-strawberry-600" />
+                    <span>{event.location}</span>
+                  </div>
+                )}
+                </div>              </div>
 
               <div className="bg-neutral-50 dark:bg-white/5 p-6 border-t border-neutral-100 dark:border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-2">

@@ -12,11 +12,20 @@ export const useEvents = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('events')
-        .select('*')
+        .select(`
+          *,
+          event_rsvps(count)
+        `)
         .order('start_time', { ascending: true });
 
       if (error) throw error;
-      setEvents(data || []);
+      
+      const processedEvents = data.map(event => ({
+        ...event,
+        rsvpCount: event.event_rsvps[0]?.count || 0
+      }));
+
+      setEvents(processedEvents || []);
     } catch (err: any) {
       setError(err.message);
     } finally {

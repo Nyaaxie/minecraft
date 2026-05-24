@@ -89,6 +89,7 @@ export interface Conversation {
   is_group: boolean
   created_at: string
   updated_at: string
+  avatar_url?: string | null
 }
 
 export interface ActivityLog {

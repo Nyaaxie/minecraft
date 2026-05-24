@@ -105,6 +105,21 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'users' | 'announcements' | 'events' | 'rules' | 'reminders' | 'versions' | 'categories' | 'badges'>('users');
   const [modal, setModal] = useState<{ isOpen: boolean; type: string; data?: any }>({ isOpen: false, type: '' });
+  const [rsvps, setRsvps] = useState<any[]>([]);
+  const [loadingRsvps, setLoadingRsvps] = useState(false);
+
+  const handleViewRsvps = async (eventId: string) => {
+    setModal({ isOpen: true, type: 'view-rsvps', data: { eventId } });
+    setLoadingRsvps(true);
+    try {
+      const data = await dbService.getRSVPs(eventId);
+      setRsvps(data.filter(rsvp => rsvp.status === 'joined'));
+    } catch (err) {
+      toast.error('Failed to load RSVPs');
+    } finally {
+      setLoadingRsvps(false);
+    }
+  };
 
   // -------------------------------------------------------------------------
   // Data fetching
@@ -449,6 +464,45 @@ const AdminPanel = () => {
         onBadgesUpdated={fetchData}
       />
 
+      {/* RSVP Viewer Modal */}
+      <Modal
+        isOpen={modal.isOpen && modal.type === 'view-rsvps'}
+        onClose={() => setModal({ isOpen: false, type: '' })}
+        title="Joined Players"
+      >
+        {loadingRsvps ? (
+          <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+        ) : (
+          <div className="space-y-4">
+            {rsvps.length === 0 ? <p className="text-center text-neutral-500">No players joined yet.</p> : (
+              rsvps.map((rsvp: any) => (
+                <div key={rsvp.id} className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+                    <img src={rsvp.profiles?.avatar_url || '/default-avatar.png'} alt="" className="h-full w-full object-cover" />
+                  </div>
+                  <p className="font-bold">{rsvp.profiles?.username || 'Unknown'}</p>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Edit Event Modal */}
+      <Modal
+        isOpen={modal.isOpen && modal.type === 'edit-event'}
+        onClose={() => setModal({ isOpen: false, type: '' })}
+        title="Edit Event"
+      >
+        <form onSubmit={(e) => { e.preventDefault(); toast('Event update logic pending implementation.'); setModal({ isOpen: false, type: '' }); }} className="space-y-6">
+          <input name="title" placeholder="Event Title" defaultValue={modal.data?.title || ''} required className={inputCls} />
+          <textarea name="description" placeholder="Description" defaultValue={modal.data?.description || ''} required className={`${inputCls} h-32 resize-none`} />
+          <button type="submit" className="w-full bg-strawberry-600 p-4 rounded-2xl font-black uppercase italic tracking-widest text-white hover:bg-strawberry-700 transition-all shadow-xl shadow-strawberry-600/20">
+            Save Changes
+          </button>
+        </form>
+      </Modal>
+
       {/* ── Page Header ── */}
       <div className="pt-2">
         <h1 className="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white leading-none">
@@ -624,9 +678,8 @@ const AdminPanel = () => {
               ) : (
                 <div className="space-y-2">
                   {events.map(ev => (
-                    <div key={ev.id} className={`${cardCls} p-3 flex items-center justify-between gap-3`}>
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-2.5 bg-strawberry-500/10 rounded-xl shrink-0">
+                    <div key={ev.id} className={`${cardCls} p-3 flex items-center justify-between gap-3 relative`}>
+                    <div className="flex items-center gap-3 min-w-0">                        <div className="p-2.5 bg-strawberry-500/10 rounded-xl shrink-0">
                           <Calendar size={16} className="text-strawberry-600" />
                         </div>
                         <div className="min-w-0">
@@ -634,11 +687,28 @@ const AdminPanel = () => {
                           <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest truncate">{new Date(ev.start_time).toLocaleDateString()}</p>
                         </div>
                       </div>
-                      <div className="flex gap-1.5 shrink-0">
-                        <button onClick={() => handleDeleteEvent(ev.id)} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-red-500 transition-all">
+                      <div className="flex gap-1.5 shrink-0 relative z-50">
+                        <button 
+                          onClick={(e) => { 
+                            e.preventDefault();
+                            e.stopPropagation(); 
+                            handleViewRsvps(ev.id); 
+                          }} 
+                          className="px-3 py-1 bg-strawberry-600/10 text-strawberry-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-strawberry-600 hover:text-white transition-all cursor-pointer"
+                        >
+                            View Joined
+                        </button>
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteEvent(ev.id); }} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-red-500 transition-all cursor-pointer">
                           <Trash2 size={14} />
                         </button>
-                        <button className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-all">
+                        <button 
+                          onClick={(e) => { 
+                            e.preventDefault();
+                            e.stopPropagation(); 
+                            setModal({ isOpen: true, type: 'edit-event', data: ev });
+                          }} 
+                          className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-all cursor-pointer"
+                        >
                           <MoreVertical size={14} />
                         </button>
                       </div>

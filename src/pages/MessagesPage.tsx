@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 import { chatService } from '../services/chatService';
@@ -7,19 +7,6 @@ import { Search, Send, Loader2, ArrowLeft, MoreVertical, MessageSquare, Plus, X,
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import type { Profile } from '../types/database.types';
-
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: '' };
-  }
-  static getDerivedStateFromError(error: Error) { return { hasError: true, error: error.message }; }
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) { console.error(error, errorInfo); }
-  render() {
-    if (this.state.hasError) return <div className="p-8 bg-red-600 text-white rounded-3xl m-4 text-xs">Error: {this.state.error}</div>;
-    return this.props.children;
-  }
-}
 
 const MessagesPage = () => {
   const { profile: currentUser } = useAuthStore();
@@ -280,27 +267,30 @@ const MessagesPage = () => {
                   messages.map((msg: any) => {
                     if (!msg || !msg.id) return null; // Defensive check
                     const isOwn = msg.sender_id === currentUser?.id;
+                    const senderAvatar = isOwn ? currentUser?.avatar_url : msg.sender?.avatar_url;
+                    const senderName = isOwn ? (currentUser?.username || 'You') : (msg.sender?.username || 'Unknown');
+                    
                     return (
                       <div key={msg.id} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} group`}>
                         <div className={`flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
-                          {!isOwn && (
-                            <div className="h-8 w-8 rounded-xl bg-neutral-200 dark:bg-neutral-800 flex-shrink-0 overflow-hidden shadow-sm">
-                              {msg.sender?.avatar_url ? (
-                                <img src={msg.sender.avatar_url} alt={msg.sender.username || 'User'} className="h-full w-full object-cover" />
-                              ) : (
-                                <User size={16} className="m-auto text-neutral-400" />
-                              )}
-                            </div>
-                          )}
-                          <div className={`px-4 py-3 rounded-3xl max-w-[70%] relative text-sm font-medium ${isOwn
+                          {/* Avatar - Displayed for both sender and receiver */}
+                          <div className="h-8 w-8 rounded-xl bg-neutral-200 dark:bg-neutral-800 flex-shrink-0 overflow-hidden shadow-sm">
+                            {senderAvatar ? (
+                              <img src={senderAvatar} alt={senderName} className="h-full w-full object-cover" />
+                            ) : (
+                              <User size={16} className="m-auto text-neutral-400" />
+                            )}
+                          </div>
+                          
+                          <div className={`px-4 py-3 rounded-3xl max-w-[85%] sm:max-w-[70%] relative text-sm font-medium break-words whitespace-pre-wrap ${isOwn
                             ? 'bg-strawberry-600 text-white rounded-br-lg'
                             : 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-bl-lg shadow-sm border border-neutral-100 dark:border-neutral-700'
                             }`}>
-                            {!isOwn && (
-                              <p className="text-[9px] font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1">
-                                {msg.sender?.username || 'Unknown'}
-                              </p>
-                            )}
+                            {/* Username - Displayed for both sender and receiver */}
+                            <p className={`text-[9px] font-black uppercase tracking-widest mb-1 ${isOwn ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                              {senderName}
+                            </p>
+                            
                             {msg.content || ''}
                             {(currentUser?.role === 'admin' || isOwn) && (
                               <button
@@ -312,7 +302,7 @@ const MessagesPage = () => {
                             )}
                           </div>
                         </div>
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 mt-1 px-10">
+                        <span className={`text-[9px] font-bold uppercase tracking-widest text-neutral-400 mt-1 ${isOwn ? 'px-10' : 'px-10'}`}>
                           {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                         </span>
                       </div>
