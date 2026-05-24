@@ -21,30 +21,38 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SidebarItem = ({ icon: Icon, label, to, active, onClick, unreadCount }: { icon: any, label: string, to: string, active: boolean, onClick?: () => void, unreadCount?: number }) => (
-  <Link
-    to={to}
-    onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group ${active
-      ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30 scale-[1.02]'
-      : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white'
-      }`}
-  >
-    <div className="relative">
-      <Icon size={22} className={`${active ? 'text-white' : 'group-hover:text-strawberry-500'} transition-colors`} />
-      {unreadCount && unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-neutral-900">
-          {unreadCount > 9 ? '9+' : unreadCount}
-        </span>
-      )}
-    </div>
-    <span className="font-bold text-sm tracking-tight">{label}</span>
-  </Link>
-);
+const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, label: string, to: string, active: boolean, onClick?: () => void }) => {
+  const unreadCounts = useChatStore((state) => state.unreadCounts);
+  
+  // Calculate unread count specifically for this item if it's the messages link
+  const count = to === '/messages' 
+    ? Object.values(unreadCounts).reduce((sum, c) => sum + c, 0)
+    : 0;
+
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group ${active
+        ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30 scale-[1.02]'
+        : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white'
+        }`}
+    >
+      <div className="relative">
+        <Icon size={22} className={`${active ? 'text-white' : 'group-hover:text-strawberry-500'} transition-colors`} />
+        {count > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-neutral-900">
+            {count > 9 ? '9+' : count}
+          </span>
+        )}
+      </div>
+      <span className="font-bold text-sm tracking-tight">{label}</span>
+    </Link>
+  );
+};
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { profile, signOut } = useAuthStore();
-  // Using a selector to ensure the component re-renders when unreadCounts changes
   const unreadCounts = useChatStore((state) => state.unreadCounts);
   
   const location = useLocation();
@@ -53,7 +61,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   // Calculate total unread messages
   const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
-  console.log('DashboardLayout: totalUnread =', totalUnread, 'unreadCounts =', unreadCounts);
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Overview', to: '/dashboard' },
@@ -96,7 +103,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           {menuItems.map((item) => (
             <SidebarItem
               key={item.to}
-              {...item}
+              icon={item.icon}
+              label={item.label}
+              to={item.to}
               active={location.pathname === item.to}
             />
           ))}

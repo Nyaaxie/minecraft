@@ -49,7 +49,7 @@ export const chatService = {
           displayAvatar = otherMember.profiles.avatar_url;
         }
       }
-      
+
       return {
         ...conv,
         name: displayName,
@@ -57,12 +57,12 @@ export const chatService = {
       };
     });
   },
-// Fetch messages for a specific conversation
-async getMessages(conversationId: string) {
-  const { data, error } = await supabase
-    .from('messages')
-    // Ensure the join is robust by explicitly selecting from the profiles table
-    .select(`
+  // Fetch messages for a specific conversation
+  async getMessages(conversationId: string) {
+    const { data, error } = await supabase
+      .from('messages')
+      // Ensure the join is robust by explicitly selecting from the profiles table
+      .select(`
       *,
       sender:profiles!sender_id(
         id, 
@@ -70,23 +70,23 @@ async getMessages(conversationId: string) {
         avatar_url
       )
     `)
-    .eq('conversation_id', conversationId)
-    .order('created_at', { ascending: true });
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true });
 
-  if (error) {
-    console.error("Supabase Error in getMessages:", error);
-    throw error;
-  }
+    if (error) {
+      console.error("Supabase Error in getMessages:", error);
+      throw error;
+    }
 
-  // Ensure sender is not null or undefined for the UI
-  const mappedData = data?.map(msg => ({
+    // Ensure sender is not null or undefined for the UI
+    const mappedData = data?.map(msg => ({
       ...msg,
       sender: Array.isArray(msg.sender) ? msg.sender[0] : msg.sender
-  })) || [];
+    })) || [];
 
-  console.log("Supabase Data in getMessages:", mappedData);
-  return mappedData;
-},
+    console.log("Supabase Data in getMessages:", mappedData);
+    return mappedData;
+  },
   async sendMessage(conversationId: string, senderId: string, receiverId: string, content: string) {
     const { data, error } = await supabase
       .from('messages')
@@ -174,7 +174,7 @@ async getMessages(conversationId: string) {
         counts[msg.conversation_id] = (counts[msg.conversation_id] || 0) + 1;
       }
     });
-    
+
     return counts;
   },
 
@@ -190,7 +190,7 @@ async getMessages(conversationId: string) {
 
   subscribeToMessages(conversationId: string, onMessage: (message: Message) => void) {
     return supabase
-      .channel(`chat:${conversationId}`)
+      .channel(`chat:messages:${conversationId}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -213,7 +213,7 @@ async getMessages(conversationId: string) {
   },
 
   broadcastTyping(conversationId: string, username: string, isTyping: boolean) {
-    return supabase.channel(`chat:${conversationId}`).send({
+    return supabase.channel(`chat:typing:${conversationId}`).send({
       type: 'broadcast',
       event: 'typing',
       payload: { username, isTyping }
@@ -230,9 +230,9 @@ async getMessages(conversationId: string) {
   subscribeToAllMessages(onMessage: (message: Message) => void) {
     console.log('chatService: Subscribing to all messages...');
     return supabase
-      .channel('schema-db-changes')
+      .channel(`schema-db-changes:${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', {
-        event: '*', 
+        event: '*',
         schema: 'public',
         table: 'messages'
       }, (payload) => {

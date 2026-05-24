@@ -1,54 +1,85 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 import { chatService } from '../services/chatService';
 import { dbService } from '../services/dbService';
-import { Search, Send, Loader2, ArrowLeft, MoreVertical, MessageSquare, Plus, X, Trash2, User } from 'lucide-react';
+import { Search, Send, ArrowLeft, MoreVertical, MessageSquare, Plus, X, Trash2, User, Loader2, CheckCheck, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import type { Profile } from '../types/database.types';
 
+// Optimistic message type — has a tempId before DB confirms
+interface OptimisticMessage {
+  id: string;
+  tempId?: string;       // set while pending, cleared on confirm
+  conversation_id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  created_at: string;
+  status: 'sending' | 'sent' | 'error';
+  sender?: { id: string; username: string; avatar_url: string | null };
+}
+
+// ── Animated typing dots ────────────────────────────────────────────────────
+const TypingDots = () => (
+  <div className="flex items-center gap-1 px-1 py-0.5">
+    {[0, 1, 2].map(i => (
+      <motion.span
+        key={i}
+        className="w-1.5 h-1.5 rounded-full bg-neutral-400 block"
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+      />
+    ))}
+  </div>
+);
+
 const MessagesPage = () => {
   const { profile: currentUser } = useAuthStore();
-  const { conversations, messages, activeConversationId, setConversations, setMessages, addMessage, removeMessage, setActiveConversationId, typingUsers, setTyping, unreadCounts, incrementUnreadCount } = useChatStore();
+  const {
+    conversations, messages, activeConversationId,
+    setConversations, setMessages, setActiveConversationId,
+    typingUsers, setTyping, unreadCounts, incrementUnreadCount,
+  } = useChatStore();
 
   const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [profileSearch, setProfileSearch] = useState('');
   const [startingChat, setStartingChat] = useState(false);
+
+  // Optimistic messages layered on top of confirmed store messages
+  const [optimisticMsgs, setOptimisticMsgs] = useState<OptimisticMessage[]>([]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeout = useRef<any>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isNearBottomRef = useRef(true);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // ── Scroll helpers ──────────────────────────────────────────────────────
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  }, []);
 
-  // Load conversations
+  const handleScroll = useCallback(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    isNearBottomRef.current = distFromBottom < 80;
+  }, []);
+
+  // ── Load conversations ──────────────────────────────────────────────────
   useEffect(() => {
     if (!currentUser) return;
     const init = async () => {
       try {
-        // Clear active conversation on page load
         setActiveConversationId(null);
-        
-        const [convs, counts] = await Promise.all([
-            chatService.getConversations(currentUser.id),
-            chatService.getUnreadCounts(currentUser.id)
-        ]);
-        console.log('MessagesPage: Loaded conversations:', convs);
-        console.log('MessagesPage: Loaded unread counts:', counts);
+        const convs = await chatService.getConversations(currentUser.id);
         setConversations(convs);
-        
-        // Initialize unread counts in the store
-        Object.entries(counts).forEach(([convId, count]) => {
-            console.log(`MessagesPage: Setting unread count for ${convId} to ${count}`);
-            (useChatStore.getState() as any).setUnreadCount(convId, count);
-        });
-      } catch (err) {
-        console.error('Failed to load conversations:', err);
+      } catch {
         toast.error('Failed to load conversations');
       } finally {
         setLoading(false);
@@ -57,146 +88,227 @@ const MessagesPage = () => {
     init();
   }, [currentUser, setConversations, setActiveConversationId]);
 
-  // Load all profiles for new chat
+  // ── Global unread-count listener (other conversations) ──────────────────
   useEffect(() => {
-    if (!showNewChat) return;
-    const load = async () => {
-      try {
-        const profiles = await dbService.getAllProfiles();
-        setAllProfiles(profiles.filter(p => p.id !== currentUser?.id));
-      } catch {
-        toast.error('Failed to load users');
+    if (!currentUser) return;
+    const sub = chatService.subscribeToAllMessages((msg) => {
+      const activeId = useChatStore.getState().activeConversationId;
+      if (msg.sender_id !== currentUser.id && msg.conversation_id !== activeId) {
+        incrementUnreadCount(msg.conversation_id);
+        const convName = conversations.find(c => c.id === msg.conversation_id)?.name || 'Chat';
+        toast(`💬 New message in ${convName}`, { duration: 3000 });
+        if (document.visibilityState === 'hidden' && Notification.permission === 'granted') {
+          new Notification(`New message in ${convName}`, { body: msg.content });
+        }
       }
-    };
-    load();
-  }, [showNewChat, currentUser]);
+    });
+    return () => { sub.unsubscribe(); };
+  }, [currentUser, conversations, incrementUnreadCount]);
 
-  // Load messages for active conversation
+  // ── Load messages + subscribe to active conversation ────────────────────
   useEffect(() => {
     if (!activeConversationId || !currentUser) return;
+
+    // Clear optimistic layer on conversation switch
+    setOptimisticMsgs([]);
 
     const loadMessages = async () => {
       try {
         const msgs = await chatService.getMessages(activeConversationId);
         setMessages(msgs);
-        
-        // Mark all messages as read
-        if (currentUser) {
-          msgs.forEach(async (msg: any) => {
-            await chatService.markMessageAsRead(msg.id, currentUser.id);
-          });
-        }
-
-        setTimeout(scrollToBottom, 100);
-      } catch (err) {
+        msgs.forEach((msg: any) => {
+          if (msg.sender_id !== currentUser.id) {
+            chatService.markMessageAsRead(msg.id, currentUser.id);
+          }
+        });
+        setTimeout(() => scrollToBottom('auto'), 50);
+      } catch {
         toast.error('Failed to load messages');
       }
     };
     loadMessages();
 
-    const msgSubscription = chatService.subscribeToMessages(activeConversationId, (msg) => {
-      if (!msg.conversation_id) return;
-      if (msg.sender_id !== currentUser.id) {
-        if (activeConversationId !== msg.conversation_id) {
-          incrementUnreadCount(msg.conversation_id);
-          const convName = conversations.find(c => c.id === msg.conversation_id)?.name || 'Chat';
-          toast.success(`New message in ${convName}`);
-          
-          // Trigger browser notification if document is hidden
-          if (document.visibilityState === 'hidden') {
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(`New message in ${convName}`, { body: msg.content || 'New message' });
-            } else if ('Notification' in window && Notification.permission !== 'denied') {
-              Notification.requestPermission();
-            }
+    // Real-time: incoming messages
+    const msgSub = chatService.subscribeToMessages(activeConversationId, async (msg) => {
+      if (msg.conversation_id !== activeConversationId) return;
+
+      // The raw realtime payload has no `sender` join — attach it now.
+      let msgWithSender: any = msg;
+      if (msg.sender_id === currentUser.id) {
+        msgWithSender = {
+          ...msg,
+          sender: {
+            id: currentUser.id,
+            username: currentUser.username || 'You',
+            avatar_url: currentUser.avatar_url ?? null,
+          },
+        };
+      } else {
+        const existingWithSender = useChatStore.getState().messages.find(
+          (m: any) => m.sender?.id === msg.sender_id
+        );
+        msgWithSender = {
+          ...msg,
+          sender: existingWithSender?.sender ?? { id: msg.sender_id, username: 'Player', avatar_url: null },
+        };
+      }
+
+      // Remove matching optimistic placeholder, then add confirmed message atomically
+      setOptimisticMsgs(prev => {
+        const match = prev.find(
+          m => m.content === msg.content && m.sender_id === msg.sender_id
+        );
+        setTimeout(() => {
+          const existing = useChatStore.getState().messages;
+          if (!existing.some((m: any) => m.id === msgWithSender.id)) {
+            useChatStore.getState().setMessages([...existing, msgWithSender]);
           }
-        } else {
-          addMessage(msg);
-          scrollToBottom();
-        }
+          if (isNearBottomRef.current) scrollToBottom();
+        }, 0);
+        return match ? prev.filter(m => m.tempId !== match.tempId) : prev;
+      });
+
+      if (msg.sender_id !== currentUser.id) {
+        chatService.markMessageAsRead(msg.id, currentUser.id);
       }
     });
 
-    const deleteSubscription = chatService.subscribeToDeleteMessages(activeConversationId, (msgId) => {
-      removeMessage(msgId);
+    // Real-time: deleted messages
+    const delSub = chatService.subscribeToDeleteMessages(activeConversationId, (msgId) => {
+      const updated = useChatStore.getState().messages.filter(m => m.id !== msgId);
+      useChatStore.getState().setMessages(updated);
     });
 
-    const typingSubscription = chatService.subscribeToTyping(activeConversationId, (payload) => {
+    // Real-time: typing
+    const typingSub = chatService.subscribeToTyping(activeConversationId, (payload) => {
       setTyping(payload.username, payload.isTyping);
     });
 
     return () => {
-      msgSubscription.unsubscribe();
-      deleteSubscription.unsubscribe();
-      typingSubscription.unsubscribe();
+      msgSub.unsubscribe();
+      delSub.unsubscribe();
+      typingSub.unsubscribe();
     };
-  }, [activeConversationId, setMessages, addMessage, removeMessage, setTyping, currentUser, incrementUnreadCount, conversations]);
+  }, [activeConversationId, currentUser, setMessages, setTyping, scrollToBottom]);
 
+  // ── Auto-scroll when messages/typing change ─────────────────────────────
+  useEffect(() => {
+    if (isNearBottomRef.current) scrollToBottom();
+  }, [messages.length, optimisticMsgs.length, typingUsers.length, scrollToBottom]);
+
+  // ── Load profiles for new chat ──────────────────────────────────────────
+  useEffect(() => {
+    if (!showNewChat) return;
+    dbService.getAllProfiles()
+      .then(p => setAllProfiles(p.filter(x => x.id !== currentUser?.id)))
+      .catch(() => toast.error('Failed to load users'));
+  }, [showNewChat, currentUser]);
+
+  // ── Send message (optimistic) ───────────────────────────────────────────
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = newMessage.trim();
+    if (!text || !activeConversationId || !currentUser || !activeConv) return;
+
+    const convData = activeConv as any;
+    const receiver = convData.conversation_members?.find(
+      (m: any) => m.profile_id !== currentUser.id
+    );
+    const receiverId = receiver?.profile_id;
+    if (!receiverId) { toast.error('Could not find recipient'); return; }
+
+    // Stop typing broadcast
+    chatService.broadcastTyping(activeConversationId, currentUser.username || 'Someone', false);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    // Create optimistic entry immediately
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+    const optimistic: OptimisticMessage = {
+      id: tempId,
+      tempId,
+      conversation_id: activeConversationId,
+      sender_id: currentUser.id,
+      receiver_id: receiverId,
+      content: text,
+      created_at: new Date().toISOString(),
+      status: 'sending',
+      sender: {
+        id: currentUser.id,
+        username: currentUser.username || 'You',
+        avatar_url: currentUser.avatar_url ?? null,
+      },
+    };
+
+    setOptimisticMsgs(prev => [...prev, optimistic]);
+    setNewMessage('');
+    scrollToBottom();
+    inputRef.current?.focus();
+
+    try {
+      await chatService.sendMessage(activeConversationId, currentUser.id, receiverId, text);
+      // Mark as sent — real-time subscription will remove it and add confirmed msg
+      setOptimisticMsgs(prev =>
+        prev.map(m => m.tempId === tempId ? { ...m, status: 'sent' } : m)
+      );
+    } catch {
+      toast.error('Failed to send message');
+      setOptimisticMsgs(prev =>
+        prev.map(m => m.tempId === tempId ? { ...m, status: 'error' } : m)
+      );
+    }
+  };
+
+  // ── Typing broadcast ────────────────────────────────────────────────────
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    if (!activeConversationId || !currentUser) return;
+    chatService.broadcastTyping(activeConversationId, currentUser.username || 'Someone', true);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      chatService.broadcastTyping(activeConversationId, currentUser.username || 'Someone', false);
+    }, 2000);
+  };
+
+  // ── Delete ──────────────────────────────────────────────────────────────
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!window.confirm('Delete this message?')) return;
+    try {
+      await chatService.deleteMessage(messageId);
+      const updated = useChatStore.getState().messages.filter(m => m.id !== messageId);
+      useChatStore.getState().setMessages(updated);
+    } catch {
+      toast.error('Failed to delete message');
+    }
+  };
+
+  // ── Start new chat ──────────────────────────────────────────────────────
   const handleStartChat = async (otherProfile: Profile) => {
     if (!currentUser) return;
     setStartingChat(true);
     try {
-      const conv = await chatService.getOrCreateDirectConversation(currentUser.id, otherProfile.id, otherProfile.username || 'Chat');
+      const conv = await chatService.getOrCreateDirectConversation(
+        currentUser.id, otherProfile.id, otherProfile.username || 'Chat'
+      );
       const convs = await chatService.getConversations(currentUser.id);
       setConversations(convs);
       setActiveConversationId(conv.id);
       setShowNewChat(false);
       setProfileSearch('');
-    } catch (err) {
+    } catch {
       toast.error('Failed to start conversation');
     } finally {
       setStartingChat(false);
     }
   };
 
-  const handleDeleteMessage = async (messageId: string) => {
-    if (!window.confirm('Delete this message?')) return;
-    try {
-      await chatService.deleteMessage(messageId);
-      removeMessage(messageId);
-    } catch {
-      toast.error('Failed to delete message');
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewMessage(e.target.value);
-    if (!activeConversationId || !currentUser) return;
-    chatService.broadcastTyping(activeConversationId, currentUser.username || 'Someone', true);
-    if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    typingTimeout.current = setTimeout(() => {
-      chatService.broadcastTyping(activeConversationId, currentUser.username || 'Someone', false);
-    }, 2000);
-  };
-
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !activeConversationId || !currentUser || sending || !activeConv) return;
-    
-    // Find the receiver: any conversation member that is not the current user
-    const receiver = activeConv.conversation_members.find(
-      (m: any) => m.profile_id !== currentUser.id
-    );
-    const receiverId = receiver?.profile_id;
-
-    if (!receiverId) {
-      toast.error('Could not determine message recipient.');
-      return;
-    }
-
-    setSending(true);
-    chatService.broadcastTyping(activeConversationId, currentUser.username || 'Someone', false);
-    try {
-      const msg = await chatService.sendMessage(activeConversationId, currentUser.id, receiverId, newMessage.trim());
-      addMessage(msg);
-      setNewMessage('');
-      scrollToBottom();
-    } catch {
-      toast.error('Failed to send message');
-    } finally {
-      setSending(false);
-    }
-  };
+  // ── Merge confirmed + optimistic messages ───────────────────────────────
+  // Optimistic messages that haven't been replaced by confirmed ones yet
+  const pendingOptimistic = optimisticMsgs.filter(
+    opt => !messages.some(m => m.id === opt.id)
+  );
+  const allMessages = [...messages, ...pendingOptimistic].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
 
   const activeConv = conversations.find(c => c.id === activeConversationId);
   const filteredProfiles = allProfiles.filter(p =>
@@ -204,18 +316,18 @@ const MessagesPage = () => {
     p.minecraft_username?.toLowerCase().includes(profileSearch.toLowerCase())
   );
 
+  // ── Render ──────────────────────────────────────────────────────────────
   return (
     <div className="flex h-[calc(100vh-14rem)] lg:h-[750px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-neutral-900/5 relative">
       <div className="flex flex-1 overflow-hidden">
 
-        {/* Conversation List */}
+        {/* ── Conversation List ── */}
         <div className={`w-full lg:w-96 border-r border-neutral-100 dark:border-white/5 flex flex-col transition-all duration-300 ${activeConversationId ? 'hidden lg:flex' : 'flex'}`}>
           <div className="p-6 pb-3 border-b border-neutral-100 dark:border-white/5 flex items-center justify-between">
             <h1 className="text-2xl font-black italic uppercase tracking-tighter">Messenger</h1>
             <button
               onClick={() => setShowNewChat(true)}
               className="p-2.5 bg-strawberry-600 text-white rounded-xl hover:bg-strawberry-700 active:scale-95 transition-all shadow-md shadow-strawberry-600/20"
-              title="New Message"
             >
               <Plus size={18} />
             </button>
@@ -233,10 +345,7 @@ const MessagesPage = () => {
                 </div>
                 <p className="font-black italic uppercase tracking-tighter text-neutral-400 text-sm mb-1">No conversations yet</p>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-300 dark:text-neutral-600 mb-4">Start chatting with other players</p>
-                <button
-                  onClick={() => setShowNewChat(true)}
-                  className="px-4 py-2 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[9px] shadow-md shadow-strawberry-600/20 active:scale-95 transition-all"
-                >
+                <button onClick={() => setShowNewChat(true)} className="px-4 py-2 bg-strawberry-600 text-white rounded-xl font-black uppercase italic tracking-widest text-[9px] shadow-md shadow-strawberry-600/20 active:scale-95 transition-all">
                   New Message
                 </button>
               </div>
@@ -245,17 +354,13 @@ const MessagesPage = () => {
                 <button
                   key={conv.id}
                   onClick={() => setActiveConversationId(conv.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all ${activeConversationId === conv.id
-                    ? 'bg-strawberry-600 text-white'
-                    : 'hover:bg-neutral-50 dark:hover:bg-white/5'
-                    }`}
+                  className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all ${activeConversationId === conv.id ? 'bg-strawberry-600 text-white' : 'hover:bg-neutral-50 dark:hover:bg-white/5'}`}
                 >
                   <div className="h-11 w-11 rounded-2xl bg-neutral-200 dark:bg-neutral-800 flex-shrink-0 flex items-center justify-center overflow-hidden border border-neutral-100 dark:border-neutral-700 shadow-sm">
-                    {conv.avatar_url ? (
-                      <img src={conv.avatar_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <MessageSquare size={20} className={activeConversationId === conv.id ? 'text-white' : 'text-neutral-400'} />
-                    )}
+                    {conv.avatar_url
+                      ? <img src={conv.avatar_url} alt="" className="h-full w-full object-cover" />
+                      : <MessageSquare size={20} className={activeConversationId === conv.id ? 'text-white' : 'text-neutral-400'} />
+                    }
                   </div>
                   <div className="flex-1 text-left min-w-0">
                     <p className="font-black italic uppercase tracking-tight text-sm truncate">{conv.name || 'Private Chat'}</p>
@@ -263,10 +368,14 @@ const MessagesPage = () => {
                       Direct Message
                     </p>
                   </div>
-                  {unreadCounts[conv.id] > 0 && (
-                    <span className="bg-strawberry-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0">
-                      {unreadCounts[conv.id]}
-                    </span>
+                  {(unreadCounts[conv.id] ?? 0) > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="bg-strawberry-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                    >
+                      {unreadCounts[conv.id] > 9 ? '9+' : unreadCounts[conv.id]}
+                    </motion.span>
                   )}
                 </button>
               ))
@@ -274,7 +383,7 @@ const MessagesPage = () => {
           </div>
         </div>
 
-        {/* Chat Area */}
+        {/* ── Chat Area ── */}
         <div className={`flex-1 flex flex-col bg-neutral-50/50 dark:bg-neutral-950/20 relative ${!activeConversationId ? 'hidden lg:flex items-center justify-center' : 'flex w-full h-full'}`}>
           {activeConversationId ? (
             <>
@@ -283,16 +392,39 @@ const MessagesPage = () => {
                 <button onClick={() => setActiveConversationId(null)} className="lg:hidden p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
                   <ArrowLeft size={20} />
                 </button>
-                <div className="h-9 w-9 rounded-xl bg-strawberry-500/10 flex items-center justify-center shrink-0">
-                  <MessageSquare size={16} className="text-strawberry-600" />
+                <div className="h-9 w-9 rounded-xl bg-strawberry-500/10 flex items-center justify-center shrink-0 overflow-hidden">
+                  {activeConv?.avatar_url
+                    ? <img src={activeConv.avatar_url} alt="" className="h-full w-full object-cover" />
+                    : <MessageSquare size={16} className="text-strawberry-600" />
+                  }
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-black italic uppercase tracking-tight text-sm truncate">{activeConv?.name || 'Chat'}</h2>
-                  {typingUsers.length > 0 && (
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-strawberry-600 italic">
-                      {typingUsers.join(', ')} typing...
-                    </p>
-                  )}
+                  <AnimatePresence mode="wait">
+                    {typingUsers.length > 0 ? (
+                      <motion.div
+                        key="typing"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        className="flex items-center gap-1"
+                      >
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-strawberry-500 italic">
+                          {typingUsers.join(', ')} typing
+                        </span>
+                        <TypingDots />
+                      </motion.div>
+                    ) : (
+                      <motion.p
+                        key="online"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-[10px] font-bold uppercase tracking-widest text-neutral-400"
+                      >
+                        Direct Message
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
                 <button className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors text-neutral-400">
                   <MoreVertical size={18} />
@@ -300,8 +432,12 @@ const MessagesPage = () => {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 hide-scrollbar">
-                {messages.length === 0 ? (
+              <div
+                ref={messagesContainerRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto p-4 space-y-1 hide-scrollbar"
+              >
+                {allMessages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     <div className="w-14 h-14 bg-strawberry-500/10 rounded-3xl flex items-center justify-center mb-3">
                       <MessageSquare size={24} className="text-strawberry-600" />
@@ -310,69 +446,148 @@ const MessagesPage = () => {
                     <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-300 dark:text-neutral-600 mt-1">Say hello!</p>
                   </div>
                 ) : (
-                  messages.map((msg: any) => {
-                    if (!msg || !msg.id) return null; // Defensive check
+                  allMessages.map((msg: any, i) => {
+                    if (!msg?.id) return null;
                     const isOwn = msg.sender_id === currentUser?.id;
-                    const senderAvatar = isOwn ? currentUser?.avatar_url : msg.sender?.avatar_url;
-                    const senderName = isOwn ? (currentUser?.username || 'You') : (msg.sender?.username || 'Unknown');
-                    
+                    const isOptimistic = !!msg.tempId;
+                    const status = msg.status as 'sending' | 'sent' | 'error' | undefined;
+
+                    // Only show avatar for received messages (left side)
+                    const senderAvatar = isOwn ? null : msg.sender?.avatar_url;
+                    const senderName = isOwn ? null : (msg.sender?.username || 'Unknown');
+
+                    // Group consecutive messages from same sender within 60s
+                    const prevMsg = allMessages[i - 1] as any;
+                    const isGrouped = prevMsg &&
+                      prevMsg.sender_id === msg.sender_id &&
+                      new Date(msg.created_at).getTime() - new Date(prevMsg.created_at).getTime() < 60000;
+
+                    // Show timestamp only on last in a group, or standalone
+                    const nextMsg = allMessages[i + 1] as any;
+                    const isLastInGroup = !nextMsg ||
+                      nextMsg.sender_id !== msg.sender_id ||
+                      new Date(nextMsg.created_at).getTime() - new Date(msg.created_at).getTime() >= 60000;
+
                     return (
-                      <div key={msg.id} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} group`}>
+                      <motion.div
+                        key={msg.tempId || msg.id}
+                        initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                        animate={{ opacity: status === 'error' ? 0.6 : 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} group ${isGrouped ? 'mt-0.5' : 'mt-3'}`}
+                      >
                         <div className={`flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
-                          {/* Avatar - Displayed for both sender and receiver */}
-                          <div className="h-8 w-8 rounded-xl bg-neutral-200 dark:bg-neutral-800 flex-shrink-0 overflow-hidden shadow-sm">
-                            {senderAvatar ? (
-                              <img src={senderAvatar} alt={senderName} className="h-full w-full object-cover" />
-                            ) : (
-                              <User size={16} className="m-auto text-neutral-400" />
+
+                          {/* Avatar — only for received messages, invisible spacer when grouped */}
+                          {!isOwn && (
+                            <div className={`h-8 w-8 rounded-xl flex-shrink-0 overflow-hidden ${isGrouped ? 'invisible' : 'bg-neutral-200 dark:bg-neutral-800'}`}>
+                              {!isGrouped && (
+                                senderAvatar
+                                  ? <img src={senderAvatar} alt={senderName || ''} className="h-full w-full object-cover" />
+                                  : <div className="h-full w-full flex items-center justify-center"><User size={14} className="text-neutral-400" /></div>
+                              )}
+                            </div>
+                          )}
+
+                          <div
+                            className={`px-4 py-2.5 rounded-2xl max-w-[72%] sm:max-w-[60%] relative text-sm font-medium break-words whitespace-pre-wrap
+                              ${isOwn
+                                ? `bg-strawberry-600 text-white ${isGrouped ? 'rounded-tr-md' : 'rounded-tr-2xl'} rounded-tl-2xl rounded-bl-2xl rounded-br-md`
+                                : `bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white ${isGrouped ? 'rounded-tl-md' : 'rounded-tl-2xl'} rounded-tr-2xl rounded-br-2xl rounded-bl-md shadow-sm border border-neutral-100 dark:border-neutral-700`
+                              }
+                              ${isOptimistic && status === 'sending' ? 'opacity-60' : ''}
+                            `}
+                          >
+                            {/* Sender name — only for received, only first in group */}
+                            {!isOwn && !isGrouped && senderName && (
+                              <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-neutral-400 dark:text-neutral-500">
+                                {senderName}
+                              </p>
                             )}
-                          </div>
-                          
-                          <div className={`px-4 py-3 rounded-3xl max-w-[85%] sm:max-w-[70%] relative text-sm font-medium break-words whitespace-pre-wrap ${isOwn
-                            ? 'bg-strawberry-600 text-white rounded-br-lg'
-                            : 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-bl-lg shadow-sm border border-neutral-100 dark:border-neutral-700'
-                            }`}>
-                            {/* Username - Displayed for both sender and receiver */}
-                            <p className={`text-[9px] font-black uppercase tracking-widest mb-1 ${isOwn ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'}`}>
-                              {senderName}
-                            </p>
-                            
                             {msg.content || ''}
-                            {(currentUser?.role === 'admin' || isOwn) && (
+
+                            {/* Delete button */}
+                            {(currentUser?.role === 'admin' || isOwn) && !isOptimistic && (
                               <button
                                 onClick={() => handleDeleteMessage(msg.id)}
-                                className={`absolute -top-2 ${isOwn ? '-left-6' : '-right-6'} p-1 text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 bg-white dark:bg-neutral-800 rounded-lg shadow-sm`}
+                                className={`absolute -top-2 ${isOwn ? '-left-7' : '-right-7'} p-1 text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-100 dark:border-neutral-700`}
                               >
-                                <Trash2 size={12} />
+                                <Trash2 size={11} />
                               </button>
                             )}
                           </div>
                         </div>
-                        <span className={`text-[9px] font-bold uppercase tracking-widest text-neutral-400 mt-1 ${isOwn ? 'px-10' : 'px-10'}`}>
-                          {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                        </span>
-                      </div>
+
+                        {/* Timestamp + status — only show on last message in group */}
+                        {isLastInGroup && (
+                          <div className={`flex items-center gap-1 mt-1 ${isOwn ? 'pr-1' : 'pl-10'}`}>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">
+                              {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                            </span>
+                            {isOwn && (
+                              <span>
+                                {status === 'sending'
+                                  ? <Clock size={10} className="text-neutral-300 animate-pulse" />
+                                  : status === 'error'
+                                    ? <span className="text-[9px] text-red-400 font-bold">!</span>
+                                    : <CheckCheck size={10} className="text-strawberry-400" />
+                                }
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </motion.div>
                     );
                   })
                 )}
+
+                {/* Typing bubble */}
+                <AnimatePresence>
+                  {typingUsers.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      className="flex items-end gap-2 mt-3"
+                    >
+                      <div className="h-8 w-8 rounded-xl bg-neutral-200 dark:bg-neutral-800 flex-shrink-0" />
+                      <div className="px-4 py-3 bg-white dark:bg-neutral-800 rounded-2xl rounded-bl-md shadow-sm border border-neutral-100 dark:border-neutral-700">
+                        <TypingDots />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div ref={messagesEndRef} />
               </div>
 
               {/* Input */}
-              <form onSubmit={handleSend} className="p-4 bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-white/5 flex gap-2">
+              <form
+                onSubmit={handleSend}
+                className="p-4 bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-white/5 flex gap-2 items-end"
+              >
                 <input
+                  ref={inputRef}
                   value={newMessage}
                   onChange={handleInputChange}
-                  className="flex-1 bg-neutral-100 dark:bg-neutral-800 rounded-2xl px-4 py-3 outline-none text-sm font-medium placeholder:text-neutral-400"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend(e as any);
+                    }
+                  }}
+                  className="flex-1 bg-neutral-100 dark:bg-neutral-800 rounded-2xl px-4 py-3 outline-none text-sm font-medium placeholder:text-neutral-400 resize-none"
                   placeholder="Type a message..."
+                  autoComplete="off"
                 />
-                <button
+                <motion.button
                   type="submit"
-                  disabled={sending || !newMessage.trim()}
-                  className="p-3 bg-strawberry-600 text-white rounded-2xl disabled:opacity-50 active:scale-95 transition-all shadow-md shadow-strawberry-600/20"
+                  disabled={!newMessage.trim()}
+                  whileTap={{ scale: 0.92 }}
+                  className="p-3 bg-strawberry-600 text-white rounded-2xl disabled:opacity-40 transition-all shadow-md shadow-strawberry-600/20 shrink-0"
                 >
-                  {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                </button>
+                  <Send size={18} />
+                </motion.button>
               </form>
             </>
           ) : (
@@ -387,14 +602,12 @@ const MessagesPage = () => {
         </div>
       </div>
 
-      {/* New Chat Modal */}
+      {/* ── New Chat Modal ── */}
       <AnimatePresence>
         {showNewChat && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10"
               onClick={() => setShowNewChat(false)}
             />

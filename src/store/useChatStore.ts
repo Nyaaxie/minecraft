@@ -40,10 +40,9 @@ export const useChatStore = create<ChatState>((set) => ({
   setUnreadCount: (convId, count) => set((state) => ({
     unreadCounts: { ...state.unreadCounts, [convId]: count }
   })),
-  incrementUnreadCount: (convId) => set((state) => ({
-    unreadCounts: {
-      ...state.unreadCounts,
-      [convId]: (state.unreadCounts[convId] || 0) + 1
-    }
-  })),
+  incrementUnreadCount: (convId) => set((state) => {
+    const newCounts = { ...state.unreadCounts };
+    newCounts[convId] = (newCounts[convId] || 0) + 1;
+    return { unreadCounts: newCounts };
+  }),
 }));

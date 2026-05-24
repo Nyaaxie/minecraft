@@ -27,14 +27,6 @@ const ProfilePage = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (authLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-32 gap-4">
-        <Loader2 className="animate-spin text-strawberry-600" size={64} />
-      </div>
-    );
-  }
-
   const [formData, setFormData] = useState<Partial<Profile>>({
     username: profile?.username || '',
     minecraft_username: profile?.minecraft_username || '',
@@ -61,6 +53,15 @@ const ProfilePage = () => {
       fetchUserBadges();
     }
   }, [profile?.id]);
+
+  // Guard AFTER all hooks — React requires hooks to always run in same order
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 gap-4">
+        <Loader2 className="animate-spin text-strawberry-600" size={64} />
+      </div>
+    );
+  }
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !profile) return;

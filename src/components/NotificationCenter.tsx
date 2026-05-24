@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../services/supabase';
 import { dbService } from '../services/dbService';
 import { useAuthStore } from '../store/useAuthStore';
+import { useChatStore } from '../store/useChatStore';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Check, X, Info, Calendar, Megaphone, Server } from 'lucide-react';
+import { Bell, Check, X, Info, Calendar, Megaphone, Server, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -22,8 +23,11 @@ const NotificationCenter = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuthStore();
+  const { unreadCounts } = useChatStore();
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const totalUnreadMessages = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
@@ -93,13 +97,15 @@ const NotificationCenter = () => {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadSystemCount = notifications.filter(n => !n.is_read).length;
+  const totalAlerts = unreadSystemCount + totalUnreadMessages;
 
   const getIcon = (type: string) => {
     switch (type) {
       case 'event': return <Calendar size={16} className="text-blue-500" />;
       case 'announcement': return <Megaphone size={16} className="text-strawberry-500" />;
       case 'system': return <Server size={16} className="text-purple-500" />;
+      case 'message': return <MessageSquare size={16} className="text-green-500" />;
       default: return <Info size={16} className="text-neutral-500" />;
     }
   };
@@ -111,9 +117,9 @@ const NotificationCenter = () => {
         className="relative p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors"
       >
         <Bell size={20} className="text-neutral-600 dark:text-neutral-400" />
-        {unreadCount > 0 && (
+        {totalAlerts > 0 && (
           <span className="absolute top-0 right-0 w-4 h-4 bg-strawberry-600 rounded-full text-[10px] flex items-center justify-center text-white font-bold">
-            {unreadCount}
+            {totalAlerts > 9 ? '9+' : totalAlerts}
           </span>
         )}
       </button>
