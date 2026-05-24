@@ -109,7 +109,7 @@ const ProfilePage = () => {
         <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
           Identity<span className="text-strawberry-600">Core</span>
         </h1>
-        <p className="text-neutral-500 max-w-2xl font-medium uppercase tracking-tight text-sm leading-relaxed">Modify your system parameters and community visual profile.</p>
+        <p className="text-neutral-500 max-w-2xl font-medium uppercase tracking-tight text-sm leading-relaxed"> Personalize your settings and how you look to the community.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -172,7 +172,7 @@ const ProfilePage = () => {
                 <span className="text-xs font-black italic uppercase text-neutral-900 dark:text-white">{profile?.role === 'admin' ? 'ADMIN' : 'BERRY'}</span>
               </div>
               <div className="flex items-center justify-between p-4 bg-neutral-50 dark:bg-white/5 rounded-2xl border border-transparent hover:border-neutral-200 dark:hover:border-white/10 transition-all group/stat">
-                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 group-hover/stat:text-strawberry-600 transition-colors">Node Entry</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 group-hover/stat:text-strawberry-600 transition-colors">DATE</span>
                 <span className="text-xs font-black italic uppercase text-neutral-900 dark:text-white">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'}</span>
               </div>
               {formData.minecraft_edition && (
@@ -189,7 +189,7 @@ const ProfilePage = () => {
             className="w-full flex items-center justify-center gap-4 p-6 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2rem] text-red-500 font-black italic uppercase tracking-widest text-xs shadow-xl shadow-neutral-900/5 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all active:scale-95 group"
           >
             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
-            De-authenticate Session
+            Sign Out
           </button>
         </div>
 
@@ -206,7 +206,7 @@ const ProfilePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-1">
                 <label className={labelCls}>
-                  <User size={14} className="text-strawberry-500" /> Network Alias
+                  <User size={14} className="text-strawberry-500" /> Username
                 </label>
                 <input
                   type="text"
@@ -233,20 +233,20 @@ const ProfilePage = () => {
             </div>
 
             <div className="space-y-1">
-              <label className={labelCls}>Personal Manifesto</label>
+              <label className={labelCls}>Personal Information</label>
               <textarea
                 name="bio"
                 value={formData.bio || ''}
                 onChange={handleChange}
                 className={`${inputCls} h-40 resize-none italic`}
-                placeholder="Broadcast your mission to the community..."
+                placeholder="Tell us about yourself..."
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="space-y-1">
                 <label className={labelCls}>
-                  <Ghost size={14} className="text-strawberry-500" /> Preferred Entity
+                  <Ghost size={14} className="text-strawberry-500" /> Favorite Mob
                 </label>
                 <input
                   type="text"
@@ -259,7 +259,7 @@ const ProfilePage = () => {
               </div>
               <div className="space-y-1">
                 <label className={labelCls}>
-                  <Blocks size={14} className="text-strawberry-500" /> Primary Core
+                  <Blocks size={14} className="text-strawberry-500" /> Favorite Block
                 </label>
                 <input
                   type="text"
@@ -275,7 +275,7 @@ const ProfilePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="space-y-1">
                 <label className={labelCls}>
-                  <Palette size={14} className="text-strawberry-500" /> Signature Hue
+                  <Palette size={14} className="text-strawberry-500" /> Favorite Color
                 </label>
                 <div className="flex gap-4">
                   <div className="w-14 h-14 rounded-2xl border-4 border-white dark:border-neutral-800 shadow-lg shrink-0" style={{ backgroundColor: formData.favorite_color || '#e35a7f' }} />
@@ -290,7 +290,7 @@ const ProfilePage = () => {
               </div>
               <div className="space-y-1">
                 <label className={labelCls}>
-                  <MonitorPlay size={14} className="text-strawberry-500" /> Deployment Core
+                  <MonitorPlay size={14} className="text-strawberry-500" /> Minecraft Edition
                 </label>
                 <select
                   name="minecraft_edition"
@@ -311,7 +311,7 @@ const ProfilePage = () => {
                 type="submit"
                 className="w-full py-6 bg-strawberry-600 rounded-[2rem] font-black italic uppercase tracking-[0.2em] text-white hover:bg-strawberry-700 transition-all flex items-center justify-center gap-4 shadow-2xl shadow-strawberry-600/40 active:scale-95 disabled:opacity-50"
               >
-                {loading ? <Loader2 className="animate-spin" size={24} /> : <><Save size={24} /> Sync System Params</>}
+                {loading ? <Loader2 className="animate-spin" size={24} /> : <><Save size={24} />Update</>}
               </button>
             </div>
           </motion.form>

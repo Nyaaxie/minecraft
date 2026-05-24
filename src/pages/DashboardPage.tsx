@@ -107,7 +107,7 @@ const DashboardPage = () => {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-6">
         <Loader2 className="animate-spin text-strawberry-600" size={64} />
-        <p className="text-neutral-500 font-black uppercase tracking-widest animate-pulse">Syncing with Node...</p>
+        <p className="text-neutral-500 font-black uppercase tracking-widest animate-pulse">Loading...</p>
       </div>
     );
   }
@@ -236,7 +236,7 @@ const DashboardPage = () => {
           <div className="space-y-4">
             <h2 className="text-xl font-black italic uppercase tracking-tighter flex items-center gap-3 px-2">
               <Box size={20} className="text-strawberry-600" />
-              System Meta
+              Minecraft Versions
             </h2>
             <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 p-8 rounded-[2rem] shadow-xl shadow-neutral-900/5 overflow-hidden relative group">
               <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/5 blur-2xl rounded-full" />

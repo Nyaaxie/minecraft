@@ -151,13 +151,13 @@ const PluginsPage = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2">
         <div className="space-y-4">
           <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
-            System<span className="text-strawberry-600">Modules</span>
+            Server<span className="text-strawberry-600">Plugins</span>
           </h1>
           <p className="text-neutral-500 max-w-xl font-medium uppercase tracking-tight text-sm italic leading-relaxed">Advanced core extensions and features enhancing the StrawberrySMP experience.</p>
         </div>
         {isAdmin && (
           <Link to="/admin/plugins/new" className="px-8 py-4 bg-strawberry-600 text-white rounded-[1.5rem] font-black italic uppercase tracking-widest text-xs shadow-xl shadow-strawberry-600/30 hover:bg-strawberry-700 transition-all active:scale-95 text-center">
-            Register Module
+            Add Plugins
           </Link>
         )}
       </div>

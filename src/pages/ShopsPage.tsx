@@ -8,7 +8,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import { useDebounce } from '../hooks/useDebounce';
 
-const ShopCard = React.memo(({ shop, currentUserId, isAdmin, onDelete }: { 
+const ShopCard = React.memo(({ shop, currentUserId, isAdmin, onDelete }: {
   shop: PlayerShop & { profiles: { username: string; avatar_url: string } | null },
   currentUserId?: string,
   isAdmin: boolean,
@@ -54,14 +54,14 @@ const ShopCard = React.memo(({ shop, currentUserId, isAdmin, onDelete }: {
 
           {canManage && (
             <div className="flex gap-2">
-              <Link 
+              <Link
                 to={`/shops/edit/${shop.id}`}
                 className="p-2.5 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 rounded-xl transition-all"
                 title="Edit Shop"
               >
                 <Edit size={16} />
               </Link>
-              <button 
+              <button
                 onClick={() => onDelete(shop.id)}
                 className="p-2.5 bg-neutral-100 dark:bg-white/5 hover:bg-red-500/10 hover:text-red-600 rounded-xl transition-all"
                 title="Delete Shop"
@@ -76,7 +76,7 @@ const ShopCard = React.memo(({ shop, currentUserId, isAdmin, onDelete }: {
           <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed mb-8 italic line-clamp-3">
             "{shop.description || 'No description provided.'}"
           </p>
-          
+
           <div className="mt-auto pt-6 border-t border-neutral-100 dark:border-white/5 flex justify-between items-center">
             <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest italic ${shop.is_active ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'}`}>
               {shop.is_active ? 'Open' : 'Closed'}
@@ -152,8 +152,8 @@ const ShopsPage = () => {
   const filteredShops = shops.filter(shop => {
     const ownerUsername = shop.profiles?.username || '';
     return shop.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-           shop.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-           ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      shop.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
   });
 
   return (
@@ -161,12 +161,12 @@ const ShopsPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
-            Market<span className="text-strawberry-600">place</span>
+            Shop<span className="text-strawberry-600"> list</span>
           </h1>
           <p className="text-neutral-500 max-w-md font-medium uppercase tracking-tight text-sm">Discover unique player-owned shops and find the best deals in the SMP.</p>
         </div>
-        <Link 
-          to="/shops/new" 
+        <Link
+          to="/shops/new"
           className="px-8 py-4 bg-strawberry-600 text-white rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm shadow-xl shadow-strawberry-600/30 hover:bg-strawberry-700 transition-all active:scale-95 text-center"
         >
           Open Your Shop
@@ -218,9 +218,9 @@ const ShopsPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredShops.map(shop => (
-            <ShopCard 
-              key={shop.id} 
-              shop={shop} 
+            <ShopCard
+              key={shop.id}
+              shop={shop}
               currentUserId={user?.id}
               isAdmin={isAdmin}
               onDelete={handleDeleteShop}
