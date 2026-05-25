@@ -1,10 +1,12 @@
-import { Map as MapIcon, Maximize2 } from 'lucide-react';
+import { Map as MapIcon } from 'lucide-react';
 
 const DynaMapPage = () => {
-  const PROXY_MAP_URL = "/live-map/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442";
+  const PROXY_MAP_URL = import.meta.env.DEV
+    ? "http://strawberrysmp.mcplay.fun:25709/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442"
+    : "https://minecraft-map-proxy.jamesbrizuela513.workers.dev/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442";
 
   return (
-    <div className="h-[calc(100vh-10rem)] w-full flex flex-col gap-6">
+    <div className="h-[calc(100vh-6rem)] w-full flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-4">
@@ -13,20 +15,13 @@ const DynaMapPage = () => {
           </div>
           <div>
             <h1 className="text-3xl font-black italic uppercase tracking-tighter">
-              Tactical <span className="text-strawberry-600">Map</span>
+              Live <span className="text-strawberry-600">Map</span>
             </h1>
             <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
               Real-time server satellite imagery active
             </p>
           </div>
         </div>
-
-        <button
-          onClick={() => window.open(PROXY_MAP_URL, '_blank', 'noopener,noreferrer')}
-          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-strawberry-600 transition-colors shadow-md"
-        >
-          <Maximize2 size={14} /> Fullscreen
-        </button>
       </div>
 
       {/* Map iframe */}
