@@ -80,7 +80,7 @@ const TransactionsPage = () => {
 
               <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-neutral-700">
                 <img
-                  src={getMinecraftItemImageUrl(t.shop_items?.minecraft_item_id || 'stone')}
+                  src={getMinecraftItemImageUrl(Array.isArray(t.shop_items) ? t.shop_items[0]?.minecraft_item_id : t.shop_items?.minecraft_item_id || 'stone')}
                   alt=""
                   className="w-8 h-8 object-contain"
                 />
@@ -88,12 +88,15 @@ const TransactionsPage = () => {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
-                  <h3 className="text-lg font-black italic uppercase tracking-tight truncate">{t.shop_items?.item_name || 'Removed Item'}</h3>
+                  <h3 className="text-lg font-black italic uppercase tracking-tight truncate">{Array.isArray(t.shop_items) ? t.shop_items[0]?.item_name : t.shop_items?.item_name || 'Removed Item'}</h3>
                   <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest italic ${t.type === 'buy' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
                     {t.type === 'buy' ? 'PURCHASE' : 'SALE'}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <div className="text-xs font-bold text-neutral-500 mb-2">
+                  Shop: {Array.isArray(t.shop_items) ? t.shop_items[0]?.player_shops?.name : t.shop_items?.player_shops?.name || 'Unknown Shop'} 
+                  | Owner: {Array.isArray(t.shop_items) ? t.shop_items[0]?.player_shops?.profiles?.username : t.shop_items?.player_shops?.profiles?.username || 'Unknown'}
+                </div>                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                   <div className="flex items-center gap-1.5 text-neutral-400">
                     <Calendar size={12} />
                     <span className="text-[10px] font-bold uppercase tracking-tight">
@@ -106,7 +109,6 @@ const TransactionsPage = () => {
                   </div>
                 </div>
               </div>
-
               <div className="flex items-center justify-between sm:justify-end gap-10 pt-4 sm:pt-0 border-t sm:border-0 border-neutral-100 dark:border-white/5">
                 <div className="text-left sm:text-right">
                   <span className="text-[8px] font-black text-neutral-400 block uppercase tracking-widest mb-1">{t.type === 'buy' ? 'Spent' : 'Earned'}</span>

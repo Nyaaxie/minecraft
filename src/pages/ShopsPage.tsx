@@ -3,7 +3,7 @@ import { dbService } from '../services/dbService';
 import type { PlayerShop } from '../types/database.types';
 import { Search, Store, RefreshCw, Edit, Trash2, User } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import { useDebounce } from '../hooks/useDebounce';
@@ -118,6 +118,7 @@ const ShopsPage = () => {
 
   const { user, profile } = useAuthStore();
   const isAdmin = profile?.role === 'admin';
+  const navigate = useNavigate();
 
   const fetchShops = useCallback(async () => {
     try {
@@ -156,6 +157,23 @@ const ShopsPage = () => {
       ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
   });
 
+  const [userShops, setUserShops] = useState<PlayerShop[]>([]);
+  useEffect(() => {
+    if (user) {
+      dbService.getPlayerShopsByOwner(user.id).then(setUserShops);
+    }
+  }, [user]);
+
+  const handleOpenShop = () => {
+    console.log('User shops:', userShops);
+    console.log('isAdmin:', isAdmin);
+    if (userShops.length > 0) {
+      navigate(`/shops/${userShops[0].id}`);
+    } else {
+      navigate('/shops/new');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4 sm:px-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -165,12 +183,12 @@ const ShopsPage = () => {
           </h1>
           <p className="text-neutral-500 max-w-md font-medium uppercase tracking-tight text-sm">Discover unique player-owned shops and find the best deals in the SMP.</p>
         </div>
-        <Link
-          to="/shops/new"
+        <button
+          onClick={handleOpenShop}
           className="px-8 py-4 bg-strawberry-600 text-white rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm shadow-xl shadow-strawberry-600/30 hover:bg-strawberry-700 transition-all active:scale-95 text-center"
         >
-          Open Your Shop
-        </Link>
+          {userShops.length > 0 && !isAdmin ? 'Go to Your Shop' : 'Open Your Shop'}
+        </button>
       </div>
 
       <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-6 lg:p-8 shadow-xl shadow-neutral-900/5 backdrop-blur-sm flex flex-col md:flex-row gap-4">

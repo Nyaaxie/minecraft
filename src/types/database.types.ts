@@ -182,6 +182,7 @@ export interface ShopItem {
   price: number;
   currency: string;
   quantity: number;
+  unit_size: number;
   description: string | null;
   availability_status: 'in_stock' | 'out_of_stock' | 'on_order';
   category_id: string | null;
@@ -209,6 +210,22 @@ export interface ShopTransaction {
   currency: string;
   quantity: number;
   transaction_time: string;
+}
+
+export interface Order {
+  id: string;
+  buyer_id: string;
+  shop_id: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  item_id: string;
+  quantity: number;
 }
 
 export interface Badge {
@@ -314,6 +331,16 @@ export interface Database {
         Row: ShopItem
         Insert: Omit<ShopItem, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<ShopItem, 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<ShopItem>
+      }
+      orders: {
+        Row: Order
+        Insert: Omit<Order, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<Order, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<Order>
+      }
+      order_items: {
+        Row: OrderItem
+        Insert: Omit<OrderItem, 'id'> & Partial<Pick<OrderItem, 'id'>>
+        Update: Partial<OrderItem>
       }
       plugin_categories: {
         Row: PluginCategory

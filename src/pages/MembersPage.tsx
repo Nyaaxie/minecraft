@@ -33,10 +33,12 @@ const MembersPage: React.FC = () => {
       setError(null);
       try {
         const [fetchedProfiles, fetchedBadges] = await Promise.all([
-          dbService.getAllProfiles(),
+          dbService.getAllProfiles(true), // Pass true to include banned users
           dbService.getBadges(), // Fetch all available badges
         ]);
-
+        
+        console.log('Fetched profiles:', fetchedProfiles);
+        
         // Cast fetchedProfiles to ProfileWithBadges[]
         setProfiles(fetchedProfiles as unknown as ProfileWithBadges[]);
         setAllBadges(fetchedBadges);
@@ -106,9 +108,13 @@ const MembersPage: React.FC = () => {
         return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
       }
       if (sortBy === 'badges') {
-        const aBadgeCount = a.user_badges?.length || 0;
-        const bBadgeCount = b.user_badges?.length || 0;
-        return bBadgeCount - aBadgeCount; // More badges first
+        const aBadgeCount = a.user_badges?.filter(ub => ub.badges?.is_visible).length || 0;
+        const bBadgeCount = b.user_badges?.filter(ub => ub.badges?.is_visible).length || 0;
+        // Sort by badge count descending, then by username ascending for stability
+        if (bBadgeCount !== aBadgeCount) {
+          return bBadgeCount - aBadgeCount;
+        }
+        return (a.username || '').localeCompare(b.username || '');
       }
       return 0;
     });

@@ -101,6 +101,17 @@ const NotificationCenter = () => {
     }
   };
 
+  const markAllRead = async () => {
+    if (!user?.id) return;
+    try {
+      await dbService.markAllNotificationsRead(user.id);
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      toast.success('All notifications marked as read');
+    } catch (err) {
+      toast.error('Failed to mark all as read');
+    }
+  };
+
   const unreadSystemCount = notifications.filter(n => !n.is_read).length;
   const totalAlerts = unreadSystemCount + totalUnreadMessages;
 
@@ -158,6 +169,14 @@ const NotificationCenter = () => {
                     </span>
                   )}
                 </div>
+                {unreadSystemCount > 0 && (
+                  <button
+                    onClick={markAllRead}
+                    className="text-[10px] font-black uppercase tracking-widest text-neutral-500 hover:text-strawberry-600 transition-colors"
+                  >
+                    Mark all read
+                  </button>
+                )}
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-1 text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"

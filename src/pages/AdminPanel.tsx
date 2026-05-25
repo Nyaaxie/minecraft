@@ -130,7 +130,7 @@ const AdminPanel = () => {
     setLoading(true);
     try {
       const [p, e, r, rem, b] = await Promise.all([
-        dbService.getAllProfiles() as any,
+        dbService.getAllProfiles(true) as any, // Include banned users
         dbService.getEvents(),
         adminService.getRules(),
         adminService.getReminders(),
@@ -165,9 +165,13 @@ const AdminPanel = () => {
   };
 
   const handleBanToggle = async (profile: Profile) => {
+    const newBanStatus = !profile.is_banned;
     try {
-      await dbService.updateProfile(profile.id, { is_banned: !profile.is_banned });
-      setProfiles(prev => prev.map(p => p.id === profile.id ? { ...p, is_banned: !profile.is_banned } : p));
+      await dbService.updateProfile(profile.id, { 
+        is_banned: newBanStatus,
+        approval_status: newBanStatus ? 'banned' : 'approved' 
+      });
+      setProfiles(prev => prev.map(p => p.id === profile.id ? { ...p, is_banned: newBanStatus, approval_status: newBanStatus ? 'banned' : 'approved' } : p));
       toast.success(`User ${profile.is_banned ? 'unbanned' : 'banned'}!`);
     } catch (err: any) {
       toast.error(`Failed to update ban status: ${err.message}`);

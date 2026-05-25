@@ -60,20 +60,38 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
 
-  const menuItems = [
-    { icon: LayoutDashboard, label: 'Overview', to: '/dashboard' },
-    { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
-    { icon: Puzzle, label: 'Plugins', to: '/plugins' },
-    { icon: Sparkle, label: 'Player Shops', to: '/shops' },
-    { icon: ShoppingBag, label: 'Trade History', to: '/transactions' },
-    { icon: Calendar, label: 'Events', to: '/events' },
-    { icon: MessageSquare, label: 'Messages', to: '/messages', unreadCount: totalUnread },
-    { icon: User, label: 'Profile', to: '/profile' },
-    { icon: UsersRound, label: 'Members', to: '/members' },
+  const menuGroups = [
+    {
+      title: 'Main',
+      items: [
+        { icon: LayoutDashboard, label: 'Overview', to: '/dashboard' },
+        { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
+        { icon: Calendar, label: 'Events', to: '/events' },
+      ]
+    },
+    {
+      title: 'Marketplace',
+      items: [
+        { icon: Puzzle, label: 'Plugins', to: '/plugins' },
+        { icon: Sparkle, label: 'Player Shops', to: '/shops' },
+        { icon: ShoppingBag, label: 'Trade History', to: '/transactions' },
+        { icon: ShoppingBag, label: 'My Orders', to: '/orders' },
+      ]
+    },
+    {
+      title: 'Social',
+      items: [
+        { icon: MessageSquare, label: 'Messages', to: '/messages', unreadCount: totalUnread },
+        { icon: UsersRound, label: 'Members', to: '/members' },
+        { icon: User, label: 'Profile', to: '/profile' },
+      ]
+    }
   ];
-
   if (profile?.role === 'admin') {
-    menuItems.push({ icon: Settings, label: 'Admin Panel', to: '/admin' });
+    menuGroups.push({
+      title: 'Administration',
+      items: [{ icon: Settings, label: 'Admin Panel', to: '/admin' }]
+    });
   }
 
   const handleSignOut = async () => {
@@ -101,15 +119,22 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto pr-2 -mr-2 hide-scrollbar">
-          {menuItems.map((item) => (
-            <SidebarItem
-              key={item.to}
-              icon={item.icon}
-              label={item.label}
-              to={item.to}
-              active={location.pathname === item.to}
-            />
+        <nav className="flex-1 space-y-6 overflow-y-auto pr-2 -mr-2 hide-scrollbar">
+          {menuGroups.map((group) => (
+            <div key={group.title}>
+              <h4 className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-2">{group.title}</h4>
+              <div className="space-y-1">
+                {group.items.map((item) => (
+                  <SidebarItem
+                    key={item.to}
+                    icon={item.icon}
+                    label={item.label}
+                    to={item.to}
+                    active={location.pathname === item.to}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
@@ -189,20 +214,27 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 </span>
               </div>
 
-              <nav className="flex-1 space-y-1 overflow-y-auto hide-scrollbar">
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${location.pathname === item.to
-                      ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30'
-                      : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5'
-                      }`}
-                  >
-                    <item.icon size={22} />
-                    <span className="text-sm font-bold tracking-tight uppercase italic">{item.label}</span>
-                  </Link>
+              <nav className="flex-1 space-y-6 overflow-y-auto hide-scrollbar">
+                {menuGroups.map((group) => (
+                  <div key={group.title}>
+                    <h4 className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-2">{group.title}</h4>
+                    <div className="space-y-1">
+                      {group.items.map((item) => (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${location.pathname === item.to
+                            ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30'
+                            : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5'
+                            }`}
+                        >
+                          <item.icon size={22} />
+                          <span className="text-sm font-bold tracking-tight uppercase italic">{item.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </nav>
 

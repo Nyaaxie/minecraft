@@ -119,7 +119,16 @@ const AdminShopPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (user) { // Only fetch if user is logged in
+      if (user) {
+        // Check for existing shops if creating new
+        if (!id) {
+          const userShops = await dbService.getPlayerShopsByOwner(user.id);
+          if (userShops.length > 0 && !isAdmin) {
+            toast.error('You already own a shop.');
+            navigate(`/shops/${userShops[0].id}`);
+            return;
+          }
+        }
         await fetchShopData();
       } else {
         setLoading(false);
@@ -127,7 +136,7 @@ const AdminShopPage = () => {
       }
     };
     loadData();
-  }, [id, user, fetchShopData]);
+  }, [id, user, fetchShopData, isAdmin, navigate]);
 
   const handleSubmit = async (formData: Omit<PlayerShop, 'id' | 'created_at' | 'updated_at' | 'owner_id'>) => {
     setIsSaving(true);

@@ -3,8 +3,8 @@ import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, Pla
 
 export const dbService = {
   // --- Profiles & Admin ---
-  async getAllProfiles() {
-    const { data, error } = await supabase
+  async getAllProfiles(includeBanned: boolean = false) {
+    let query = supabase
       .from('profiles')
       .select(`
         *,
@@ -16,6 +16,12 @@ export const dbService = {
         )
       `)
       .order('username', { ascending: true });
+    
+    if (!includeBanned) {
+      query = query.eq('is_banned', false);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data;
   },
@@ -176,6 +182,11 @@ export const dbService = {
 
   async markNotificationRead(id: string) {
     const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+    if (error) throw error;
+  },
+
+  async markAllNotificationsRead(profileId: string) {
+    const { error } = await supabase.from('notifications').update({ is_read: true }).eq('profile_id', profileId);
     if (error) throw error;
   },
 
@@ -443,7 +454,7 @@ export const dbService = {
   async getShopTransactionsByBuyer(buyerId: string) {
     const { data, error } = await supabase
       .from('shop_transactions')
-      .select('*, shop_items(item_name, minecraft_item_id)')
+      .select('*, shop_items(item_name, minecraft_item_id, player_shops(name, profiles!owner_id(username)))')
       .eq('buyer_id', buyerId)
       .order('transaction_time', { ascending: false });
     if (error) throw error;
@@ -452,7 +463,7 @@ export const dbService = {
   async getShopTransactionsBySeller(sellerId: string) {
     const { data, error } = await supabase
       .from('shop_transactions')
-      .select('*, shop_items(item_name, minecraft_item_id)')
+      .select('*, shop_items(item_name, minecraft_item_id, player_shops(name, profiles!owner_id(username)))')
       .eq('seller_id', sellerId)
       .order('transaction_time', { ascending: false });
     if (error) throw error;

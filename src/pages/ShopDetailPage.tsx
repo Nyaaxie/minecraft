@@ -3,10 +3,12 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { dbService } from '../services/dbService';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 import type { PlayerShop, ShopItem } from '../types/database.types';
-import { Loader2, Store, Tag, Edit, Banknote, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, X, ShoppingCart } from 'lucide-react';
+import { Loader2, Store, Tag, Edit, Banknote, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, Minus, X, ShoppingCart, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
+import { useCartStore } from '../store/useCartStore';
+import { orderService } from '../services/orderService';
 
 const PurchaseModal = ({
   item,
@@ -77,27 +79,37 @@ const PurchaseModal = ({
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="w-12 h-12 bg-neutral-100 dark:bg-white/5 rounded-xl flex items-center justify-center font-black hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
-                  >-</button>
+                    className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center font-black hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-all active:scale-95 border border-neutral-200 dark:border-white/10"
+                  >
+                    <Minus size={24} />
+                  </button>
                   <input
                     type="number"
                     value={quantity}
                     onChange={(e) => setQuantity(Math.min(item.quantity, Math.max(1, parseInt(e.target.value) || 1)))}
-                    className="flex-1 h-12 bg-neutral-100 dark:bg-white/5 rounded-xl text-center font-black outline-none border border-transparent focus:border-strawberry-500/30 transition-all"
+                    className="flex-1 h-16 bg-white dark:bg-neutral-950 rounded-2xl text-center font-black outline-none border border-neutral-200 dark:border-white/10 focus:border-strawberry-500/50 transition-all text-xl"
                   />
                   <button
                     onClick={() => setQuantity(q => Math.min(item.quantity, q + 1))}
-                    className="w-12 h-12 bg-neutral-100 dark:bg-white/5 rounded-xl flex items-center justify-center font-black hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
-                  >+</button>
+                    className="w-16 h-16 bg-strawberry-600 text-white rounded-2xl flex items-center justify-center font-black hover:bg-strawberry-700 transition-all active:scale-95 shadow-lg shadow-strawberry-600/20"
+                  >
+                    <Plus size={24} />
+                  </button>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-neutral-100 dark:border-white/5 space-y-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-black uppercase tracking-widest text-neutral-400">Total Valuation</span>
-                  <div className="flex items-center gap-2">
-                    <Banknote size={16} className="text-strawberry-600" />
-                    <span className="text-2xl font-black italic uppercase tracking-tighter">{totalPrice} {item.currency}</span>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block">Total Items</span>
+                    <span className="text-sm font-bold">{quantity * item.unit_size} items ({quantity} units x {item.unit_size})</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block">Total Price</span>
+                    <div className="flex items-center justify-end gap-2">
+                      <Banknote size={16} className="text-strawberry-600" />
+                      <span className="text-2xl font-black italic uppercase tracking-tighter">{totalPrice} {item.currency}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -118,13 +130,14 @@ const PurchaseModal = ({
   );
 };
 
-const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, isBuying }: {
+const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, addToCart, isBuying }: {
   item: ShopItem,
   canManage: boolean,
   isOwner: boolean,
   onEdit: (id: string) => void,
   onDelete: (id: string) => void,
   onPurchase: (item: ShopItem) => void,
+  addToCart: (item: ShopItem) => void,
   isBuying: boolean
 }) => {
   const itemImageUrl = getMinecraftItemImageUrl(item.minecraft_item_id, { size: 64 });
@@ -137,12 +150,9 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, 
       viewport={{ once: true }}
       className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl shadow-neutral-900/5 flex flex-col group hover:border-strawberry-500/30 hover:shadow-strawberry-500/10 transition-all duration-300 relative h-full"
     >
-      {/* Hover glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-strawberry-500/0 via-transparent to-strawberry-500/0 group-hover:from-strawberry-500/5 transition-all duration-500 pointer-events-none rounded-3xl" />
 
-      {/* Card Header */}
       <div className="relative p-5 pb-4">
-        {/* Manage buttons - absolutely positioned top-right */}
         {canManage && (
           <div className="absolute top-4 right-4 flex gap-1.5 z-10">
             <button
@@ -163,7 +173,6 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, 
         )}
 
         <div className="flex items-center gap-3">
-          {/* Item image */}
           <div className="w-[4.5rem] h-[4.5rem] bg-neutral-100 dark:bg-neutral-800/80 rounded-2xl flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-white/5 shadow-inner group-hover:scale-105 transition-transform duration-500 shrink-0">
             <img
               src={itemImageUrl}
@@ -173,35 +182,30 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, 
             />
           </div>
 
-          {/* Name + stock — padded right so text never slides under the buttons */}
           <div className={`flex-1 min-w-0 ${canManage ? 'pr-20' : ''}`}>
             <h3 className="text-sm font-black italic uppercase tracking-tight leading-tight group-hover:text-strawberry-600 transition-colors truncate">
               {item.item_name}
             </h3>
             <div className="flex items-center gap-1.5 mt-1.5">
               <Package size={11} className="text-neutral-400 shrink-0" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                {item.quantity} Available
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                {item.quantity} Quantity
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Divider */}
       <div className="h-px bg-neutral-100 dark:bg-white/5 mx-5" />
 
-      {/* Description */}
       <div className="px-5 py-4 flex-grow">
         <p className="text-xs text-neutral-500 dark:text-neutral-400 italic leading-relaxed line-clamp-2">
           "{item.description || 'No description provided.'}"
         </p>
       </div>
 
-      {/* Footer */}
       <div className="px-5 pb-5 flex flex-col gap-3 mt-auto">
         <div className="flex items-center gap-2">
-          {/* Price badge */}
           <div className="flex items-center gap-1.5 px-3.5 py-2 bg-strawberry-600 text-white rounded-xl shadow-lg shadow-strawberry-600/25 shrink-0">
             <Banknote size={13} />
             <span className="text-[11px] font-black italic uppercase tracking-widest">
@@ -209,7 +213,6 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, 
             </span>
           </div>
 
-          {/* Category badge */}
           <div className="flex items-center gap-1.5 px-3 py-2 bg-neutral-100 dark:bg-white/5 rounded-xl border border-neutral-200/50 dark:border-white/5 min-w-0">
             <Tag size={10} className="text-neutral-400 shrink-0" />
             <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 truncate">
@@ -219,19 +222,92 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, 
         </div>
 
         {!isOwner && (
-          <button
-            onClick={() => onPurchase(item)}
-            disabled={isBuying || item.quantity <= 0}
-            className="w-full py-2.5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 rounded-xl font-black italic uppercase tracking-widest text-[10px] hover:bg-strawberry-600 dark:hover:bg-strawberry-600 hover:text-white dark:hover:text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
-          >
-            {isBuying ? <Loader2 size={13} className="animate-spin" /> : <Banknote size={13} />}
-            {item.quantity <= 0 ? 'Out of Stock' : 'Secure Purchase'}
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => addToCart(item)}
+              disabled={item.quantity <= 0}
+              className="py-2.5 bg-neutral-100 dark:bg-white/5 text-neutral-900 dark:text-white rounded-xl font-black italic uppercase tracking-widest text-[10px] hover:bg-strawberry-100 dark:hover:bg-strawberry-900/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+            >
+              <ShoppingCart size={13} /> Add
+            </button>
+            <button
+              onClick={() => onPurchase(item)}
+              disabled={isBuying || item.quantity <= 0}
+              className="py-2.5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 rounded-xl font-black italic uppercase tracking-widest text-[10px] hover:bg-strawberry-600 dark:hover:bg-strawberry-600 hover:text-white dark:hover:text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+            >
+              {isBuying ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+              {item.quantity <= 0 ? 'Out of Stock' : 'Secure'}
+            </button>
+          </div>
         )}
       </div>
     </motion.div>
   );
 };
+
+const CartSidebar = () => {
+  const { items, removeFromCart, increaseQuantity, decreaseQuantity, clearCart } = useCartStore();
+  const { user } = useAuthStore();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const navigate = useNavigate();
+
+  const handlePlaceOrder = async () => {
+    if (!user || items.length === 0) return;
+    setIsProcessing(true);
+    try {
+      // Assuming all items are from the same shop for this implementation
+      const shopId = items[0].shop_id;
+      const orderItems = items.map(item => ({ itemId: item.id, quantity: item.cartQuantity }));
+      await orderService.createOrder(user.id, shopId, orderItems);
+      toast.success('Order placed successfully!');
+      clearCart();
+      navigate('/orders');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to place order');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (items.length === 0) return null;
+
+  return (
+    <motion.div
+      initial={{ x: '100%' }}
+      animate={{ x: 0 }}
+      className="fixed right-6 bottom-6 w-96 bg-white dark:bg-neutral-900 rounded-[2rem] shadow-2xl border border-neutral-200 dark:border-white/10 p-6 z-50 max-h-[80vh] flex flex-col"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-black italic uppercase tracking-tighter text-xl">Your Cart</h3>
+        <button onClick={clearCart} className="text-xs text-red-500 font-bold uppercase tracking-widest">Clear</button>
+      </div>
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+        {items.map(item => (
+          <div key={item.id} className="flex items-center gap-4 bg-neutral-50 dark:bg-neutral-800 p-3 rounded-xl">
+            <div className="flex flex-col gap-1 items-center">
+               <button onClick={() => increaseQuantity(item.id)} className="text-strawberry-600"><Plus size={12}/></button>
+               <span className="text-xs font-bold">{item.cartQuantity}</span>
+               <button onClick={() => decreaseQuantity(item.id)} className="text-strawberry-600"><Minus size={12}/></button>
+            </div>
+            <span className="flex-1 text-sm truncate">{item.item_name}</span>
+            <span className="text-xs font-black italic">{item.price * item.cartQuantity} {item.currency}</span>
+            <button onClick={() => removeFromCart(item.id)} className="text-neutral-400 hover:text-red-500"><X size={14}/></button>
+          </div>
+        ))}
+      </div>
+      <button 
+        onClick={handlePlaceOrder}
+        disabled={isProcessing}
+        className="w-full py-4 bg-strawberry-600 text-white rounded-xl font-black italic uppercase tracking-widest text-sm shadow-lg shadow-strawberry-600/30"
+      >
+        {isProcessing ? 'Processing...' : 'Place Order'}
+      </button>
+    </motion.div>
+  );
+};
+
+// ... (rest of the ShopDetailPage component stays mostly same, just add CartSidebar)
 
 const ShopDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -387,6 +463,11 @@ const ShopDetailPage = () => {
               <Link to={`/shops/edit/${shop.id}`} className="px-5 py-3 bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-300 rounded-xl flex items-center gap-2 font-black italic uppercase tracking-widest text-[10px] transition-all">
                 <Edit size={14} /> Update
               </Link>
+              {isOwner && (
+                <Link to={`/shops/${shop.id}/orders`} className="px-5 py-3 bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-300 rounded-xl flex items-center gap-2 font-black italic uppercase tracking-widest text-[10px] transition-all">
+                  <Package size={14} /> Manage Orders
+                </Link>
+              )}
               <button
                 onClick={handleDeleteShop}
                 className="px-5 py-3 bg-neutral-100 dark:bg-white/5 hover:bg-red-500/10 hover:text-red-600 text-neutral-600 dark:text-neutral-300 rounded-xl flex items-center gap-2 font-black italic uppercase tracking-widest text-[10px] transition-all"
@@ -446,6 +527,7 @@ const ShopDetailPage = () => {
                 onEdit={(id) => navigate(`/shops/${shop.id}/items/edit/${id}`)}
                 onDelete={handleDeleteItem}
                 onPurchase={initiatePurchase}
+                addToCart={() => useCartStore.getState().addToCart(item)}
                 isBuying={buyingId === item.id}
               />
             ))}
@@ -460,6 +542,7 @@ const ShopDetailPage = () => {
         onConfirm={handlePurchaseConfirm}
         isProcessing={!!buyingId}
       />
+      <CartSidebar />
     </div>
   );
 };

@@ -34,6 +34,7 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
   const [price, setPrice] = useState(item?.price.toString() || '');
   const [currency, setCurrency] = useState(item?.currency || 'diamond');
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1');
+  const [unitSize, setUnitSize] = useState(item?.unit_size?.toString() || '1');
   const [description, setDescription] = useState(item?.description || '');
   const [availabilityStatus, setAvailabilityStatus] = useState(item?.availability_status || 'in_stock');
   const [categoryId, setCategoryId] = useState(item?.category_id || '');
@@ -51,6 +52,7 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
       price: parseFloat(price),
       currency,
       quantity: parseInt(quantity),
+      unit_size: parseInt(unitSize),
       description,
       availability_status: availabilityStatus as ShopItem['availability_status'],
       category_id: categoryId || null,
@@ -135,6 +137,18 @@ const AdminShopItemForm = ({ item, shopCategories, onSubmit, onCancel, isSaving 
           id="quantity"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
+          className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
+          required
+          min="1"
+        />
+      </div>
+      <div>
+        <label htmlFor="unitSize" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Items per Unit</label>
+        <input
+          type="number"
+          id="unitSize"
+          value={unitSize}
+          onChange={(e) => setUnitSize(e.target.value)}
           className="w-full px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
           required
           min="1"
