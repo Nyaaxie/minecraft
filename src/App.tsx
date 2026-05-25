@@ -42,7 +42,6 @@ const LoadingScreen = () => (
 
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
   const { user, profile, loading, signOut } = useAuthStore();
-  const [profileFetchFailed, setProfileFetchFailed] = React.useState(false);
   
   console.log('ProtectedRoute state:', { hasUser: !!user, hasProfile: !!profile, loading });
   
