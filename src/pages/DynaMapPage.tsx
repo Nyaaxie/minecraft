@@ -14,7 +14,7 @@ const DynaMapPage = () => {
           Due to security restrictions, the map must be opened in a new secure window.
         </p>
       </div>
-      <button 
+      <button
         onClick={() => window.open(DYNAMAP_URL, '_blank', 'noopener,noreferrer')}
         className="px-8 py-4 bg-strawberry-600 text-white rounded-2xl font-black hover:bg-strawberry-700 transition-all shadow-xl shadow-strawberry-600/20 active:scale-95 italic uppercase"
       >
@@ -23,5 +23,6 @@ const DynaMapPage = () => {
     </div>
   );
 };
+
 
 export default DynaMapPage;
