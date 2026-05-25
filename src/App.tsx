@@ -26,7 +26,8 @@ const ShopDetailPage = lazy(() => import('./pages/ShopDetailPage'));
 const AdminShopPage = lazy(() => import('./pages/AdminShopPage'));
 const AdminShopItemPage = lazy(() => import('./pages/AdminShopItemPage'));
 const AdminCategoriesPage = lazy(() => import('./pages/AdminCategoriesPage'));
-const MembersPage = lazy(() => import('./pages/MembersPage')); // New Import
+const MembersPage = lazy(() => import('./pages/MembersPage'));
+const TransactionsPage = lazy(() => import('./pages/TransactionsPage'));
 
 import DashboardLayout from './components/DashboardLayout';
 
@@ -40,7 +41,8 @@ const LoadingScreen = () => (
 );
 
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
-  const { user, profile, loading } = useAuthStore();
+  const { user, profile, loading, signOut } = useAuthStore();
+  const [profileFetchFailed, setProfileFetchFailed] = React.useState(false);
   
   console.log('ProtectedRoute state:', { hasUser: !!user, hasProfile: !!profile, loading });
   
@@ -50,8 +52,18 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   // 2. If no user, definitely go to login
   if (!user) return <Navigate to="/login" replace />;
   
-  // 3. If user is logged in, but profile isn't loaded yet, keep loading
-  if (!profile) return <LoadingScreen />;
+  // 3. If user is logged in, but profile isn't loaded yet, we need to check if it's still loading or if it failed
+  if (!profile) {
+    // If we've finished initializing but still have no profile, it means the profile doesn't exist (DB Reset?)
+    // To prevent infinite hang, sign out and redirect to home.
+    setTimeout(() => {
+      if (!profile) {
+        console.error('ProtectedRoute: Profile missing for user. Signing out to clear session.');
+        signOut();
+      }
+    }, 2000);
+    return <LoadingScreen />;
+  }
   
   // 4. Now that we have a user and profile, check roles
   if (adminOnly && profile.role !== 'admin') return <Navigate to="/dashboard" replace />;
@@ -96,6 +108,7 @@ function App() {
               <Route path="/shops/edit/:id" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/shops/:shopId/items/new" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/shops/:shopId/items/edit/:itemId" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/transactions" element={<ProtectedRoute><DashboardLayout><TransactionsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/events" element={<ProtectedRoute><DashboardLayout><EventsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><DashboardLayout><MessagesPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><NotificationsPage /></DashboardLayout></ProtectedRoute>} />

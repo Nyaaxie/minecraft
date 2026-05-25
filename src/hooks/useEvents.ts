@@ -36,16 +36,17 @@ export const useEvents = () => {
   useEffect(() => {
     fetchEvents();
 
-    // Subscribe to changes
+    // Subscribe to changes with a unique channel name to avoid collisions
+    const channelId = `events-changes:${Math.random().toString(36).substring(7)}`;
     const subscription = supabase
-      .channel('public:events')
+      .channel(channelId)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
         fetchEvents();
       })
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(subscription);
     };
   }, []);
 

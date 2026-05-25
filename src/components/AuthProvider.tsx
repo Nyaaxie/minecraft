@@ -22,14 +22,61 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── Fetch profile helper (reused in both init and auth-change listener) ──
   const fetchAndSetProfile = useCallback(async (userId: string) => {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    if (profile) setProfile(profile as Profile);
-    return profile;
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error || !profile) {
+        console.warn('AuthProvider: Profile not found in database.');
+        setProfile(null);
+        return null;
+      }
+
+      setProfile(profile as Profile);
+      return profile;
+    } catch (err) {
+      console.error('AuthProvider: Profile fetch error', err);
+      setProfile(null);
+      return null;
+    }
   }, [setProfile]);
+
+  // ── Update online status ─────────────────────────────────────────────
+  const updateStatus = useCallback(async (status: 'online' | 'offline') => {
+    if (!user?.id) return;
+    try {
+      await supabase
+        .from('profiles')
+        .update({ 
+          status, 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', user.id);
+    } catch (err) {
+      console.error('AuthProvider: status update error', err);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      updateStatus('online');
+
+      // Set offline when the tab is closed or user navigates away
+      const handleBeforeUnload = () => {
+        updateStatus('offline');
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      
+      return () => {
+        updateStatus('offline');
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [user, updateStatus]);
 
   useEffect(() => {
     // ── 1. Auth state change listener ────────────────────────────────────

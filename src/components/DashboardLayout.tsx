@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Calendar,
   MessageSquare,
-  Bell,
   User,
   Settings,
   LogOut,
@@ -17,15 +16,15 @@ import {
   Map as MapIcon,
   Puzzle,
   Sparkle,
-  UsersRound
+  UsersRound,
+  ShoppingBag
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, label: string, to: string, active: boolean, onClick?: () => void }) => {
   const unreadCounts = useChatStore((state) => state.unreadCounts);
-  
-  // Calculate unread count specifically for this item if it's the messages link
-  const count = to === '/messages' 
+
+  const count = to === '/messages'
     ? Object.values(unreadCounts).reduce((sum, c) => sum + c, 0)
     : 0;
 
@@ -54,12 +53,11 @@ const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, la
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { profile, signOut } = useAuthStore();
   const unreadCounts = useChatStore((state) => state.unreadCounts);
-  
+
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
-  // Calculate total unread messages
   const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
 
   const menuItems = [
@@ -67,9 +65,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
     { icon: Puzzle, label: 'Plugins', to: '/plugins' },
     { icon: Sparkle, label: 'Player Shops', to: '/shops' },
+    { icon: ShoppingBag, label: 'Trade History', to: '/transactions' },
     { icon: Calendar, label: 'Events', to: '/events' },
     { icon: MessageSquare, label: 'Messages', to: '/messages', unreadCount: totalUnread },
-    { icon: Bell, label: 'Notifications', to: '/notifications' },
     { icon: User, label: 'Profile', to: '/profile' },
     { icon: UsersRound, label: 'Members', to: '/members' },
   ];
@@ -87,16 +85,20 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans selection:bg-strawberry-500/30">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-72 flex-col border-r border-neutral-200 dark:border-white/5 bg-white/80 dark:bg-neutral-900/50 backdrop-blur-xl p-6 fixed h-screen z-50 transition-all duration-300">
-        <div className="flex items-center gap-4 px-2 py-4 mb-8">
+        {/* Logo row */}
+        <div className="flex items-center gap-3 px-2 py-4 mb-8">
           <motion.div
             whileHover={{ rotate: 15 }}
-            className="p-2.5 bg-strawberry-600 rounded-2xl text-white shadow-lg shadow-strawberry-600/30 flex items-center justify-center"
+            className="p-2.5 bg-strawberry-600 rounded-2xl text-white shadow-lg shadow-strawberry-600/30 flex items-center justify-center shrink-0"
           >
             <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
           </motion.div>
-          <span className="text-2xl font-black tracking-tighter italic uppercase">
+          <span className="text-base font-black tracking-tighter italic uppercase flex-1 min-w-0">
             Strawberry<span className="text-strawberry-600 font-black">SMP</span>
           </span>
+          <div className="hidden lg:flex items-center shrink-0 -mr-1">
+            <NotificationCenter />
+          </div>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto pr-2 -mr-2 hide-scrollbar">

@@ -29,8 +29,9 @@ export const useMinecraftVersions = () => {
   useEffect(() => {
     fetchVersions();
 
+    const channelId = `minecraft-versions:${Math.random().toString(36).substring(7)}`;
     const channel = supabase
-      .channel('public:minecraft_versions')
+      .channel(channelId)
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'minecraft_versions' },
         (_payload) => {
@@ -41,7 +42,7 @@ export const useMinecraftVersions = () => {
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, []);
 

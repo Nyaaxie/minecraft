@@ -3,16 +3,129 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { dbService } from '../services/dbService';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 import type { PlayerShop, ShopItem } from '../types/database.types';
-import { Loader2, Store, Tag, Edit, Banknote, Package, ArrowLeft, Trash2, User, AlertCircle, Plus } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Loader2, Store, Tag, Edit, Banknote, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, X, ShoppingCart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
 
-const ShopItemCard = ({ item, canManage, onEdit, onDelete }: { 
-  item: ShopItem, 
+const PurchaseModal = ({
+  item,
+  isOpen,
+  onClose,
+  onConfirm,
+  isProcessing
+}: {
+  item: ShopItem | null,
+  isOpen: boolean,
+  onClose: () => void,
+  onConfirm: (quantity: number) => void,
+  isProcessing: boolean
+}) => {
+  const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    if (isOpen) setQuantity(1);
+  }, [isOpen]);
+
+  if (!item) return null;
+
+  const totalPrice = item.price * quantity;
+  const itemImageUrl = getMinecraftItemImageUrl(item.minecraft_item_id, { size: 64 });
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-neutral-950/60 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative w-full max-w-md bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-2xl border border-neutral-200 dark:border-white/5 overflow-hidden"
+          >
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-strawberry-600" />
+
+            <div className="p-8 space-y-8">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-black italic uppercase tracking-tighter">Confirm Purchase</h3>
+                <button onClick={onClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-white/5 rounded-xl transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-6 p-5 bg-neutral-50 dark:bg-white/5 rounded-3xl border border-neutral-100 dark:border-white/5">
+                <div className="w-20 h-20 bg-white dark:bg-neutral-800 rounded-2xl flex items-center justify-center border border-neutral-200 dark:border-white/5 shadow-sm shrink-0">
+                  <img src={itemImageUrl} alt={item.item_name} className="w-12 h-12 object-contain drop-shadow-lg" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-lg font-black italic uppercase tracking-tight truncate">{item.item_name}</h4>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">{item.price} {item.currency} per unit</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-end">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-1">Quantity to Purchase</label>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 px-1">{item.quantity} in stock</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    className="w-12 h-12 bg-neutral-100 dark:bg-white/5 rounded-xl flex items-center justify-center font-black hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
+                  >-</button>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Math.min(item.quantity, Math.max(1, parseInt(e.target.value) || 1)))}
+                    className="flex-1 h-12 bg-neutral-100 dark:bg-white/5 rounded-xl text-center font-black outline-none border border-transparent focus:border-strawberry-500/30 transition-all"
+                  />
+                  <button
+                    onClick={() => setQuantity(q => Math.min(item.quantity, q + 1))}
+                    className="w-12 h-12 bg-neutral-100 dark:bg-white/5 rounded-xl flex items-center justify-center font-black hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
+                  >+</button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-neutral-100 dark:border-white/5 space-y-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-black uppercase tracking-widest text-neutral-400">Total Valuation</span>
+                  <div className="flex items-center gap-2">
+                    <Banknote size={16} className="text-strawberry-600" />
+                    <span className="text-2xl font-black italic uppercase tracking-tighter">{totalPrice} {item.currency}</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onConfirm(quantity)}
+                  disabled={isProcessing}
+                  className="w-full py-5 bg-strawberry-600 hover:bg-strawberry-700 text-white rounded-2xl font-black italic uppercase tracking-widest text-xs shadow-xl shadow-strawberry-600/30 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                >
+                  {isProcessing ? <Loader2 size={18} className="animate-spin" /> : <ShoppingCart size={18} />}
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, isBuying }: {
+  item: ShopItem,
   canManage: boolean,
+  isOwner: boolean,
   onEdit: (id: string) => void,
-  onDelete: (id: string) => void 
+  onDelete: (id: string) => void,
+  onPurchase: (item: ShopItem) => void,
+  isBuying: boolean
 }) => {
   const itemImageUrl = getMinecraftItemImageUrl(item.minecraft_item_id, { size: 64 });
   const categoryName = (item.shop_categories as { name: string } | null)?.name || 'Uncategorized';
@@ -22,59 +135,99 @@ const ShopItemCard = ({ item, canManage, onEdit, onDelete }: {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2rem] p-6 shadow-xl shadow-neutral-900/5 flex flex-col group hover:border-strawberry-500/30 transition-all relative overflow-hidden h-full"
+      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl shadow-neutral-900/5 flex flex-col group hover:border-strawberry-500/30 hover:shadow-strawberry-500/10 transition-all duration-300 relative h-full"
     >
-      <div className="absolute top-0 right-0 w-24 h-24 bg-strawberry-500/5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
-      
-      <div className="flex items-start justify-between w-full mb-6 relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center overflow-hidden border-2 border-white dark:border-neutral-900 shadow-md group-hover:scale-110 transition-transform duration-500">
-            <img 
-              src={itemImageUrl} 
-              alt={item.item_name} 
-              className="w-10 h-10 object-contain drop-shadow-lg"
-              onError={(e) => { e.currentTarget.src = 'https://api.minecraftitems.xyz/api/item/stone?size=64'; }} 
-            />
-          </div>
-          <div>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter leading-none group-hover:text-strawberry-600 transition-colors">{item.item_name}</h3>
-            <div className="flex items-center gap-1.5 mt-2">
-              <Package size={12} className="text-neutral-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">{item.quantity} available</span>
-            </div>
-          </div>
-        </div>
+      {/* Hover glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-strawberry-500/0 via-transparent to-strawberry-500/0 group-hover:from-strawberry-500/5 transition-all duration-500 pointer-events-none rounded-3xl" />
+
+      {/* Card Header */}
+      <div className="relative p-5 pb-4">
+        {/* Manage buttons - absolutely positioned top-right */}
         {canManage && (
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all -translate-y-2 group-hover:translate-y-0">
-            <button 
+          <div className="absolute top-4 right-4 flex gap-1.5 z-10">
+            <button
               onClick={() => onEdit(item.id)}
-              className="p-2 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-strawberry-600 transition-all shadow-sm"
+              className="p-2 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-400 hover:text-strawberry-600 hover:bg-strawberry-50 dark:hover:bg-strawberry-500/10 transition-all"
               title="Edit Item"
             >
-              <Edit size={14} />
+              <Edit size={13} />
             </button>
-            <button 
+            <button
               onClick={() => onDelete(item.id)}
-              className="p-2 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-500 hover:text-red-600 transition-all shadow-sm"
+              className="p-2 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
               title="Delete Item"
             >
-              <Trash2 size={14} />
+              <Trash2 size={13} />
             </button>
           </div>
         )}
+
+        <div className="flex items-center gap-3">
+          {/* Item image */}
+          <div className="w-[4.5rem] h-[4.5rem] bg-neutral-100 dark:bg-neutral-800/80 rounded-2xl flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-white/5 shadow-inner group-hover:scale-105 transition-transform duration-500 shrink-0">
+            <img
+              src={itemImageUrl}
+              alt={item.item_name}
+              className="w-11 h-11 object-contain drop-shadow-lg"
+              onError={(e) => { e.currentTarget.src = 'https://api.minecraftitems.xyz/api/item/stone?size=64'; }}
+            />
+          </div>
+
+          {/* Name + stock — padded right so text never slides under the buttons */}
+          <div className={`flex-1 min-w-0 ${canManage ? 'pr-20' : ''}`}>
+            <h3 className="text-sm font-black italic uppercase tracking-tight leading-tight group-hover:text-strawberry-600 transition-colors truncate">
+              {item.item_name}
+            </h3>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <Package size={11} className="text-neutral-400 shrink-0" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                {item.quantity} Available
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8 italic line-clamp-2 leading-relaxed flex-grow">"{item.description || 'Accessing product specifications...'}"</p>
-      
-      <div className="flex justify-between items-center w-full pt-6 border-t border-neutral-100 dark:border-white/5 mt-auto relative z-10">
-        <div className="flex items-center gap-2 px-4 py-2 bg-strawberry-600 text-white rounded-xl shadow-lg shadow-strawberry-600/20">
-          <Banknote size={14} />
-          <span className="text-xs font-black italic uppercase tracking-widest">{item.price} {item.currency}</span>
+      {/* Divider */}
+      <div className="h-px bg-neutral-100 dark:bg-white/5 mx-5" />
+
+      {/* Description */}
+      <div className="px-5 py-4 flex-grow">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 italic leading-relaxed line-clamp-2">
+          "{item.description || 'No description provided.'}"
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div className="px-5 pb-5 flex flex-col gap-3 mt-auto">
+        <div className="flex items-center gap-2">
+          {/* Price badge */}
+          <div className="flex items-center gap-1.5 px-3.5 py-2 bg-strawberry-600 text-white rounded-xl shadow-lg shadow-strawberry-600/25 shrink-0">
+            <Banknote size={13} />
+            <span className="text-[11px] font-black italic uppercase tracking-widest">
+              {item.price} {item.currency}
+            </span>
+          </div>
+
+          {/* Category badge */}
+          <div className="flex items-center gap-1.5 px-3 py-2 bg-neutral-100 dark:bg-white/5 rounded-xl border border-neutral-200/50 dark:border-white/5 min-w-0">
+            <Tag size={10} className="text-neutral-400 shrink-0" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 truncate">
+              {categoryName}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg border border-transparent group-hover:border-neutral-200 dark:group-hover:border-white/5 transition-all">
-          <Tag size={10} className="text-neutral-400" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 truncate max-w-[80px]">{categoryName}</span>
-        </div>
+
+        {!isOwner && (
+          <button
+            onClick={() => onPurchase(item)}
+            disabled={isBuying || item.quantity <= 0}
+            className="w-full py-2.5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 rounded-xl font-black italic uppercase tracking-widest text-[10px] hover:bg-strawberry-600 dark:hover:bg-strawberry-600 hover:text-white dark:hover:text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+          >
+            {isBuying ? <Loader2 size={13} className="animate-spin" /> : <Banknote size={13} />}
+            {item.quantity <= 0 ? 'Out of Stock' : 'Secure Purchase'}
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -86,6 +239,9 @@ const ShopDetailPage = () => {
   const [shop, setShop] = useState<(PlayerShop & { profiles: { username: string; avatar_url: string } | null }) | null>(null);
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [buyingId, setBuyingId] = useState<string | null>(null);
+  const [selectedItemForPurchase, setSelectedItemForPurchase] = useState<ShopItem | null>(null);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user, profile } = useAuthStore();
   const isAdmin = profile?.role === 'admin';
@@ -127,6 +283,32 @@ const ShopDetailPage = () => {
     } catch (err) {
       console.error('Error deleting item:', err);
       toast.error('Failed to delete item.');
+    }
+  };
+
+  const initiatePurchase = (item: ShopItem) => {
+    if (!user) {
+      toast.error('You must be logged in to make a purchase.');
+      return;
+    }
+    setSelectedItemForPurchase(item);
+    setIsPurchaseModalOpen(true);
+  };
+
+  const handlePurchaseConfirm = async (quantity: number) => {
+    if (!selectedItemForPurchase || !user) return;
+
+    try {
+      setBuyingId(selectedItemForPurchase.id);
+      await dbService.purchaseItem(selectedItemForPurchase.id, user.id, quantity);
+      toast.success(`Purchase successful! ${quantity}x ${selectedItemForPurchase.item_name} secured.`);
+      setIsPurchaseModalOpen(false);
+      fetchShopData();
+    } catch (err: any) {
+      console.error('Error purchasing item:', err);
+      toast.error(err.message || 'Failed to process purchase.');
+    } finally {
+      setBuyingId(null);
     }
   };
 
@@ -172,7 +354,7 @@ const ShopDetailPage = () => {
         className="space-y-12"
       >
         <Link to="/shops" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group">
-          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           Back to marketplace
         </Link>
 
@@ -205,7 +387,7 @@ const ShopDetailPage = () => {
               <Link to={`/shops/edit/${shop.id}`} className="px-5 py-3 bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-300 rounded-xl flex items-center gap-2 font-black italic uppercase tracking-widest text-[10px] transition-all">
                 <Edit size={14} /> Update
               </Link>
-              <button 
+              <button
                 onClick={handleDeleteShop}
                 className="px-5 py-3 bg-neutral-100 dark:bg-white/5 hover:bg-red-500/10 hover:text-red-600 text-neutral-600 dark:text-neutral-300 rounded-xl flex items-center gap-2 font-black italic uppercase tracking-widest text-[10px] transition-all"
               >
@@ -217,7 +399,7 @@ const ShopDetailPage = () => {
             </div>
           )}
         </div>
-        
+
         <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 p-8 rounded-[2.5rem] shadow-xl shadow-neutral-900/5 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 bg-strawberry-600 h-full" />
           <p className="text-neutral-600 dark:text-neutral-400 text-lg leading-relaxed italic max-w-4xl">
@@ -229,7 +411,7 @@ const ShopDetailPage = () => {
       <div className="mt-20 space-y-10">
         <div className="flex items-center justify-between px-2">
           <h2 className="text-3xl font-black italic uppercase tracking-tighter flex items-center gap-4">
-            <Package className="text-strawberry-600" /> 
+            <Package className="text-strawberry-600" />
             Live Inventory
           </h2>
           <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-xl shadow-md">
@@ -254,19 +436,30 @@ const ShopDetailPage = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 lg:gap-8">
             {shopItems.map(item => (
-              <ShopItemCard 
-                key={item.id} 
-                item={item} 
+              <ShopItemCard
+                key={item.id}
+                item={item}
                 canManage={canManageShop}
+                isOwner={isOwner}
                 onEdit={(id) => navigate(`/shops/${shop.id}/items/edit/${id}`)}
                 onDelete={handleDeleteItem}
+                onPurchase={initiatePurchase}
+                isBuying={buyingId === item.id}
               />
             ))}
           </div>
         )}
       </div>
+
+      <PurchaseModal
+        item={selectedItemForPurchase}
+        isOpen={isPurchaseModalOpen}
+        onClose={() => setIsPurchaseModalOpen(false)}
+        onConfirm={handlePurchaseConfirm}
+        isProcessing={!!buyingId}
+      />
     </div>
   );
 };

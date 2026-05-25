@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../services/supabase';
 import { dbService } from '../services/dbService';
 import type { Profile, Badge } from '../types/database.types'; // Import Badge type
 import { User, Search, Ghost, Blocks, Palette, MonitorPlay, UsersRound, Loader2, Users, AlertCircle } from 'lucide-react'; // Removed unused icons
@@ -48,6 +49,25 @@ const MembersPage: React.FC = () => {
     };
 
     fetchAllData();
+
+    // Subscribe to realtime profile changes (status, etc.)
+    const channelId = `profiles-status:${Math.random().toString(36).substring(7)}`;
+    const subscription = supabase
+      .channel(channelId)
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'profiles' 
+      }, (payload) => {
+        setProfiles(current => 
+          current.map(p => p.id === payload.new.id ? { ...p, ...payload.new } : p)
+        );
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, []);
 
   const filteredAndSortedProfiles = profiles

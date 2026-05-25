@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { supabase } from '../services/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 import { useEvents } from '../hooks/useEvents';
 import { dbService } from '../services/dbService';
@@ -84,7 +85,25 @@ const DashboardPage = () => {
       }
     };
     fetchData();
-    return () => { isMounted = false; };
+
+    // Realtime subscription for online status
+    const channelId = `profiles-stats:${Math.random().toString(36).substring(7)}`;
+    const subscription = supabase
+      .channel(channelId)
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'profiles' 
+      }, () => {
+        // Simple approach: re-fetch profiles or just adjust counts
+        fetchData(); 
+      })
+      .subscribe();
+
+    return () => { 
+      isMounted = false; 
+      supabase.removeChannel(subscription);
+    };
   }, []);
 
   const handleDeleteEvent = async (id: string) => {

@@ -416,22 +416,47 @@ export const dbService = {
 
   // --- Shop Transactions ---
   async getShopTransactions() {
-    const { data, error } = await supabase.from('shop_transactions').select('*').order('transaction_time', { ascending: false });
+    const { data, error } = await supabase.from('shop_transactions').select(`
+      *,
+      shop_items(item_name, minecraft_item_id),
+      buyer:profiles!buyer_id(username),
+      seller:profiles!seller_id(username)
+    `).order('transaction_time', { ascending: false });
     if (error) throw error;
     return data;
   },
+
+  async purchaseItem(itemId: string, buyerId: string, quantity: number = 1) {
+    const { data, error } = await supabase.rpc('purchase_shop_item', {
+      p_item_id: itemId,
+      p_buyer_id: buyerId,
+      p_quantity: quantity
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
   async getShopTransactionById(id: string) {
     const { data, error } = await supabase.from('shop_transactions').select('*').eq('id', id).single();
     if (error) throw error;
     return data;
   },
   async getShopTransactionsByBuyer(buyerId: string) {
-    const { data, error } = await supabase.from('shop_transactions').select('*').eq('buyer_id', buyerId).order('transaction_time', { ascending: false });
+    const { data, error } = await supabase
+      .from('shop_transactions')
+      .select('*, shop_items(item_name, minecraft_item_id)')
+      .eq('buyer_id', buyerId)
+      .order('transaction_time', { ascending: false });
     if (error) throw error;
     return data;
   },
   async getShopTransactionsBySeller(sellerId: string) {
-    const { data, error } = await supabase.from('shop_transactions').select('*').eq('seller_id', sellerId).order('transaction_time', { ascending: false });
+    const { data, error } = await supabase
+      .from('shop_transactions')
+      .select('*, shop_items(item_name, minecraft_item_id)')
+      .eq('seller_id', sellerId)
+      .order('transaction_time', { ascending: false });
     if (error) throw error;
     return data;
   },
