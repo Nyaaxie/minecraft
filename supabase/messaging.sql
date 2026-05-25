@@ -39,78 +39,50 @@ CREATE TABLE IF NOT EXISTS message_reads (
 
 -- Enable RLS
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE conversation_members ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE message_reads ENABLE ROW LEVEL SECURITY;
+
+-- Security Definer Function to break recursion
+CREATE OR REPLACE FUNCTION is_conversation_member(conv_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1
+        FROM conversation_members
+        WHERE conversation_id = conv_id
+        AND profile_id = auth.uid()
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Policies for conversations
 DROP POLICY IF EXISTS "Users can view conversations they are members of" ON conversations;
-
-CREATE POLICY "Users can view conversations they are members of" ON conversations FOR
-SELECT USING (
-        EXISTS (
-            SELECT 1
-            FROM conversation_members
-            WHERE
-                conversation_id = conversations.id
-                AND profile_id = auth.uid ()
-        )
-    );
+CREATE POLICY "Users can view conversations they are members of" ON conversations 
+FOR SELECT USING (is_conversation_member(id));
 
 DROP POLICY IF EXISTS "Users can create conversations" ON conversations;
-
-CREATE POLICY "Users can create conversations" ON conversations FOR
-INSERT
-WITH
-    CHECK (true);
+CREATE POLICY "Users can create conversations" ON conversations 
+FOR INSERT WITH CHECK (true);
 
 -- Policies for conversation_members
 DROP POLICY IF EXISTS "Users can view members of conversations they are part of" ON conversation_members;
-
-CREATE POLICY "Users can view members of conversations they are part of" ON conversation_members FOR
-SELECT USING (
-        EXISTS (
-            SELECT 1
-            FROM conversation_members AS cm
-            WHERE
-                cm.conversation_id = conversation_members.conversation_id
-                AND profile_id = auth.uid ()
-        )
-    );
+CREATE POLICY "Users can view members of conversations they are part of" ON conversation_members 
+FOR SELECT USING (is_conversation_member(conversation_id));
 
 DROP POLICY IF EXISTS "Users can add themselves to conversations" ON conversation_members;
-
-CREATE POLICY "Users can add themselves to conversations" ON conversation_members FOR
-INSERT
-WITH
-    CHECK (profile_id = auth.uid ());
+CREATE POLICY "Users can add themselves to conversations" ON conversation_members 
+FOR INSERT WITH CHECK (profile_id = auth.uid ());
 
 -- Policies for messages
 DROP POLICY IF EXISTS "Users can view messages in conversations they are part of" ON messages;
-
-CREATE POLICY "Users can view messages in conversations they are part of" ON messages FOR
-SELECT USING (
-        EXISTS (
-            SELECT 1
-            FROM conversation_members
-            WHERE
-                conversation_id = messages.conversation_id
-                AND profile_id = auth.uid ()
-        )
-    );
+CREATE POLICY "Users can view messages in conversations they are part of" ON messages 
+FOR SELECT USING (is_conversation_member(conversation_id));
 
 DROP POLICY IF EXISTS "Users can send messages in conversations they are part of" ON messages;
+CREATE POLICY "Users can send messages in conversations they are part of" ON messages 
+FOR INSERT WITH CHECK (is_conversation_member(conversation_id));
 
-CREATE POLICY "Users can send messages in conversations they are part of" ON messages FOR
-INSERT
-WITH
-    CHECK (
-        EXISTS (
-            SELECT 1
-            FROM conversation_members
-            WHERE
-                conversation_id = messages.conversation_id
-                AND profile_id = auth.uid ()
-        )
-    );
+-- Policies for message_reads
+DROP POLICY IF EXISTS "Users can manage their own message reads" ON message_reads;
+CREATE POLICY "Users can manage their own message reads" ON message_reads 
+FOR ALL USING (profile_id = auth.uid());

@@ -298,7 +298,7 @@ CREATE POLICY "Admins can manage badges" ON badges FOR ALL USING (
 CREATE POLICY "User badges are viewable by everyone" ON user_badges FOR
 SELECT USING (true);
 
-coCREATE POLICY "Admins can assign and revoke user badges" ON user_badges FOR ALL USING (
+CREATE POLICY "Admins can assign and revoke user badges" ON user_badges FOR ALL USING (
     EXISTS (
         SELECT 1
         FROM profiles

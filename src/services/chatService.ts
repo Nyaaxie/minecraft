@@ -25,7 +25,7 @@ export const chatService = {
         updated_at,
         conversation_members(
           profile_id,
-          profiles(username, avatar_url)
+          profiles!profile_id(username, avatar_url)
         )
       `)
       .in('id', convIds)

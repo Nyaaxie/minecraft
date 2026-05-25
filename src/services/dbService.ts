@@ -94,7 +94,7 @@ export const dbService = {
   },
 
   async getUsersWithBadge(badgeId: string) {
-    const { data, error } = await supabase.from('user_badges').select('*, profiles(username, avatar_url)').eq('badge_id', badgeId);
+    const { data, error } = await supabase.from('user_badges').select('*, profiles!user_id(username, avatar_url)').eq('badge_id', badgeId);
     if (error) throw error;
     return data;
   },
@@ -103,7 +103,7 @@ export const dbService = {
   async getEvents() {
     const { data, error } = await supabase
       .from('events')
-      .select('*, profiles(username)')
+      .select('*, profiles!created_by(username)')
       .order('start_time', { ascending: true });
     if (error) throw error;
     return data;
@@ -129,7 +129,7 @@ export const dbService = {
 
   // --- RSVPs ---
   async getRSVPs(eventId: string) {
-    const { data, error } = await supabase.from('event_rsvps').select('*, profiles(username, avatar_url)').eq('event_id', eventId);
+    const { data, error } = await supabase.from('event_rsvps').select('*, profiles!profile_id(username, avatar_url)').eq('event_id', eventId);
     if (error) throw error;
     return data;
   },
@@ -225,7 +225,7 @@ export const dbService = {
 
   // --- Announcements ---
   async getAnnouncements() {
-    const { data, error } = await supabase.from('announcements').select('*, profiles(username)').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('announcements').select('*, profiles!created_by(username)').order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   },
@@ -350,17 +350,17 @@ export const dbService = {
 
   // --- Player Shops ---
   async getPlayerShops() {
-    const { data, error } = await supabase.from('player_shops').select('*, profiles(username, avatar_url)').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('player_shops').select('*, profiles!owner_id(username, avatar_url)').order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   },
   async getPlayerShopById(id: string) {
-    const { data, error } = await supabase.from('player_shops').select('*, profiles(username, avatar_url)').eq('id', id).single();
+    const { data, error } = await supabase.from('player_shops').select('*, profiles!owner_id(username, avatar_url)').eq('id', id).single();
     if (error) throw error;
     return data;
   },
-  async getPlayerShopsByOwner(ownerId: string) {
-    const { data, error } = await supabase.from('player_shops').select('*, profiles(username, avatar_url)').eq('owner_id', ownerId).order('created_at', { ascending: false });
+  async getPlayerShopsByOwner(owner_id: string) {
+    const { data, error } = await supabase.from('player_shops').select('*, profiles!owner_id(username, avatar_url)').eq('owner_id', owner_id).order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   },
