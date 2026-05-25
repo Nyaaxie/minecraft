@@ -16,37 +16,36 @@ const OrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [confirmingOrder, setConfirmingOrder] = useState<string | null>(null);
   const { user } = useAuthStore();
+const fetchOrders = async () => {
+  if (!user) return;
+  try {
+    setLoading(true);
+    const data = await orderService.getOrdersForBuyer(user.id);
 
-  const fetchOrders = async () => {
-    if (!user) return;
-    try {
-      setLoading(true);
-      const data = await orderService.getOrdersForBuyer(user.id);
-      
-      // Fetch item details for all items
-      const itemIds = Array.from(new Set(data.flatMap(o => o.order_items.map(i => i.item_id))));
-      
-      const { data: items } = await supabase
-        .from('shop_items')
-        .select('*')
-        .in('id', itemIds);
-        
-      const itemMap = new Map((items || []).map(i => [i.id, i]));
-      
-      const ordersWithDetails = data.map(o => ({
-        ...o,
-        order_items: o.order_items.map(i => ({ ...i, shop_item: itemMap.get(i.item_id)! })),
-        shop: (o as any).shop
-      }));
+    // Fetch item details for all items
+    const itemIds = Array.from(new Set(data.flatMap(o => o.order_items.map(i => i.item_id))));
 
-      setOrders(ordersWithDetails);
-    } catch (err) {
-      toast.error('Failed to load orders');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const { data: items } = await supabase
+      .from('shop_items')
+      .select('*')
+      .in('id', itemIds);
 
+    const itemMap = new Map((items || []).map(i => [i.id, i]));
+
+    const ordersWithDetails = data.map(o => ({
+      ...o,
+      order_items: o.order_items.map(i => ({ ...i, shop_item: itemMap.get(i.item_id)! })),
+      shop: (o as any).shop
+    }));
+
+    setOrders(ordersWithDetails);
+  } catch (err) {
+    import.meta.env.DEV && console.error('Error fetching orders:', err);
+    toast.error('Failed to load orders');
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     fetchOrders();
   }, [user]);

@@ -165,8 +165,8 @@ const ShopsPage = () => {
   }, [user]);
 
   const handleOpenShop = () => {
-    console.log('User shops:', userShops);
-    console.log('isAdmin:', isAdmin);
+    import.meta.env.DEV && console.log('User shops:', userShops);
+    import.meta.env.DEV && console.log('isAdmin:', isAdmin);
     if (userShops.length > 0) {
       navigate(`/shops/${userShops[0].id}`);
     } else {

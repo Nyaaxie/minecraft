@@ -201,7 +201,7 @@ export const dbService = {
   },
 
   async notifyAllUsers(title: string, message: string, type: 'event' | 'announcement' | 'message' | 'system', link?: string) {
-    if (import.meta.env.DEV) console.log('dbService: [NOTIFY] Starting notifyAllUsers...');
+    import.meta.env.DEV && console.log('dbService: [NOTIFY] Starting notifyAllUsers...');
 
     try {
       const { data: profiles, error } = await supabase.from('profiles').select('id');
@@ -211,7 +211,7 @@ export const dbService = {
         return;
       }
 
-      console.log(`dbService: [NOTIFY] Found ${profiles.length} profiles to notify.`);
+      import.meta.env.DEV && console.log(`dbService: [NOTIFY] Found ${profiles.length} profiles to notify.`);
 
       const notifications = profiles.map(p => ({
         profile_id: p.id,
@@ -226,7 +226,7 @@ export const dbService = {
         console.error('dbService: [NOTIFY] Bulk insert error:', insertError);
         throw insertError;
       }
-      console.log('dbService: [NOTIFY] Finished processing all notifications.');
+      import.meta.env.DEV && console.log('dbService: [NOTIFY] Finished processing all notifications.');
     } catch (err) {
       console.error('dbService: [NOTIFY] Unexpected error:', err);
     }

@@ -37,7 +37,7 @@ const MembersPage: React.FC = () => {
           dbService.getBadges(), // Fetch all available badges
         ]);
         
-        console.log('Fetched profiles:', fetchedProfiles);
+        import.meta.env.DEV && console.log('Fetched profiles:', fetchedProfiles);
         
         // Cast fetchedProfiles to ProfileWithBadges[]
         setProfiles(fetchedProfiles as unknown as ProfileWithBadges[]);

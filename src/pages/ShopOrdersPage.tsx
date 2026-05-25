@@ -31,11 +31,11 @@ const ShopOrdersPage = () => {
       }
 
       const data = await orderService.getOrdersForShop(shopId);
-      console.log('Fetched orders:', data);
+      import.meta.env.DEV && console.log('Fetched orders:', data);
       
       // Fetch item details for all items
       const itemIds = Array.from(new Set(data.flatMap(o => o.order_items.map(i => i.item_id))));
-      console.log('Fetching details for items:', itemIds);
+      import.meta.env.DEV && console.log('Fetching details for items:', itemIds);
       
       const { data: items, error: itemsError } = await supabase
         .from('shop_items')
@@ -44,7 +44,7 @@ const ShopOrdersPage = () => {
         
       if (itemsError) throw itemsError;
       
-      console.log('Fetched items:', items);
+      import.meta.env.DEV && console.log('Fetched items:', items);
       
       const itemMap = new Map(items.map(i => [i.id, i]));
       

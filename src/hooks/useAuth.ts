@@ -9,7 +9,7 @@ export const useAuth = () => {
   useEffect(() => {
     // 1. Initialize Auth Session
     const initializeAuth = async () => {
-      console.log('Auth: Initializing...');
+      import.meta.env.DEV && console.log('Auth: Initializing...');
       
       // Add a timeout promise to detect if getSession hangs
       const timeout = new Promise((_, reject) => 
@@ -20,7 +20,7 @@ export const useAuth = () => {
         const getSessionPromise = supabase.auth.getSession();
         
         const { data: { session } } = await Promise.race([getSessionPromise, timeout]) as any;
-        console.log('Auth: Session found', !!session);
+        import.meta.env.DEV && console.log('Auth: Session found', !!session);
         
         if (session) {
           setUser(session.user);
@@ -35,14 +35,14 @@ export const useAuth = () => {
           
           await supabase.from('profiles').update({ status: 'online' }).eq('id', session.user.id);
         } else {
-          console.log('Auth: No session');
+          import.meta.env.DEV && console.log('Auth: No session');
           setUser(null);
           setProfile(null);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
       } finally {
-        if (import.meta.env.DEV) console.log('Auth: Setting loading to false');
+        import.meta.env.DEV && console.log('Auth: Setting loading to false');
         setLoading(false);
       }
     };
