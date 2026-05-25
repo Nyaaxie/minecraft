@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // ── 1. Auth state change listener ────────────────────────────────────
     // Fires on: tab focus (token refresh), sign-in, sign-out, SIGNED_IN on return
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('AuthProvider: auth event', event);
+      if (import.meta.env.DEV) console.log('AuthProvider: auth event', event);
 
       // During first load, initializeAuth() handles everything — skip here
       // to avoid a race between the listener and the initial getSession call.
@@ -90,8 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (session) {
         setUser(session.user);
-        // TOKEN_REFRESHED fires when the tab gets focus after being away.
-        // Re-fetch the profile in case it changed while the tab was away.
+        // Force immediate fetch on SIGNED_IN
         try {
           await fetchAndSetProfile(session.user.id);
         } catch (err) {

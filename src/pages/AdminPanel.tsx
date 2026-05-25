@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
 import { adminService } from '../services/adminService';
+import AdminApprovalPanel from '../components/AdminApprovalPanel';
 import { Modal } from '../components/Modal';
 import { AddVersionModal } from '../components/AddVersionModal';
 import { AnnouncementModal } from '../components/AnnouncementModal';
@@ -31,6 +32,7 @@ import {
   Check,
   X,
   Award,
+
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -103,7 +105,7 @@ const AdminPanel = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
   const { versions, loading: versionsLoading, refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'announcements' | 'events' | 'rules' | 'reminders' | 'versions' | 'categories' | 'badges'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'approvals' | 'announcements' | 'events' | 'rules' | 'reminders' | 'versions' | 'categories' | 'badges'>('users');
   const [modal, setModal] = useState<{ isOpen: boolean; type: string; data?: any }>({ isOpen: false, type: '' });
   const [rsvps, setRsvps] = useState<any[]>([]);
   const [loadingRsvps, setLoadingRsvps] = useState(false);
@@ -128,7 +130,7 @@ const AdminPanel = () => {
     setLoading(true);
     try {
       const [p, e, r, rem, b] = await Promise.all([
-        dbService.getAllProfiles(),
+        dbService.getAllProfiles() as any,
         dbService.getEvents(),
         adminService.getRules(),
         adminService.getReminders(),
@@ -169,6 +171,16 @@ const AdminPanel = () => {
       toast.success(`User ${profile.is_banned ? 'unbanned' : 'banned'}!`);
     } catch (err: any) {
       toast.error(`Failed to update ban status: ${err.message}`);
+    }
+  };
+
+  const handleStatusChange = async (profile: Profile, newStatus: 'pending' | 'approved' | 'rejected' | 'banned') => {
+    try {
+      await dbService.updateProfile(profile.id, { approval_status: newStatus });
+      setProfiles(prev => prev.map(p => p.id === profile.id ? { ...p, approval_status: newStatus } : p));
+      toast.success(`User status updated to ${newStatus}!`);
+    } catch (err: any) {
+      toast.error(`Failed to update status: ${err.message}`);
     }
   };
 
@@ -516,7 +528,7 @@ const AdminPanel = () => {
       {/* ── Tab bar ── */}
       <div className="w-full">
         <div className="flex gap-1.5 p-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {(['users', 'announcements', 'events', 'rules', 'reminders', 'versions', 'categories', 'badges'] as const).map(tab => (
+          {(['users', 'approvals', 'announcements', 'events', 'rules', 'reminders', 'versions', 'categories', 'badges'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -525,7 +537,7 @@ const AdminPanel = () => {
                 : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                 }`}
             >
-              {tab}
+              {tab === 'users' ? 'Users' : tab === 'approvals' ? 'Approvals' : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
@@ -541,6 +553,9 @@ const AdminPanel = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
+
+          {/* ── APPROVALS ── */}
+          {activeTab === 'approvals' && <AdminApprovalPanel />}
 
           {/* ── USERS ── */}
           {activeTab === 'users' && (
@@ -580,6 +595,16 @@ const AdminPanel = () => {
                               {p.role}
                             </span>
                             <div className="flex items-center gap-0.5">
+                              <select
+                                value={p.approval_status}
+                                onChange={(e) => handleStatusChange(p, e.target.value as any)}
+                                className="bg-neutral-100 dark:bg-neutral-800 text-[10px] p-1 rounded-lg border-none focus:ring-0"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="banned">Banned</option>
+                              </select>
                               <button onClick={() => handleRoleToggle(p)} className="p-1.5 rounded-lg text-neutral-400 hover:text-strawberry-500 active:scale-95 transition-all" title="Toggle Role">
                                 <Shield size={14} />
                               </button>
@@ -589,8 +614,7 @@ const AdminPanel = () => {
                               <button onClick={() => setModal({ isOpen: true, type: 'assign-badges', data: p })} className="p-1.5 rounded-lg text-neutral-400 hover:text-strawberry-500 active:scale-95 transition-all" title="Assign Badges">
                                 <Award size={14} />
                               </button>
-                            </div>
-                          </div>
+                            </div>                          </div>
                         </div>
                       ))}
                     </>
@@ -624,6 +648,16 @@ const AdminPanel = () => {
                               {p.role}
                             </span>
                             <div className="flex items-center gap-0.5">
+                              <select
+                                value={p.approval_status}
+                                onChange={(e) => handleStatusChange(p, e.target.value as any)}
+                                className="bg-neutral-100 dark:bg-neutral-800 text-[10px] p-1 rounded-lg border-none focus:ring-0"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="banned">Banned</option>
+                              </select>
                               <button onClick={() => handleRoleToggle(p)} className="p-1.5 rounded-lg text-neutral-400 hover:text-strawberry-500 active:scale-95 transition-all" title="Toggle Role">
                                 <Shield size={14} />
                               </button>
@@ -633,8 +667,7 @@ const AdminPanel = () => {
                               <button onClick={() => setModal({ isOpen: true, type: 'assign-badges', data: p })} className="p-1.5 rounded-lg text-neutral-400 hover:text-strawberry-500 active:scale-95 transition-all" title="Assign Badges">
                                 <Award size={14} />
                               </button>
-                            </div>
-                          </div>
+                            </div>                          </div>
                         </div>
                       ))}
                     </>
@@ -679,34 +712,34 @@ const AdminPanel = () => {
                 <div className="space-y-2">
                   {events.map(ev => (
                     <div key={ev.id} className={`${cardCls} p-3 flex items-center justify-between gap-3 relative`}>
-                    <div className="flex items-center gap-3 min-w-0">                        <div className="p-2.5 bg-strawberry-500/10 rounded-xl shrink-0">
-                          <Calendar size={16} className="text-strawberry-600" />
-                        </div>
+                      <div className="flex items-center gap-3 min-w-0">                        <div className="p-2.5 bg-strawberry-500/10 rounded-xl shrink-0">
+                        <Calendar size={16} className="text-strawberry-600" />
+                      </div>
                         <div className="min-w-0">
                           <p className="font-black italic uppercase tracking-tighter text-sm truncate">{ev.title}</p>
                           <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest truncate">{new Date(ev.start_time).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="flex gap-1.5 shrink-0 relative z-50">
-                        <button 
-                          onClick={(e) => { 
+                        <button
+                          onClick={(e) => {
                             e.preventDefault();
-                            e.stopPropagation(); 
-                            handleViewRsvps(ev.id); 
-                          }} 
+                            e.stopPropagation();
+                            handleViewRsvps(ev.id);
+                          }}
                           className="px-3 py-1 bg-strawberry-600/10 text-strawberry-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-strawberry-600 hover:text-white transition-all cursor-pointer"
                         >
-                            View Joined
+                          View Joined
                         </button>
                         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteEvent(ev.id); }} className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-red-500 transition-all cursor-pointer">
                           <Trash2 size={14} />
                         </button>
-                        <button 
-                          onClick={(e) => { 
+                        <button
+                          onClick={(e) => {
                             e.preventDefault();
-                            e.stopPropagation(); 
+                            e.stopPropagation();
                             setModal({ isOpen: true, type: 'edit-event', data: ev });
-                          }} 
+                          }}
                           className="p-1.5 bg-neutral-100 dark:bg-white/5 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-all cursor-pointer"
                         >
                           <MoreVertical size={14} />

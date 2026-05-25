@@ -7,9 +7,7 @@ export const dbService = {
     const { data, error } = await supabase
       .from('profiles')
       .select(`
-        id, username, minecraft_username, avatar_url, role, status, bio, is_banned,
-        theme_preference, created_at, updated_at, favorite_mob, favorite_block,
-        favorite_color, minecraft_edition,
+        *,
         user_badges!user_badges_user_id_fkey (
           badge_id,
           badges (
@@ -192,7 +190,7 @@ export const dbService = {
   },
 
   async notifyAllUsers(title: string, message: string, type: 'event' | 'announcement' | 'message' | 'system', link?: string) {
-    console.log('dbService: [NOTIFY] Starting notifyAllUsers...');
+    if (import.meta.env.DEV) console.log('dbService: [NOTIFY] Starting notifyAllUsers...');
 
     try {
       const { data: profiles, error } = await supabase.from('profiles').select('id');

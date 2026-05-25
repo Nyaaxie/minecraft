@@ -19,11 +19,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   profile: null,
   loading: true,
   setUser: (user) => {
-    console.log('useAuthStore: Setting user:', !!user);
+    if (import.meta.env.DEV) console.log('useAuthStore: Setting user:', !!user);
     set({ user });
   },
   setProfile: (profile) => {
-    console.log('useAuthStore: Setting profile:', !!profile);
+    if (import.meta.env.DEV) console.log('useAuthStore: Setting profile:', !!profile);
     set({ profile });
   },
   setLoading: (loading) => set({ loading }),

@@ -19,6 +19,10 @@ export interface Profile {
   status: ProfileStatus
   bio: string | null
   is_banned: boolean
+  approval_status: 'pending' | 'approved' | 'rejected' | 'banned'
+  approved_by: string | null
+  approved_at: string | null
+  rejection_reason: string | null
   theme_preference: 'dark' | 'light' | null
   created_at: string
   updated_at: string

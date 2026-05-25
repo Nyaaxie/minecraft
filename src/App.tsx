@@ -40,10 +40,10 @@ const LoadingScreen = () => (
   </div>
 );
 
+const StatusPage = lazy(() => import('./pages/StatusPage'));
+
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
   const { user, profile, loading, signOut } = useAuthStore();
-  
-  console.log('ProtectedRoute state:', { hasUser: !!user, hasProfile: !!profile, loading });
   
   // 1. Wait for auth to finish loading
   if (loading) return <LoadingScreen />;
@@ -51,20 +51,18 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   // 2. If no user, definitely go to login
   if (!user) return <Navigate to="/login" replace />;
   
-  // 3. If user is logged in, but profile isn't loaded yet, we need to check if it's still loading or if it failed
+  // 3. If profile missing, handle it
   if (!profile) {
-    // If we've finished initializing but still have no profile, it means the profile doesn't exist (DB Reset?)
-    // To prevent infinite hang, sign out and redirect to home.
-    setTimeout(() => {
-      if (!profile) {
-        console.error('ProtectedRoute: Profile missing for user. Signing out to clear session.');
-        signOut();
-      }
-    }, 2000);
+    setTimeout(() => { signOut(); }, 2000);
     return <LoadingScreen />;
   }
+
+  // 4. Registration Approval Check
+  if (profile.approval_status !== 'approved' && profile.role !== 'admin') {
+    return <StatusPage status={profile.approval_status as 'pending' | 'rejected' | 'banned'} reason={profile.rejection_reason} />;
+  }
   
-  // 4. Now that we have a user and profile, check roles
+  // 5. Admin check
   if (adminOnly && profile.role !== 'admin') return <Navigate to="/dashboard" replace />;
   
   return <>{children}</>;

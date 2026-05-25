@@ -42,7 +42,7 @@ export const useAuth = () => {
       } catch (error) {
         console.error('Error initializing auth:', error);
       } finally {
-        console.log('Auth: Setting loading to false');
+        if (import.meta.env.DEV) console.log('Auth: Setting loading to false');
         setLoading(false);
       }
     };
