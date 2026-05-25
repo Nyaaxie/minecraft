@@ -39,8 +39,15 @@ const DynaMapPage = () => {
         />
         <div className="absolute inset-0 pointer-events-none border-[12px] border-black/5 rounded-[2.5rem]" />
       </div>
+      <button
+        onClick={() => window.open(DYNAMAP_URL, '_blank', 'noopener,noreferrer')}
+        className="px-8 py-4 bg-strawberry-600 text-white rounded-2xl font-black hover:bg-strawberry-700 transition-all shadow-xl shadow-strawberry-600/20 active:scale-95 italic uppercase"
+      >
+        Open Live Map
+      </button>
     </div>
   );
 };
+
 
 export default DynaMapPage;
