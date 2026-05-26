@@ -3,142 +3,20 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { dbService } from '../services/dbService';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 import type { PlayerShop, ShopItem } from '../types/database.types';
-import { Loader2, Store, Tag, Edit, Banknote, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, Minus, X, ShoppingCart, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Store, Tag, Edit, Banknote, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, Minus, X, ShoppingCart } from 'lucide-react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCartStore } from '../store/useCartStore';
 import { orderService } from '../services/orderService';
 
-const PurchaseModal = ({
-  item,
-  isOpen,
-  onClose,
-  onConfirm,
-  isProcessing
-}: {
-  item: ShopItem | null,
-  isOpen: boolean,
-  onClose: () => void,
-  onConfirm: (quantity: number) => void,
-  isProcessing: boolean
-}) => {
-  const [quantity, setQuantity] = useState(1);
-
-  useEffect(() => {
-    if (isOpen) setQuantity(1);
-  }, [isOpen]);
-
-  if (!item) return null;
-
-  const totalPrice = item.price * quantity;
-  const itemImageUrl = getMinecraftItemImageUrl(item.minecraft_item_id, { size: 64 });
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-neutral-950/60 backdrop-blur-sm"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-2xl border border-neutral-200 dark:border-white/5 overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-strawberry-600" />
-
-            <div className="p-8 space-y-8">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-black italic uppercase tracking-tighter">Confirm Purchase</h3>
-                <button onClick={onClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-white/5 rounded-xl transition-colors">
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-6 p-5 bg-neutral-50 dark:bg-white/5 rounded-3xl border border-neutral-100 dark:border-white/5">
-                <div className="w-20 h-20 bg-white dark:bg-neutral-800 rounded-2xl flex items-center justify-center border border-neutral-200 dark:border-white/5 shadow-sm shrink-0">
-                  <img src={itemImageUrl} alt={item.item_name} className="w-12 h-12 object-contain drop-shadow-lg" />
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-lg font-black italic uppercase tracking-tight truncate">{item.item_name}</h4>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">{item.price} {item.currency} per unit</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-end">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-1">Quantity to Purchase</label>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 px-1">{item.quantity} in stock</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center font-black hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-all active:scale-95 border border-neutral-200 dark:border-white/10"
-                  >
-                    <Minus size={24} />
-                  </button>
-                  <input
-                    type="number"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.min(item.quantity, Math.max(1, parseInt(e.target.value) || 1)))}
-                    className="flex-1 h-16 bg-white dark:bg-neutral-950 rounded-2xl text-center font-black outline-none border border-neutral-200 dark:border-white/10 focus:border-strawberry-500/50 transition-all text-xl"
-                  />
-                  <button
-                    onClick={() => setQuantity(q => Math.min(item.quantity, q + 1))}
-                    className="w-16 h-16 bg-strawberry-600 text-white rounded-2xl flex items-center justify-center font-black hover:bg-strawberry-700 transition-all active:scale-95 shadow-lg shadow-strawberry-600/20"
-                  >
-                    <Plus size={24} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-neutral-100 dark:border-white/5 space-y-6">
-                <div className="flex justify-between items-center">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block">Total Items</span>
-                    <span className="text-sm font-bold">{quantity * item.unit_size} items ({quantity} units x {item.unit_size})</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block">Total Price</span>
-                    <div className="flex items-center justify-end gap-2">
-                      <Banknote size={16} className="text-strawberry-600" />
-                      <span className="text-2xl font-black italic uppercase tracking-tighter">{totalPrice} {item.currency}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onConfirm(quantity)}
-                  disabled={isProcessing}
-                  className="w-full py-5 bg-strawberry-600 hover:bg-strawberry-700 text-white rounded-2xl font-black italic uppercase tracking-widest text-xs shadow-xl shadow-strawberry-600/30 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
-                >
-                  {isProcessing ? <Loader2 size={18} className="animate-spin" /> : <ShoppingCart size={18} />}
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, addToCart, isBuying }: {
+const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, addToCart }: {
   item: ShopItem,
   canManage: boolean,
   isOwner: boolean,
   onEdit: (id: string) => void,
   onDelete: (id: string) => void,
-  onPurchase: (item: ShopItem) => void,
-  addToCart: (item: ShopItem) => void,
-  isBuying: boolean
+  addToCart: (item: ShopItem) => void
 }) => {
   const itemImageUrl = getMinecraftItemImageUrl(item.minecraft_item_id, { size: 64 });
   const categoryName = (item.shop_categories as { name: string } | null)?.name || 'Uncategorized';
@@ -305,9 +183,6 @@ const ShopDetailPage = () => {
   const [shop, setShop] = useState<(PlayerShop & { profiles: { username: string; avatar_url: string } | null }) | null>(null);
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [buyingId, setBuyingId] = useState<string | null>(null);
-  const [selectedItemForPurchase, setSelectedItemForPurchase] = useState<ShopItem | null>(null);
-  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user, profile } = useAuthStore();
   const isAdmin = profile?.role === 'admin';
@@ -349,32 +224,6 @@ const ShopDetailPage = () => {
     } catch (err) {
       console.error('Error deleting item:', err);
       toast.error('Failed to delete item.');
-    }
-  };
-
-  const initiatePurchase = (item: ShopItem) => {
-    if (!user) {
-      toast.error('You must be logged in to make a purchase.');
-      return;
-    }
-    setSelectedItemForPurchase(item);
-    setIsPurchaseModalOpen(true);
-  };
-
-  const handlePurchaseConfirm = async (quantity: number) => {
-    if (!selectedItemForPurchase || !user) return;
-
-    try {
-      setBuyingId(selectedItemForPurchase.id);
-      await dbService.purchaseItem(selectedItemForPurchase.id, user.id, quantity);
-      toast.success(`Purchase successful! ${quantity}x ${selectedItemForPurchase.item_name} secured.`);
-      setIsPurchaseModalOpen(false);
-      fetchShopData();
-    } catch (err: any) {
-      console.error('Error purchasing item:', err);
-      toast.error(err.message || 'Failed to process purchase.');
-    } finally {
-      setBuyingId(null);
     }
   };
 
@@ -516,22 +365,13 @@ const ShopDetailPage = () => {
                 isOwner={isOwner}
                 onEdit={(id) => navigate(`/shops/${shop.id}/items/edit/${id}`)}
                 onDelete={handleDeleteItem}
-                onPurchase={initiatePurchase}
                 addToCart={() => useCartStore.getState().addToCart(item)}
-                isBuying={buyingId === item.id}
               />
             ))}
           </div>
         )}
       </div>
 
-      <PurchaseModal
-        item={selectedItemForPurchase}
-        isOpen={isPurchaseModalOpen}
-        onClose={() => setIsPurchaseModalOpen(false)}
-        onConfirm={handlePurchaseConfirm}
-        isProcessing={!!buyingId}
-      />
       <CartSidebar />
     </div>
   );
