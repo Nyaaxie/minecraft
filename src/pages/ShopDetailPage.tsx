@@ -222,23 +222,13 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, onPurchase, 
         </div>
 
         {!isOwner && (
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => addToCart(item)}
-              disabled={item.quantity <= 0}
-              className="py-2.5 bg-neutral-100 dark:bg-white/5 text-neutral-900 dark:text-white rounded-xl font-black italic uppercase tracking-widest text-[10px] hover:bg-strawberry-100 dark:hover:bg-strawberry-900/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
-            >
-              <ShoppingCart size={13} /> Add
-            </button>
-            <button
-              onClick={() => onPurchase(item)}
-              disabled={isBuying || item.quantity <= 0}
-              className="py-2.5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 rounded-xl font-black italic uppercase tracking-widest text-[10px] hover:bg-strawberry-600 dark:hover:bg-strawberry-600 hover:text-white dark:hover:text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
-            >
-              {isBuying ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
-              {item.quantity <= 0 ? 'Out of Stock' : 'Secure'}
-            </button>
-          </div>
+          <button
+            onClick={() => addToCart(item)}
+            disabled={item.quantity <= 0}
+            className="w-full py-2.5 bg-strawberry-600 text-white rounded-xl font-black italic uppercase tracking-widest text-[10px] hover:bg-strawberry-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+          >
+            <ShoppingCart size={13} /> {item.quantity <= 0 ? 'Out of Stock' : 'Order'}
+          </button>
         )}
       </div>
     </motion.div>
@@ -279,7 +269,7 @@ const CartSidebar = () => {
       className="fixed right-6 bottom-6 w-96 bg-white dark:bg-neutral-900 rounded-[2rem] shadow-2xl border border-neutral-200 dark:border-white/10 p-6 z-50 max-h-[80vh] flex flex-col"
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-black italic uppercase tracking-tighter text-xl">Your Cart</h3>
+        <h3 className="font-black italic uppercase tracking-tighter text-xl">Your Order</h3>
         <button onClick={clearCart} className="text-xs text-red-500 font-bold uppercase tracking-widest">Clear</button>
       </div>
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
@@ -301,7 +291,7 @@ const CartSidebar = () => {
         disabled={isProcessing}
         className="w-full py-4 bg-strawberry-600 text-white rounded-xl font-black italic uppercase tracking-widest text-sm shadow-lg shadow-strawberry-600/30"
       >
-        {isProcessing ? 'Processing...' : 'Place Order'}
+        {isProcessing ? 'Processing...' : 'Order'}
       </button>
     </motion.div>
   );

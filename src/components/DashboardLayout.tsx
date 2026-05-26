@@ -67,12 +67,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         { icon: LayoutDashboard, label: 'Overview', to: '/dashboard' },
         { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
         { icon: Calendar, label: 'Events', to: '/events' },
+        { icon: Puzzle, label: 'Plugins', to: '/plugins' },
       ]
     },
     {
       title: 'Marketplace',
       items: [
-        { icon: Puzzle, label: 'Plugins', to: '/plugins' },
         { icon: Sparkle, label: 'Player Shops', to: '/shops' },
         { icon: ShoppingBag, label: 'Trade History', to: '/transactions' },
         { icon: ShoppingBag, label: 'My Orders', to: '/orders' },

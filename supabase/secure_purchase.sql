@@ -59,7 +59,7 @@ BEGIN
         'Item Sold!',
         'You sold ' || p_quantity || 'x ' || v_item.item_name || ' for ' || v_total_price || ' ' || v_item.currency || '.',
         'system',
-        '/shops/' || v_item.shop_id
+        '/shops/' || v_item.shop_id || '/orders'
     );
 
     RETURN jsonb_build_object(

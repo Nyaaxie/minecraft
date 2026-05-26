@@ -42,7 +42,7 @@ export const orderService = {
         title: 'New Order Received',
         message: `You have received a new order for your shop: ${shop.name}.`,
         type: 'system',
-        link: '/orders' // Assuming shop owners can see their shop's orders here, or update this link to a specific management page if needed.
+        link: `/shops/${shopId}/orders`  // ← make sure it's this, not '/orders'
       });
 
     return order;
@@ -68,9 +68,9 @@ export const orderService = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data as (Order & { 
-      order_items: OrderItem[], 
-      shop: { name: string, owner: { username: string } } 
+    return data as (Order & {
+      order_items: OrderItem[],
+      shop: { name: string, owner: { username: string } }
     })[];
   },
 

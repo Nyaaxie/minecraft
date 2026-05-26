@@ -16,10 +16,14 @@ import {
   MonitorPlay // For Minecraft Edition
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import type { Profile, UserBadge } from '../types/database.types'; // Import UserBadge
+import type { Profile, UserBadge, Badge } from '../types/database.types'; // Import Badge type
 
 import BadgeChip from '../components/BadgeChip';
+import { sortBadges } from '../utils/badgeUtils';
 
+interface UserBadgeWithDetails extends UserBadge {
+  badges: Badge;
+}
 
 const ProfilePage = () => {
   const { profile, setProfile, signOut, loading: authLoading } = useAuthStore();
@@ -37,14 +41,14 @@ const ProfilePage = () => {
     favorite_color: profile?.favorite_color || '',
     minecraft_edition: profile?.minecraft_edition || null,
   });
-  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
+  const [userBadges, setUserBadges] = useState<UserBadgeWithDetails[]>([]);
 
   useEffect(() => {
     if (profile?.id) {
       const fetchUserBadges = async () => {
         try {
           const badges = await dbService.getUserBadges(profile.id);
-          setUserBadges(badges);
+          setUserBadges(badges as UserBadgeWithDetails[]);
         } catch (error) {
           console.error('Failed to fetch user badges:', error);
           toast.error('Failed to load user badges.');
@@ -160,10 +164,8 @@ const ProfilePage = () => {
             {/* Badges System */}
             {userBadges.length > 0 && (
               <div className="flex flex-wrap justify-center gap-2.5 mb-10">
-                {userBadges.map(ub => (
-                  // @ts-ignore
-                  ub.badges && <BadgeChip key={ub.badge_id} badge={ub.badges} />
-                ))}
+                {sortBadges(userBadges.map(ub => ub.badges).filter((b): b is Badge => !!b))
+                  .map(badge => <BadgeChip key={badge.id} badge={badge} />)}
               </div>
             )}
 

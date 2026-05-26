@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import type { Profile, Badge } from '../types/database.types';
 import { Loader2, Check } from 'lucide-react';
 
+import { sortBadges } from '../utils/badgeUtils';
+
 interface AssignBadgesModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -89,7 +91,7 @@ const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({ isOpen, onClose, 
             <p className="text-center text-neutral-500">No badges available to assign.</p>
           ) : (
             <div className="grid grid-cols-1 gap-3">
-              {allBadges.map(badge => (
+              {sortBadges(allBadges).map(badge => (
                 <div
                   key={badge.id}
                   className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer

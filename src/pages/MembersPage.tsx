@@ -5,6 +5,7 @@ import type { Profile, Badge } from '../types/database.types'; // Import Badge t
 import { User, Search, Ghost, Blocks, Palette, MonitorPlay, UsersRound, Loader2, Users, AlertCircle } from 'lucide-react'; // Removed unused icons
 import { motion } from 'framer-motion';
 import BadgeChip from '../components/BadgeChip';
+import { sortBadges, BADGE_ORDER } from '../utils/badgeUtils';
 
 // Define an extended Profile type that includes the joined user_badges
 interface ProfileWithBadges extends Profile {
@@ -41,7 +42,7 @@ const MembersPage: React.FC = () => {
         
         // Cast fetchedProfiles to ProfileWithBadges[]
         setProfiles(fetchedProfiles as unknown as ProfileWithBadges[]);
-        setAllBadges(fetchedBadges);
+        setAllBadges(sortBadges(fetchedBadges));
       } catch (err) {
         console.error('Failed to fetch data:', err);
         setError('Failed to load members or badges. Please try again later.');
@@ -108,6 +109,26 @@ const MembersPage: React.FC = () => {
         return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
       }
       if (sortBy === 'badges') {
+        const getBestBadgeRank = (p: ProfileWithBadges) => {
+          if (!p.user_badges || p.user_badges.length === 0) return 999;
+          const badgeNames = p.user_badges.map(ub => ub.badges?.name.toLowerCase().trim()).filter(Boolean);
+          let bestRank = 998;
+          
+          BADGE_ORDER.forEach((name, index) => {
+            if (badgeNames.includes(name) && index < bestRank) {
+              bestRank = index;
+            }
+          });
+          return bestRank;
+        };
+
+        const aRank = getBestBadgeRank(a);
+        const bRank = getBestBadgeRank(b);
+
+        if (aRank !== bRank) {
+          return aRank - bRank;
+        }
+
         const aBadgeCount = a.user_badges?.filter(ub => ub.badges?.is_visible).length || 0;
         const bBadgeCount = b.user_badges?.filter(ub => ub.badges?.is_visible).length || 0;
         // Sort by badge count descending, then by username ascending for stability
@@ -313,9 +334,8 @@ const MembersPage: React.FC = () => {
                 {/* Badges Row */}
                 {profile.user_badges && profile.user_badges.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-8">
-                    {[...profile.user_badges]
-                      .sort((a, b) => (b.badges?.priority ?? 0) - (a.badges?.priority ?? 0))
-                      .map(ub => ub.badges && <BadgeChip key={ub.badge_id} badge={ub.badges} />)}
+                    {sortBadges(profile.user_badges.map(ub => ub.badges).filter((b): b is Badge => !!b))
+                      .map(badge => <BadgeChip key={badge.id} badge={badge} />)}
                   </div>
                 )}
 

@@ -96,6 +96,8 @@ const PriorityCell = ({
 // ---------------------------------------------------------------------------
 // AdminPanel
 // ---------------------------------------------------------------------------
+import { sortBadges } from '../utils/badgeUtils';
+
 const AdminPanel = () => {
   const { profile: currentAdminProfile } = useAuthStore();
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -948,7 +950,7 @@ const AdminPanel = () => {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {badges.map(badge => (
+                  {sortBadges(badges).map(badge => (
                     <div key={badge.id} className={`${cardCls} p-4`}>
                       <div className="mb-3 overflow-hidden">
                         <BadgeChip badge={badge} />

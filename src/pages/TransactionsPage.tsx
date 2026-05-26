@@ -36,6 +36,16 @@ const TransactionsPage = () => {
     fetchTransactions();
   }, [user]);
 
+  const totalEarned = transactions
+    .filter(t => t.type === 'sell')
+    .reduce((sum, t) => sum + (t.price || 0), 0);
+  
+  const totalSpent = transactions
+    .filter(t => t.type === 'buy')
+    .reduce((sum, t) => sum + (t.price || 0), 0);
+
+  const netBalance = totalEarned - totalSpent;
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-6">
@@ -52,6 +62,64 @@ const TransactionsPage = () => {
           Trade<span className="text-strawberry-600">History</span>
         </h1>
         <p className="text-neutral-500 max-w-2xl font-medium uppercase tracking-tight text-sm">Full audit log of your marketplace operations.</p>
+      </div>
+
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 p-6 rounded-[2rem] shadow-xl shadow-neutral-900/5 relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">Total Earned</p>
+              <h2 className="text-3xl font-black italic uppercase tracking-tighter text-green-600">{totalEarned} Diamonds</h2>
+            </div>
+            <div className="p-4 bg-green-500/10 text-green-600 rounded-2xl group-hover:scale-110 transition-transform">
+              <ArrowDownLeft size={24} />
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 p-6 rounded-[2rem] shadow-xl shadow-neutral-900/5 relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">Total Spent</p>
+              <h2 className="text-3xl font-black italic uppercase tracking-tighter text-red-600">{totalSpent} Diamonds</h2>
+            </div>
+            <div className="p-4 bg-red-500/10 text-red-600 rounded-2xl group-hover:scale-110 transition-transform">
+              <ArrowUpRight size={24} />
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 p-6 rounded-[2rem] shadow-xl shadow-neutral-900/5 relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-strawberry-600/5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">Net Balance</p>
+              <h2 className={`text-3xl font-black italic uppercase tracking-tighter ${netBalance >= 0 ? 'text-strawberry-600' : 'text-red-600'}`}>
+                {netBalance > 0 ? '+' : ''}{netBalance} Diamonds
+              </h2>
+            </div>
+            <div className="p-4 bg-strawberry-600/10 text-strawberry-600 rounded-2xl group-hover:scale-110 transition-transform">
+              <Banknote size={24} />
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {transactions.length === 0 ? (
