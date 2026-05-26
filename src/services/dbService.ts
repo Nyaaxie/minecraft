@@ -275,6 +275,64 @@ export const dbService = {
     return data;
   },
 
+  // --- Suggestions ---
+  async createSuggestion(suggestion: { user_id: string; title: string; description: string }) {
+    const { data, error } = await supabase.from('suggestions').insert(suggestion).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  // --- Help Requests ---
+  async createHelpRequest(request: { user_id: string; subject: string; message: string }) {
+    const { data, error } = await supabase.from('help_requests').insert(request).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  // --- Commands ---
+  async getCommands() {
+    const { data, error } = await supabase.from('commands').select('*').order('name', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+  async createCommand(command: { name: string; description: string }) {
+    const { data, error } = await supabase.from('commands').insert(command).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updateCommand(id: string, updates: { name: string; description: string }) {
+    const { data, error } = await supabase.from('commands').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deleteCommand(id: string) {
+    const { error } = await supabase.from('commands').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // --- Guides ---
+  async getGuides() {
+    const { data, error } = await supabase.from('guides').select('*').order('title', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+  async createGuide(guide: { title: string; content: string }) {
+    const { data, error } = await supabase.from('guides').insert(guide).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updateGuide(id: string, updates: { title: string; content: string }) {
+    const { data, error } = await supabase.from('guides').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deleteGuide(id: string) {
+    const { error } = await supabase.from('guides').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
   // --- Minecraft Versions ---
   async getMinecraftVersions() {
     const { data, error } = await supabase

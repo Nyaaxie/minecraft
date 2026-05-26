@@ -14,10 +14,11 @@ import {
   Menu,
   X,
   Map as MapIcon,
-  Puzzle,
   Sparkle,
   UsersRound,
-  ShoppingBag
+  ShoppingBag,
+  ShieldCheck,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -62,27 +63,22 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const menuGroups = [
     {
-      title: 'Main',
+      title: 'Explore',
       items: [
-        { icon: LayoutDashboard, label: 'Overview', to: '/dashboard' },
         { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
         { icon: Calendar, label: 'Events', to: '/events' },
-        { icon: Puzzle, label: 'Plugins', to: '/plugins' },
+        { icon: LayoutDashboard, label: 'Server Info', to: '/dashboard' },
+        { icon: ShieldCheck, label: 'Rules', to: '/rules' },
+        { icon: Info, label: 'Help', to: '/help' },
       ]
     },
     {
-      title: 'Marketplace',
+      title: 'Community',
       items: [
-        { icon: Sparkle, label: 'Player Shops', to: '/shops' },
-        { icon: ShoppingBag, label: 'Trade History', to: '/transactions' },
-        { icon: ShoppingBag, label: 'My Orders', to: '/orders' },
-      ]
-    },
-    {
-      title: 'Social',
-      items: [
-        { icon: MessageSquare, label: 'Messages', to: '/messages', unreadCount: totalUnread },
         { icon: UsersRound, label: 'Members', to: '/members' },
+        { icon: ShoppingBag, label: 'Shops', to: '/shops' },
+        { icon: MessageSquare, label: 'Messages', to: '/messages', unreadCount: totalUnread },
+        { icon: Sparkle, label: 'Suggestions', to: '/suggestions' },
         { icon: User, label: 'Profile', to: '/profile' },
       ]
     }
@@ -103,7 +99,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans selection:bg-strawberry-500/30">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-72 flex-col border-r border-neutral-200 dark:border-white/5 bg-white/80 dark:bg-neutral-900/50 backdrop-blur-xl p-6 fixed h-screen z-50 transition-all duration-300">
-        {/* Logo row */}
         <div className="flex items-center gap-3 px-2 py-4 mb-8">
           <motion.div
             whileHover={{ rotate: 15 }}

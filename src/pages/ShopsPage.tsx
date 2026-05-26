@@ -152,10 +152,19 @@ const ShopsPage = () => {
 
   const filteredShops = shops.filter(shop => {
     const ownerUsername = shop.profiles?.username || '';
+    // Assuming products are part of the shop data or need to be fetched/filtered
+    // Since this is a simple UI update, for now, focus on shop name/description search
+    // To implement real product search, we'd need to fetch shop items and filter based on those
     return shop.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       shop.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
   });
+
+  // Example of how we might implement product search if we had access to items in ShopsPage:
+  // const filteredShopsWithProducts = shops.filter(shop => {
+  //   const shopItems = itemsByShop[shop.id] || [];
+  //   return shopItems.some(item => item.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
+  // });
 
   const [userShops, setUserShops] = useState<PlayerShop[]>([]);
   useEffect(() => {
@@ -165,8 +174,6 @@ const ShopsPage = () => {
   }, [user]);
 
   const handleOpenShop = () => {
-    import.meta.env.DEV && console.log('User shops:', userShops);
-    import.meta.env.DEV && console.log('isAdmin:', isAdmin);
     if (userShops.length > 0) {
       navigate(`/shops/${userShops[0].id}`);
     } else {
@@ -179,9 +186,9 @@ const ShopsPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
-            Shop<span className="text-strawberry-600"> list</span>
+            Shop<span className="text-strawberry-600"> Directory</span>
           </h1>
-          <p className="text-neutral-500 max-w-md font-medium uppercase tracking-tight text-sm">Discover unique player-owned shops and find the best deals in the SMP.</p>
+          <p className="text-neutral-500 max-w-md font-medium uppercase tracking-tight text-sm">Discover unique player-owned shops, find items, and browse amazing products.</p>
         </div>
         <button
           onClick={handleOpenShop}
@@ -196,7 +203,7 @@ const ShopsPage = () => {
           <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-strawberry-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search shops, owners, or descriptions..."
+            placeholder="Search shops, owners, or products..."
             className="w-full bg-neutral-100 dark:bg-neutral-800/50 border border-transparent focus:border-strawberry-500/20 rounded-2xl py-4 pl-12 pr-6 text-neutral-900 dark:text-white outline-none transition-all text-sm font-medium"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -207,7 +214,7 @@ const ShopsPage = () => {
           className="px-6 py-4 bg-neutral-100 dark:bg-white/5 border border-transparent hover:border-strawberry-500/30 rounded-2xl text-neutral-600 dark:text-neutral-400 hover:text-strawberry-600 transition-all flex items-center justify-center gap-3 font-bold text-xs uppercase tracking-widest"
         >
           <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          <span>Sync Marketplace</span>
+          <span>Sync</span>
         </button>
       </div>
 

@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
 import { supabase } from '../services/supabase';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { signupSchema } from '../utils/validation';
 
 const SignupPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
 
     // Validate input using Zod
     const validation = signupSchema.safeParse({ email, password, username });
@@ -145,10 +153,34 @@ const SignupPage = () => {
                   <Lock size={18} />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full rounded-lg bg-neutral-800 border border-neutral-700 py-2.5 pl-10 pr-10 text-white placeholder-neutral-500 focus:border-strawberry-500 focus:ring-1 focus:ring-strawberry-500 sm:text-sm transition-colors"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-500 hover:text-white"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-neutral-300">Confirm Password</label>
+              <div className="relative mt-1">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-500">
+                  <Lock size={18} />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="block w-full rounded-lg bg-neutral-800 border border-neutral-700 py-2.5 pl-10 pr-3 text-white placeholder-neutral-500 focus:border-strawberry-500 focus:ring-1 focus:ring-strawberry-500 sm:text-sm transition-colors"
                   placeholder="••••••••"
                 />
@@ -181,5 +213,6 @@ const SignupPage = () => {
     </div>
   );
 };
+
 
 export default SignupPage;

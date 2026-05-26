@@ -28,8 +28,9 @@ const AdminShopItemPage = lazy(() => import('./pages/AdminShopItemPage'));
 const AdminCategoriesPage = lazy(() => import('./pages/AdminCategoriesPage'));
 const MembersPage = lazy(() => import('./pages/MembersPage'));
 const TransactionsPage = lazy(() => import('./pages/TransactionsPage'));
-const OrdersPage = lazy(() => import('./pages/OrdersPage'));
-const ShopOrdersPage = lazy(() => import('./pages/ShopOrdersPage'));
+const RulesPage = lazy(() => import('./pages/RulesPage'));
+const HelpPage = lazy(() => import('./pages/HelpPage'));
+const SuggestionsPage = lazy(() => import('./pages/SuggestionsPage'));
 
 import DashboardLayout from './components/DashboardLayout';
 
@@ -108,12 +109,13 @@ function App() {
               <Route path="/shops/:shopId/items/new" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/shops/:shopId/items/edit/:itemId" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/transactions" element={<ProtectedRoute><DashboardLayout><TransactionsPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/orders" element={<ProtectedRoute><DashboardLayout><OrdersPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/shops/:shopId/orders" element={<ProtectedRoute><DashboardLayout><ShopOrdersPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/events" element={<ProtectedRoute><DashboardLayout><EventsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><DashboardLayout><MessagesPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><NotificationsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfilePage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/rules" element={<ProtectedRoute><DashboardLayout><RulesPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/help" element={<ProtectedRoute><DashboardLayout><HelpPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/suggestions" element={<ProtectedRoute><DashboardLayout><SuggestionsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/admin/categories/:categoryType" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/admin/categories/:categoryType/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminCategoriesPage /></DashboardLayout></ProtectedRoute>} />

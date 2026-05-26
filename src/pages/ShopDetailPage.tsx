@@ -3,14 +3,14 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { dbService } from '../services/dbService';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 import type { PlayerShop, ShopItem } from '../types/database.types';
-import { Loader2, Store, Tag, Edit, Banknote, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, Minus, X, ShoppingCart } from 'lucide-react';
+import { Loader2, Store, Edit, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, Minus, X, } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCartStore } from '../store/useCartStore';
 import { orderService } from '../services/orderService';
 
-const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, addToCart }: {
+const ShopItemCard = ({ item, canManage, onEdit, onDelete, }: {
   item: ShopItem,
   canManage: boolean,
   isOwner: boolean,
@@ -19,7 +19,6 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, addToCart }:
   addToCart: (item: ShopItem) => void
 }) => {
   const itemImageUrl = getMinecraftItemImageUrl(item.minecraft_item_id, { size: 64 });
-  const categoryName = (item.shop_categories as { name: string } | null)?.name || 'Uncategorized';
 
   return (
     <motion.div
@@ -30,7 +29,7 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, addToCart }:
     >
       <div className="absolute inset-0 bg-gradient-to-br from-strawberry-500/0 via-transparent to-strawberry-500/0 group-hover:from-strawberry-500/5 transition-all duration-500 pointer-events-none rounded-3xl" />
 
-      <div className="relative p-5 pb-4">
+      <div className="relative p-5">
         {canManage && (
           <div className="absolute top-4 right-4 flex gap-1.5 z-10">
             <button
@@ -60,54 +59,26 @@ const ShopItemCard = ({ item, canManage, isOwner, onEdit, onDelete, addToCart }:
             />
           </div>
 
-          <div className={`flex-1 min-w-0 ${canManage ? 'pr-20' : ''}`}>
+          <div className={`flex-1 min-w-0 ${canManage ? 'pr-12' : ''}`}>
             <h3 className="text-sm font-black italic uppercase tracking-tight leading-tight group-hover:text-strawberry-600 transition-colors truncate">
               {item.item_name}
             </h3>
             <div className="flex items-center gap-1.5 mt-1.5">
-              <Package size={11} className="text-neutral-400 shrink-0" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-                {item.quantity} Quantity
+              <span className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 bg-strawberry-500/10 px-2 py-0.5 rounded-lg">
+                {item.quantity} Units
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="h-px bg-neutral-100 dark:bg-white/5 mx-5" />
-
-      <div className="px-5 py-4 flex-grow">
-        <p className="text-xs text-neutral-500 dark:text-neutral-400 italic leading-relaxed line-clamp-2">
-          "{item.description || 'No description provided.'}"
-        </p>
-      </div>
-
-      <div className="px-5 pb-5 flex flex-col gap-3 mt-auto">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3.5 py-2 bg-strawberry-600 text-white rounded-xl shadow-lg shadow-strawberry-600/25 shrink-0">
-            <Banknote size={13} />
-            <span className="text-[11px] font-black italic uppercase tracking-widest">
-              {item.price} {item.currency}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-neutral-100 dark:bg-white/5 rounded-xl border border-neutral-200/50 dark:border-white/5 min-w-0">
-            <Tag size={10} className="text-neutral-400 shrink-0" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 truncate">
-              {categoryName}
-            </span>
-          </div>
+      <div className="px-5 pb-5 mt-auto">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl">
+          <span className="text-[11px] font-black italic uppercase tracking-widest text-neutral-500">Price</span>
+          <span className="text-[11px] font-black italic uppercase tracking-widest text-neutral-900 dark:text-white">
+            {item.price} {item.currency}
+          </span>
         </div>
-
-        {!isOwner && (
-          <button
-            onClick={() => addToCart(item)}
-            disabled={item.quantity <= 0}
-            className="w-full py-2.5 bg-strawberry-600 text-white rounded-xl font-black italic uppercase tracking-widest text-[10px] hover:bg-strawberry-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
-          >
-            <ShoppingCart size={13} /> {item.quantity <= 0 ? 'Out of Stock' : 'Order'}
-          </button>
-        )}
       </div>
     </motion.div>
   );
@@ -154,17 +125,17 @@ const CartSidebar = () => {
         {items.map(item => (
           <div key={item.id} className="flex items-center gap-4 bg-neutral-50 dark:bg-neutral-800 p-3 rounded-xl">
             <div className="flex flex-col gap-1 items-center">
-               <button onClick={() => increaseQuantity(item.id)} className="text-strawberry-600"><Plus size={12}/></button>
-               <span className="text-xs font-bold">{item.cartQuantity}</span>
-               <button onClick={() => decreaseQuantity(item.id)} className="text-strawberry-600"><Minus size={12}/></button>
+              <button onClick={() => increaseQuantity(item.id)} className="text-strawberry-600"><Plus size={12} /></button>
+              <span className="text-xs font-bold">{item.cartQuantity}</span>
+              <button onClick={() => decreaseQuantity(item.id)} className="text-strawberry-600"><Minus size={12} /></button>
             </div>
             <span className="flex-1 text-sm truncate">{item.item_name}</span>
             <span className="text-xs font-black italic">{item.price * item.cartQuantity} {item.currency}</span>
-            <button onClick={() => removeFromCart(item.id)} className="text-neutral-400 hover:text-red-500"><X size={14}/></button>
+            <button onClick={() => removeFromCart(item.id)} className="text-neutral-400 hover:text-red-500"><X size={14} /></button>
           </div>
         ))}
       </div>
-      <button 
+      <button
         onClick={handlePlaceOrder}
         disabled={isProcessing}
         className="w-full py-4 bg-strawberry-600 text-white rounded-xl font-black italic uppercase tracking-widest text-sm shadow-lg shadow-strawberry-600/30"
@@ -332,11 +303,11 @@ const ShopDetailPage = () => {
         <div className="flex items-center justify-between px-2">
           <h2 className="text-3xl font-black italic uppercase tracking-tighter flex items-center gap-4">
             <Package className="text-strawberry-600" />
-            Live Inventory
+            Products
           </h2>
           <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-xl shadow-md">
             <span className="text-[10px] font-black uppercase tracking-widest text-strawberry-600">{shopItems.length}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Active Listings</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Available Items</span>
           </div>
         </div>
 

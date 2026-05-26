@@ -30,6 +30,10 @@ export interface Profile {
   favorite_block: string | null
   favorite_color: string | null
   minecraft_edition: MinecraftEdition | null
+  social_links: string | null
+  bedrock_username: string | null
+  birthmonth: string | null
+  join_date: string | null
 }
 
 export interface Event {

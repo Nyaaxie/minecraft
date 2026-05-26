@@ -13,7 +13,9 @@ import {
   Palette, // For favorite color
   Blocks, // For favorite block
   Ghost, // For favorite mob
-  MonitorPlay // For Minecraft Edition
+  MonitorPlay, // For Minecraft Edition
+  Globe,
+  Calendar
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Profile, UserBadge, Badge } from '../types/database.types'; // Import Badge type
@@ -40,6 +42,11 @@ const ProfilePage = () => {
     favorite_block: profile?.favorite_block || '',
     favorite_color: profile?.favorite_color || '',
     minecraft_edition: profile?.minecraft_edition || null,
+    // @ts-ignore - Assuming these fields exist in Profile type or will be added
+    social_links: profile?.social_links || '',
+    bedrock_username: profile?.bedrock_username || '',
+    birthmonth: profile?.birthmonth || '',
+    join_date: profile?.join_date || '',
   });
   const [userBadges, setUserBadges] = useState<UserBadgeWithDetails[]>([]);
 
@@ -231,6 +238,57 @@ const ProfilePage = () => {
                   onChange={handleChange}
                   className={inputCls}
                   placeholder="In-game handle..."
+                />
+              </div>
+              <div className="space-y-1">
+                <label className={labelCls}>
+                  <Gamepad2 size={14} className="text-strawberry-500" /> Bedrock Username
+                </label>
+                <input
+                  type="text"
+                  name="bedrock_username"
+                  value={formData.bedrock_username || ''}
+                  onChange={handleChange}
+                  className={inputCls}
+                  placeholder="Bedrock handle..."
+                />
+              </div>
+              <div className="space-y-1">
+                <label className={labelCls}>
+                  <Globe size={14} className="text-strawberry-500" /> Social Links
+                </label>
+                <input
+                  type="text"
+                  name="social_links"
+                  value={formData.social_links || ''}
+                  onChange={handleChange}
+                  className={inputCls}
+                  placeholder="Links..."
+                />
+              </div>
+              <div className="space-y-1">
+                <label className={labelCls}>
+                  <Calendar size={14} className="text-strawberry-500" /> Birthmonth
+                </label>
+                <input
+                  type="text"
+                  name="birthmonth"
+                  value={formData.birthmonth || ''}
+                  onChange={handleChange}
+                  className={inputCls}
+                  placeholder="e.g. January..."
+                />
+              </div>
+              <div className="space-y-1">
+                <label className={labelCls}>
+                  <Calendar size={14} className="text-strawberry-500" /> Join Date
+                </label>
+                <input
+                  type="date"
+                  name="join_date"
+                  value={formData.join_date || ''}
+                  onChange={handleChange}
+                  className={inputCls}
                 />
               </div>
             </div>
