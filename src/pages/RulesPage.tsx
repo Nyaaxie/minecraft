@@ -25,11 +25,11 @@ const RulesPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
-      <Link to="/dashboard" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group mb-8">
+      <Link to="/server-info" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group mb-8">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-        Back to Dashboard
+        Back to Server Info
       </Link>
-      
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -39,7 +39,7 @@ const RulesPage = () => {
           <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20">
             <ShieldCheck className="text-strawberry-600" size={32} />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">System Rules</h1>
+          <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Server Rules</h1>
         </div>
 
         {loading ? (

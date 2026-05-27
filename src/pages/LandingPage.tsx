@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom';
 import { Menu, X, Heart, Sparkles } from 'lucide-react';
 import { ThemeToggle } from '../components/ThemeToggle';
 
-// ─── Font injection (Playfair Display for title) ───────────────────────────
-const fontLink = document.createElement('link');
-fontLink.rel = 'stylesheet';
-fontLink.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@300;400;500&display=swap';
-document.head.appendChild(fontLink);
+<link href="https://fonts.googleapis.com/css2?family=Genty&display=swap" rel="stylesheet" />
+
+
+
 
 // ─── Floating petals background ────────────────────────────────────────────
 const PETALS = Array.from({ length: 18 }, (_, i) => ({
@@ -60,7 +59,7 @@ const Navbar = () => {
           <div className="w-9 h-9 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
             <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
           </div>
-          <span style={{ fontFamily: "'Playfair Display', serif" }} className="text-lg font-black tracking-tight text-neutral-900 dark:text-white italic">
+          <span style={{ fontFamily: "'Genty', serif" }} className="text-lg font-black tracking-tight text-neutral-900 dark:text-white italic">
             Strawberry<span className="text-strawberry-600">SMP</span>
           </span>
         </Link>
@@ -178,12 +177,7 @@ const LandingPage = () => {
             >
               Join Community
             </Link>
-            <a
-              href="#culture"
-              className="px-8 py-3.5 bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-700 dark:text-neutral-300 font-bold rounded-2xl transition-all text-sm uppercase tracking-widest"
-            >
-              Learn More
-            </a>
+
           </motion.div>
 
           {/* Cute little heart divider */}

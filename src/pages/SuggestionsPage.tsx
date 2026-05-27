@@ -36,9 +36,9 @@ const SuggestionsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
-      <Link to="/dashboard" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group mb-8">
+      <Link to="/server-info" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group mb-8">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-        Back to Dashboard
+        Back to Server Info
       </Link>
       
       <motion.div

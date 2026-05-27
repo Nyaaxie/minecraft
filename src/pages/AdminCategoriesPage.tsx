@@ -124,7 +124,7 @@ const AdminCategoriesPage = () => {
   useEffect(() => {
     const loadData = async () => {
       if (!isAdmin) {
-        navigate('/dashboard'); // Redirect if not admin
+        navigate('/server-info'); // Redirect if not admin
         toast.error('Unauthorized access.');
         return;
       }

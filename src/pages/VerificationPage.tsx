@@ -17,7 +17,7 @@ const VerificationPage = () => {
       // Once loading finishes, check if we have a user
       if (user) {
         setStatus('success');
-        setTimeout(() => navigate('/dashboard'), 2000);
+        setTimeout(() => navigate('/server-info'), 2000);
       } else {
         setStatus('error');
       }

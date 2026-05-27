@@ -245,6 +245,13 @@ export interface Badge {
   created_by: string | null
 }
 
+export interface ServerInfo {
+  id: string
+  label: string
+  value: string
+  created_at: string
+}
+
 export interface UserBadge {
   user_id: string
   badge_id: string
@@ -397,6 +404,11 @@ export interface Database {
         Row: Badge
         Insert: Omit<Badge, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<Badge, 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Badge>
+      }
+      server_info: {
+        Row: ServerInfo
+        Insert: Omit<ServerInfo, 'id' | 'created_at'> & Partial<Pick<ServerInfo, 'id' | 'created_at'>>
+        Update: Partial<ServerInfo>
       }
       user_badges: {
         Row: UserBadge

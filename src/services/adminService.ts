@@ -82,6 +82,29 @@ export const adminService = {
     return data;
   },
 
+  async getServerInfo() {
+    const { data, error } = await supabase.from('server_info').select('*').order('created_at', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  async upsertServerInfo(data: any[]) {
+    // 1. Delete all existing
+    const { error: deleteError } = await supabase.from('server_info').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // Tricky to delete all, maybe just delete all via a broader filter or a function
+    // Better way: get all ids and delete them, or use a function.
+    // Actually, delete everything by not providing a filter:
+    const { error: deleteErrorAll } = await supabase.from('server_info').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // Actually, just do .delete().neq('id', '00000000-0000-0000-0000-000000000000') is wrong if id is random.
+    // Easiest: use .select('id') then .delete().in('id', ids).
+    const { data: existing } = await supabase.from('server_info').select('id');
+    if (existing && existing.length > 0) {
+      await supabase.from('server_info').delete().in('id', existing.map(e => e.id));
+    }
+
+    // 2. Insert new
+    const { error: insertError } = await supabase.from('server_info').insert(data);
+    if (insertError) throw insertError;
+  },
+
   async createVersion(version: Omit<MinecraftVersion, 'id' | 'updated_at'>) {
     const { data, error } = await supabase.from('minecraft_versions').insert(version).select().single();
     if (error) throw error;

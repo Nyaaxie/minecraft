@@ -53,7 +53,7 @@ const LoginPage = () => {
         if (profile) setProfile(profile);
       }
       
-      navigate('/dashboard', { replace: true });
+      navigate('/server-info', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
       setLoading(false);

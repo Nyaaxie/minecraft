@@ -14,7 +14,7 @@ import BadgeChip from '../components/BadgeChip';
 import {
   Loader2, Trash2, Award, Calendar, Megaphone, ShieldCheck,
   Users, CheckSquare, Bell, Tag, BookOpen, Puzzle, Terminal,
-  GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw,
+  GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw, Info,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sortBadges } from '../utils/badgeUtils';
@@ -24,7 +24,7 @@ import { sortBadges } from '../utils/badgeUtils';
 type TabKey =
   | 'users' | 'approvals' | 'announcements' | 'events'
   | 'rules' | 'reminders' | 'versions' | 'categories'
-  | 'badges' | 'commands' | 'guides' | 'plugins';
+  | 'badges' | 'commands' | 'guides' | 'plugins' | 'serverInfo';
 
 const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'users', label: 'Users', icon: Users },
@@ -39,6 +39,7 @@ const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'commands', label: 'Commands', icon: Terminal },
   { key: 'guides', label: 'Guides', icon: BookOpen },
   { key: 'plugins', label: 'Plugins', icon: Puzzle },
+  { key: 'serverInfo', label: 'Server Info', icon: Info },
 ];
 
 // ─── Shared UI ─────────────────────────────────────────────────────────────
@@ -191,6 +192,35 @@ const EmptyState = ({ icon: Icon, label }: { icon: React.ElementType; label: str
   </div>
 );
 
+const ServerInfoTab = ({ serverInfo, onSave }: { serverInfo: any[], onSave: (data: any[]) => void }) => {
+  const [data, setData] = useState(serverInfo);
+
+  const updateItem = (index: number, key: string, value: string) => {
+    const newData = [...data];
+    newData[index][key] = value;
+    setData(newData);
+  };
+
+  const addItem = () => setData([...data, { label: '', value: '' }]);
+  const deleteItem = (index: number) => setData(data.filter((_, i) => i !== index));
+
+  return (
+    <>
+      <SectionHeader icon={Info} title="Server Info Management" onAdd={addItem} addLabel="Add Row" />
+      <div className={`${cardCls} space-y-3`}>
+        {data.map((item, i) => (
+          <div key={i} className="flex gap-2">
+            <input className={inputCls} value={item.label} onChange={e => updateItem(i, 'label', e.target.value)} placeholder="Label" />
+            <input className={inputCls} value={item.value} onChange={e => updateItem(i, 'value', e.target.value)} placeholder="Value" />
+            <button onClick={() => deleteItem(i)} className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20"><Trash2 size={16} /></button>
+          </div>
+        ))}
+      </div>
+      <button onClick={() => onSave(data)} className="mt-4 px-6 py-2.5 rounded-xl bg-strawberry-600 text-white font-black italic uppercase tracking-widest text-[10px]">Save Changes</button>
+    </>
+  );
+};
+
 // ─── USERS TAB ─────────────────────────────────────────────────────────────
 
 const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
@@ -204,6 +234,8 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
   const ROLES: UserRole[] = ['player', 'admin'];
 
   const filtered = profiles.filter(p => p.username?.toLowerCase().includes(search.toLowerCase()));
+  const admins = filtered.filter(p => p.role === 'admin');
+  const players = filtered.filter(p => p.role !== 'admin');
 
   const openEdit = (p: Profile) => { setForm({ role: p.role || 'player', username: p.username || '' }); setEditTarget(p); };
 
@@ -231,32 +263,43 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
     catch { toast.error('Failed to delete user'); }
   };
 
+  const UserRow = ({ p }: { p: Profile }) => (
+    <div key={p.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0">
+          {p.avatar_url ? <img src={p.avatar_url} alt={p.username ?? undefined} className="w-full h-full object-cover" /> : <Users size={16} className="text-neutral-400" />}
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-black italic uppercase tracking-tight truncate">{p.username}</p>
+          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${(p.role as string) === 'admin' ? 'bg-strawberry-500/10 text-strawberry-600' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
+            {p.role || 'player'}
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button onClick={() => onAssignBadges(p)} className="flex items-center gap-1.5 px-3 py-2 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 text-neutral-400 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest italic">
+          <Award size={11} /> Badges
+        </button>
+        <RowActions onEdit={() => openEdit(p)} onDelete={() => setDeleteTarget(p)} />
+      </div>
+    </div>
+  );
+
   return (
     <>
       <SectionHeader icon={Users} title="Users" count={filtered.length} search={search} onSearch={setSearch} />
-      {filtered.length === 0 ? <EmptyState icon={Users} label="No users found" /> : filtered.map(p => (
-        <div key={p.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0">
-              {/* Fix: convert null to undefined for alt prop */}
-              {p.avatar_url ? <img src={p.avatar_url} alt={p.username ?? undefined} className="w-full h-full object-cover" /> : <Users size={16} className="text-neutral-400" />}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-black italic uppercase tracking-tight truncate">{p.username}</p>
-              {/* Fix: cast role to any to allow comparison with string literals beyond the strict UserRole union */}
-              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${(p.role as string) === 'admin' ? 'bg-strawberry-500/10 text-strawberry-600' : (p.role as string) === 'moderator' ? 'bg-blue-500/10 text-blue-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
-                {p.role || 'player'}
-              </span>
-            </div>
+      {filtered.length === 0 ? <EmptyState icon={Users} label="No users found" /> : (
+        <>
+          <div className="mb-6">
+            <h3 className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-3 px-2">Admins</h3>
+            {admins.length === 0 ? <p className="text-[10px] text-neutral-500 px-4 italic">No admins</p> : admins.map(p => <UserRow key={p.id} p={p} />)}
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button onClick={() => onAssignBadges(p)} className="flex items-center gap-1.5 px-3 py-2 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 text-neutral-400 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest italic">
-              <Award size={11} /> Badges
-            </button>
-            <RowActions onEdit={() => openEdit(p)} onDelete={() => setDeleteTarget(p)} />
+          <div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-3 px-2">Players</h3>
+            {players.length === 0 ? <p className="text-[10px] text-neutral-500 px-4 italic">No players</p> : players.map(p => <UserRow key={p.id} p={p} />)}
           </div>
-        </div>
-      ))}
+        </>
+      )}
       <CrudModal open={!!editTarget} onClose={() => setEditTarget(null)} title="Edit User" icon={Users} onSubmit={handleSave} submitting={saving}>
         <div><label className={labelCls}>Username</label><input className={inputCls} value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} placeholder="Username" /></div>
         <div>
@@ -829,6 +872,7 @@ const AdminPanel = () => {
   const [commands, setCommands] = useState<any[]>([]);
   const [guides, setGuides] = useState<any[]>([]);
   const [plugins, setPlugins] = useState<any[]>([]);
+  const [serverInfo, setServerInfo] = useState<any[]>([]);
   const { refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('users');
@@ -849,6 +893,9 @@ const AdminPanel = () => {
       ]);
       setProfiles(p); setEvents(e); setRules(r); setReminders(rem);
       setBadges(b); setCommands(c); setGuides(g); setPlugins(pl);
+      // Fetch server info
+      const info = await adminService.getServerInfo();
+      setServerInfo(info);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load admin data');
@@ -932,6 +979,7 @@ const AdminPanel = () => {
             {activeTab === 'commands' && <CommandsTab commands={commands} onRefresh={fetchData} />}
             {activeTab === 'guides' && <GuidesTab guides={guides} onRefresh={fetchData} />}
             {activeTab === 'plugins' && <PluginsTab plugins={plugins} onRefresh={fetchData} />}
+            {activeTab === 'serverInfo' && <ServerInfoTab serverInfo={serverInfo} onSave={async (data) => { await adminService.upsertServerInfo(data); toast.success('Saved'); fetchData(); }} />}
           </motion.div>
         </AnimatePresence>
       )}

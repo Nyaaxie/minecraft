@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Genty&display=swap');
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -16,7 +15,11 @@
   --color-strawberry-900: #881337;
   --color-strawberry-950: #4c0519;
 
-  --font-sans: "Genty", "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+.font-genty {
+  font-family: "Genty", serif;
 }
 
 :root {

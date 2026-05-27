@@ -257,7 +257,7 @@ export const dbService = {
   async createReminder(reminder: Omit<Reminder, 'id' | 'created_at'>) {
     const { data, error } = await supabase.from('reminders').insert(reminder).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Reminder', reminder.title, 'system', '/dashboard');
+    await this.notifyAllUsers('New Reminder', reminder.title, 'system', '/server-info');
     return data;
   },
 

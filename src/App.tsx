@@ -12,7 +12,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const VerificationPage = lazy(() => import('./pages/VerificationPage'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const ServerInfoPage = lazy(() => import('./pages/ServerInfoPage'));
 const EventsPage = lazy(() => import('./pages/EventsPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
@@ -66,7 +66,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   }
   
   // 5. Admin check
-  if (adminOnly && profile.role !== 'admin') return <Navigate to="/dashboard" replace />;
+  if (adminOnly && profile.role !== 'admin') return <Navigate to="/server-info" replace />;
   
   return <>{children}</>;
 };
@@ -86,12 +86,13 @@ function App() {
                 <Route path="/verify" element={<VerificationPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />              <Route path="/reset-password" element={<ResetPasswordPage />} />
                 
+                <Route path="/dashboard" element={<Navigate to="/server-info" replace />} />
                 <Route 
-                  path="/dashboard" 
+                  path="/server-info" 
                   element={
                     <ProtectedRoute>
                       <DashboardLayout>
-                        <DashboardPage />
+                        <ServerInfoPage />
                       </DashboardLayout>
                     </ProtectedRoute>
                   } 

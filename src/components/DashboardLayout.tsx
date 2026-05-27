@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
 const SidebarItem = ({ icon: Icon, label, to, active, onClick }: { icon: any, label: string, to: string, active: boolean, onClick?: () => void }) => {
   const unreadCounts = useChatStore((state) => state.unreadCounts);
 
@@ -67,7 +68,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       items: [
         { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
         { icon: Calendar, label: 'Events', to: '/events' },
-        { icon: LayoutDashboard, label: 'Server Info', to: '/dashboard' },
+        { icon: LayoutDashboard, label: 'Server Info', to: '/server-info' },
         { icon: ShieldCheck, label: 'Rules', to: '/rules' },
         { icon: Info, label: 'Help', to: '/help' },
       ]
@@ -106,8 +107,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
           </motion.div>
-          <span className="text-base font-black tracking-tighter italic uppercase flex-1 min-w-0">
-            Strawberry<span className="text-strawberry-600 font-black">SMP</span>
+          <span className="font-genty font-bold italic text-base tracking-tight flex-1 min-w-0">
+            Strawberry<span className="text-strawberry-600">SMP</span>
           </span>
           <div className="hidden lg:flex items-center shrink-0 -mr-1">
             <NotificationCenter />
