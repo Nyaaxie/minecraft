@@ -3,12 +3,11 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { dbService } from '../services/dbService';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 import type { PlayerShop, ShopItem } from '../types/database.types';
-import { Loader2, Store, Edit, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, Minus, X, } from 'lucide-react';
+import { Loader2, Store, Edit, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCartStore } from '../store/useCartStore';
-import { orderService } from '../services/orderService';
 
 const ShopItemCard = ({ item, canManage, onEdit, onDelete, }: {
   item: ShopItem,
@@ -83,70 +82,6 @@ const ShopItemCard = ({ item, canManage, onEdit, onDelete, }: {
     </motion.div>
   );
 };
-
-const CartSidebar = () => {
-  const { items, removeFromCart, increaseQuantity, decreaseQuantity, clearCart } = useCartStore();
-  const { user } = useAuthStore();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const navigate = useNavigate();
-
-  const handlePlaceOrder = async () => {
-    if (!user || items.length === 0) return;
-    setIsProcessing(true);
-    try {
-      // Assuming all items are from the same shop for this implementation
-      const shopId = items[0].shop_id;
-      const orderItems = items.map(item => ({ itemId: item.id, quantity: item.cartQuantity }));
-      await orderService.createOrder(user.id, shopId, orderItems);
-      toast.success('Order placed successfully!');
-      clearCart();
-      navigate('/orders');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to place order');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  if (items.length === 0) return null;
-
-  return (
-    <motion.div
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      className="fixed right-6 bottom-6 w-96 bg-white dark:bg-neutral-900 rounded-[2rem] shadow-2xl border border-neutral-200 dark:border-white/10 p-6 z-50 max-h-[80vh] flex flex-col"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-black italic uppercase tracking-tighter text-xl">Your Order</h3>
-        <button onClick={clearCart} className="text-xs text-red-500 font-bold uppercase tracking-widest">Clear</button>
-      </div>
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-        {items.map(item => (
-          <div key={item.id} className="flex items-center gap-4 bg-neutral-50 dark:bg-neutral-800 p-3 rounded-xl">
-            <div className="flex flex-col gap-1 items-center">
-              <button onClick={() => increaseQuantity(item.id)} className="text-strawberry-600"><Plus size={12} /></button>
-              <span className="text-xs font-bold">{item.cartQuantity}</span>
-              <button onClick={() => decreaseQuantity(item.id)} className="text-strawberry-600"><Minus size={12} /></button>
-            </div>
-            <span className="flex-1 text-sm truncate">{item.item_name}</span>
-            <span className="text-xs font-black italic">{item.price * item.cartQuantity} {item.currency}</span>
-            <button onClick={() => removeFromCart(item.id)} className="text-neutral-400 hover:text-red-500"><X size={14} /></button>
-          </div>
-        ))}
-      </div>
-      <button
-        onClick={handlePlaceOrder}
-        disabled={isProcessing}
-        className="w-full py-4 bg-strawberry-600 text-white rounded-xl font-black italic uppercase tracking-widest text-sm shadow-lg shadow-strawberry-600/30"
-      >
-        {isProcessing ? 'Processing...' : 'Order'}
-      </button>
-    </motion.div>
-  );
-};
-
-// ... (rest of the ShopDetailPage component stays mostly same, just add CartSidebar)
 
 const ShopDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -273,11 +208,6 @@ const ShopDetailPage = () => {
               <Link to={`/shops/edit/${shop.id}`} className="px-5 py-3 bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-300 rounded-xl flex items-center gap-2 font-black italic uppercase tracking-widest text-[10px] transition-all">
                 <Edit size={14} /> Update
               </Link>
-              {isOwner && (
-                <Link to={`/shops/${shop.id}/orders`} className="px-5 py-3 bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-300 rounded-xl flex items-center gap-2 font-black italic uppercase tracking-widest text-[10px] transition-all">
-                  <Package size={14} /> Manage Orders
-                </Link>
-              )}
               <button
                 onClick={handleDeleteShop}
                 className="px-5 py-3 bg-neutral-100 dark:bg-white/5 hover:bg-red-500/10 hover:text-red-600 text-neutral-600 dark:text-neutral-300 rounded-xl flex items-center gap-2 font-black italic uppercase tracking-widest text-[10px] transition-all"
@@ -342,8 +272,6 @@ const ShopDetailPage = () => {
           </div>
         )}
       </div>
-
-      <CartSidebar />
     </div>
   );
 };

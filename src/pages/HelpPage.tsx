@@ -9,7 +9,7 @@ import { useAuthStore } from '../store/useAuthStore';
 // ─── Section Card ───────────────────────────────────────────────────────────
 
 const SectionCard = ({
-  id,
+  id: _id,
   icon: Icon,
   title,
   count,

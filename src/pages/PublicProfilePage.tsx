@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { dbService } from '../services/dbService';
 import { Loader2, User, Shield, Gamepad2, Globe, Calendar, Ghost, Blocks, Palette, MonitorPlay, ArrowLeft } from 'lucide-react';

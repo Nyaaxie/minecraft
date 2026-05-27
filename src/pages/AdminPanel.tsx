@@ -13,7 +13,7 @@ import type { Profile, Event, Rule, Reminder, Badge, UserRole } from '../types/d
 import BadgeChip from '../components/BadgeChip';
 import {
   Loader2, Trash2, Award, Calendar, Megaphone, ShieldCheck,
-  Users, CheckSquare, Bell, Tag, BookOpen, Puzzle, Terminal,
+  Users, CheckSquare, Bell, BookOpen, Puzzle, Terminal,
   GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw, Info, MessageSquare, Sparkle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -735,82 +735,7 @@ const BadgesTab = ({ badges, onRefresh, onAdd, onEdit }: {
   );
 };
 
-// ─── CATEGORIES TAB ────────────────────────────────────────────────────────
-
-const CategoriesTab = () => {
-  const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<any>(null);
-  const [deleteTarget, setDeleteTarget] = useState<any>(null);
-  const [form, setForm] = useState({ name: '', description: '', color: '#ef4444' });
-  const [saving, setSaving] = useState(false);
-
-  const fetchCats = async () => {
-    setLoading(true);
-    // Fix: use correct method name getShopCategories
-    try { setCategories(await dbService.getShopCategories()); }
-    catch { toast.error('Failed to load categories'); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { fetchCats(); }, []);
-
-  const openAdd = () => { setForm({ name: '', description: '', color: '#ef4444' }); setEditTarget(null); setModalOpen(true); };
-  const openEdit = (c: any) => { setForm({ name: c.name || '', description: c.description || '', color: c.color || '#ef4444' }); setEditTarget(c); setModalOpen(true); };
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      // Fix: use correct method names updateShopCategory / createShopCategory
-      if (editTarget) { await dbService.updateShopCategory(editTarget.id, form); toast.success('Category updated'); }
-      else { await dbService.createShopCategory({ ...form, icon_url: null }); toast.success('Category created'); }
-      setModalOpen(false); fetchCats();
-    } catch { toast.error('Failed to save category'); }
-    finally { setSaving(false); }
-  };
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    // Fix: use correct method name deleteShopCategory
-    try { await dbService.deleteShopCategory(deleteTarget.id); toast.success('Category deleted'); setDeleteTarget(null); fetchCats(); }
-    catch { toast.error('Failed to delete category'); }
-  };
-
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-strawberry-600" size={28} /></div>;
-
-  return (
-    <>
-      <SectionHeader icon={Tag} title="Categories" count={categories.length} onAdd={openAdd} addLabel="New Category" />
-      {categories.length === 0 ? <EmptyState icon={Tag} label="No categories found" /> : categories.map(c => (
-        <div key={c.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: (c.color || '#ef4444') + '20', border: `1px solid ${c.color || '#ef4444'}30` }}>
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: c.color || '#ef4444' }} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-black italic uppercase tracking-tight truncate">{c.name}</p>
-              {c.description && <p className="text-[10px] text-neutral-400 font-bold truncate">{c.description}</p>}
-            </div>
-          </div>
-          <RowActions onEdit={() => openEdit(c)} onDelete={() => setDeleteTarget(c)} />
-        </div>
-      ))}
-      <CrudModal open={modalOpen} onClose={() => setModalOpen(false)} title={editTarget ? 'Edit Category' : 'New Category'} icon={Tag} onSubmit={handleSave} submitting={saving}>
-        <div><label className={labelCls}>Name</label><input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Category name" /></div>
-        <div>
-          <label className={labelCls}>Color</label>
-          <div className="flex items-center gap-3">
-            <input type="color" className="w-12 h-10 rounded-xl border border-neutral-200 dark:border-white/10 cursor-pointer" value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} />
-            <input className={`${inputCls} flex-1`} value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} placeholder="#ef4444" />
-          </div>
-        </div>
-        <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Category description..." /></div>
-      </CrudModal>
-      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'category'} />
-    </>
-  );
-};
+// ... (rest of the file content)
 
 // ─── VERSIONS TAB ──────────────────────────────────────────────────────────
 
