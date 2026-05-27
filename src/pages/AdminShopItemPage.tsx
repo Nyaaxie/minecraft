@@ -154,8 +154,7 @@ const AdminShopItemPage = () => {
 
   return (
     <div className="container mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-8">{item ? 'Edit Shop Item' : 'Add New Shop Item'}</h1>
-      <AdminShopItemForm item={item} onSubmit={handleSubmit} onCancel={() => navigate(`/shops/${shopId}`)} isSaving={isSaving} />
+      <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none text-neutral-900 dark:text-white mb-8">{item ? 'Edit Shop Item' : 'Add New Shop Item'}</h1>      <AdminShopItemForm item={item} onSubmit={handleSubmit} onCancel={() => navigate(`/shops/${shopId}`)} isSaving={isSaving} />
     </div>
   );
 };

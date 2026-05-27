@@ -26,7 +26,6 @@ const ShopCard = React.memo(({ shop, currentUserId, isAdmin, onDelete }: {
       viewport={{ once: true }}
       className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-xl shadow-neutral-900/5 flex flex-col h-full hover:border-strawberry-500/30 transition-all group overflow-hidden relative"
     >
-      {/* Background Accent */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-strawberry-500/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
 
       <div className="relative z-10 flex flex-col h-full">
@@ -111,6 +110,7 @@ const ShopCardSkeleton = () => (
 
 const ShopsPage = () => {
   const [shops, setShops] = useState<(PlayerShop & { profiles: { username: string; avatar_url: string } | null })[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -124,8 +124,12 @@ const ShopsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const fetchedShops = await dbService.getPlayerShops();
+      const [fetchedShops, fetchedItems] = await Promise.all([
+        dbService.getPlayerShops(),
+        dbService.getShopItems()
+      ]);
       setShops(fetchedShops);
+      setItems(fetchedItems);
     } catch (err) {
       console.error('Error fetching shops:', err);
       setError('Failed to load shops. Please try again later.');
@@ -152,19 +156,13 @@ const ShopsPage = () => {
 
   const filteredShops = shops.filter(shop => {
     const ownerUsername = shop.profiles?.username || '';
-    // Assuming products are part of the shop data or need to be fetched/filtered
-    // Since this is a simple UI update, for now, focus on shop name/description search
-    // To implement real product search, we'd need to fetch shop items and filter based on those
+    const shopItems = items.filter(item => item.shop_id === shop.id);
+    
     return shop.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       shop.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      shopItems.some(item => item.item_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
   });
-
-  // Example of how we might implement product search if we had access to items in ShopsPage:
-  // const filteredShopsWithProducts = shops.filter(shop => {
-  //   const shopItems = itemsByShop[shop.id] || [];
-  //   return shopItems.some(item => item.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
-  // });
 
   const [userShops, setUserShops] = useState<PlayerShop[]>([]);
   useEffect(() => {
@@ -182,13 +180,20 @@ const ShopsPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4 sm:px-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
-            Shop<span className="text-strawberry-600"> Directory</span>
-          </h1>
-          <p className="text-neutral-500 max-w-md font-medium uppercase tracking-tight text-sm">Discover unique player-owned shops, find items, and browse amazing products.</p>
+    <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6 space-y-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2 mb-12">
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600">
+            <Store size={32} />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
+              Shops
+            </h1>
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
+              Discover unique player-owned shops.
+            </p>
+          </div>
         </div>
         <button
           onClick={handleOpenShop}

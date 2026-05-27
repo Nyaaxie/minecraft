@@ -201,8 +201,7 @@ const AdminPluginsPage = () => {
 
   return (
     <div className="container mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-8">
-        {plugin ? 'Edit Plugin' : 'Add New Plugin'}
+      <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none text-neutral-900 dark:text-white mb-8">        {plugin ? 'Edit Plugin' : 'Add New Plugin'}
       </h1>
       <AdminPluginForm 
         plugin={plugin} 

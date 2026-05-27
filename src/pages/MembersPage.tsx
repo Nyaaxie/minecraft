@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import { dbService } from '../services/dbService';
 import type { Profile, Badge } from '../types/database.types'; // Import Badge type
@@ -37,9 +38,9 @@ const MembersPage: React.FC = () => {
           dbService.getAllProfiles(true), // Pass true to include banned users
           dbService.getBadges(), // Fetch all available badges
         ]);
-        
+
         import.meta.env.DEV && console.log('Fetched profiles:', fetchedProfiles);
-        
+
         // Cast fetchedProfiles to ProfileWithBadges[]
         setProfiles(fetchedProfiles as unknown as ProfileWithBadges[]);
         setAllBadges(sortBadges(fetchedBadges));
@@ -57,12 +58,12 @@ const MembersPage: React.FC = () => {
     const channelId = `profiles-status:${Math.random().toString(36).substring(7)}`;
     const subscription = supabase
       .channel(channelId)
-      .on('postgres_changes', { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'profiles' 
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'profiles'
       }, (payload) => {
-        setProfiles(current => 
+        setProfiles(current =>
           current.map(p => p.id === payload.new.id ? { ...p, ...payload.new } : p)
         );
       })
@@ -88,10 +89,10 @@ const MembersPage: React.FC = () => {
 
       const lowerMob = filterMob.toLowerCase();
       const matchesMob = filterMob === '' || (profile.favorite_mob?.toLowerCase().includes(lowerMob) ?? false);
-      
+
       const lowerBlock = filterBlock.toLowerCase();
       const matchesBlock = filterBlock === '' || (profile.favorite_block?.toLowerCase().includes(lowerBlock) ?? false);
-      
+
       const lowerColor = filterColor.toLowerCase();
       const matchesColor = filterColor === '' || (profile.favorite_color?.toLowerCase().includes(lowerColor) ?? false);
 
@@ -113,7 +114,7 @@ const MembersPage: React.FC = () => {
           if (!p.user_badges || p.user_badges.length === 0) return 999;
           const badgeNames = p.user_badges.map(ub => ub.badges?.name.toLowerCase().trim()).filter(Boolean);
           let bestRank = 998;
-          
+
           BADGE_ORDER.forEach((name, index) => {
             if (badgeNames.includes(name) && index < bestRank) {
               bestRank = index;
@@ -141,14 +142,21 @@ const MembersPage: React.FC = () => {
     });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12 text-neutral-900 dark:text-neutral-100 pb-20">
-      <div className="text-center space-y-4">
-        <h1 className="text-5xl md:text-6xl font-black tracking-tighter italic uppercase text-neutral-900 dark:text-white">
-          Community <span className="text-strawberry-600">Members</span>
-        </h1>
-        <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto text-lg">
-          Meet the amazing berries of StrawberrySMP. Explore, connect, and grow together in our peaceful community.
-        </p>
+    <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6 space-y-12 text-neutral-900 dark:text-neutral-100">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2 mb-12">
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600">
+            <Users size={32} />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
+              Members
+            </h1>
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
+              Meet the amazing berries of StrawberrySMP.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Search and Filter/Sort Controls */}
@@ -165,7 +173,7 @@ const MembersPage: React.FC = () => {
               className="w-full pl-12 pr-6 py-4 bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 transition-all"
             />
           </div>
-          
+
           <div className="flex gap-4">
             <select
               value={sortBy}
@@ -273,108 +281,109 @@ const MembersPage: React.FC = () => {
       {!loading && !error && filteredAndSortedProfiles.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredAndSortedProfiles.map(profile => (
-            <motion.div 
-              key={profile.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -8 }}
-              className="group relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 transition-all hover:border-strawberry-500/30 overflow-hidden shadow-sm dark:shadow-none"
-            >
-              {/* Background Accent */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-strawberry-500/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
-              
-              <div className="relative z-10">
-                <div className="flex items-start justify-between mb-8">
-                  <div className="relative">
-                    <div className="h-24 w-24 rounded-3xl bg-neutral-100 dark:bg-neutral-800 border-4 border-white dark:border-neutral-900 shadow-xl overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                      {profile.avatar_url ? (
-                        <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center text-neutral-400 bg-neutral-50 dark:bg-neutral-800">
-                          <User size={48} />
-                        </div>
-                      )}
-                    </div>
-                    <div className={`absolute -bottom-2 -right-2 h-8 w-8 rounded-full border-4 border-white dark:border-neutral-900 flex items-center justify-center shadow-lg ${profile.status === 'online' ? 'bg-green-500' : 'bg-neutral-400'}`}>
-                      <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
-                    </div>
-                  </div>
-                  
-                  {/* Join Date / Role Badge */}
-                  <div className="text-right">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1">Joined</span>
-                    <span className="text-xs font-black italic text-neutral-600 dark:text-neutral-300">
-                      {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                    </span>
-                    <div className="mt-2">
-                      <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest italic ${profile.role === 'admin' ? 'bg-strawberry-600 text-white' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500'}`}>
-                        {profile.role === 'admin' ? 'Admin' : 'Member'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            <Link key={profile.id} to={`/profile/${profile.id}`}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -8 }}
+                className="group relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 transition-all hover:border-strawberry-500/30 overflow-hidden shadow-sm dark:shadow-none"
+              >
+                {/* Background Accent */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-strawberry-500/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
 
-                <div className="space-y-2 mb-6 text-left">
-                  <h2 className="text-2xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white group-hover:text-strawberry-600 transition-colors">
-                    {profile.username || 'Berry Player'}
-                  </h2>
-                  {profile.minecraft_username && (
-                    <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
-                      <MonitorPlay size={14} className="text-strawberry-500" />
-                      <span className="text-sm font-bold tracking-tight">{profile.minecraft_username}</span>
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-8">
+                    <div className="relative">
+                      <div className="h-24 w-24 rounded-3xl bg-neutral-100 dark:bg-neutral-800 border-4 border-white dark:border-neutral-900 shadow-xl overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                        {profile.avatar_url ? (
+                          <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center text-neutral-400 bg-neutral-50 dark:bg-neutral-800">
+                            <User size={48} />
+                          </div>
+                        )}
+                      </div>
+                      <div className={`absolute -bottom-2 -right-2 h-8 w-8 rounded-full border-4 border-white dark:border-neutral-900 flex items-center justify-center shadow-lg ${profile.status === 'online' ? 'bg-green-500' : 'bg-neutral-400'}`}>
+                        <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                      </div>
+                    </div>
+
+                    {/* Join Date / Role Badge */}
+                    <div className="text-right">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 block mb-1">Joined</span>
+                      <span className="text-xs font-black italic text-neutral-600 dark:text-neutral-300">
+                        {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                      </span>
+                      <div className="mt-2">
+                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest italic ${profile.role === 'admin' ? 'bg-strawberry-600 text-white' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500'}`}>
+                          {profile.role === 'admin' ? 'Admin' : 'Member'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 mb-6 text-left">
+                    <h2 className="text-2xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white group-hover:text-strawberry-600 transition-colors">
+                      {profile.username || 'Berry Player'}
+                    </h2>
+                    {profile.minecraft_username && (
+                      <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                        <MonitorPlay size={14} className="text-strawberry-500" />
+                        <span className="text-sm font-bold tracking-tight">{profile.minecraft_username}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed line-clamp-3 mb-8 min-h-[4.5rem] italic">
+                    "{profile.bio || 'No bio provided.'}"
+                  </p>
+
+                  {/* Badges Row */}
+                  {profile.user_badges && profile.user_badges.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {sortBadges(profile.user_badges.map(ub => ub.badges).filter((b): b is Badge => !!b))
+                        .map(badge => <BadgeChip key={badge.id} badge={badge} />)}
                     </div>
                   )}
-                </div>
 
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed line-clamp-3 mb-8 min-h-[4.5rem] italic">
-                  "{profile.bio || 'No bio provided.'}"
-                </p>
-
-                {/* Badges Row */}
-                {profile.user_badges && profile.user_badges.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-8">
-                    {sortBadges(profile.user_badges.map(ub => ub.badges).filter((b): b is Badge => !!b))
-                      .map(badge => <BadgeChip key={badge.id} badge={badge} />)}
-                  </div>
-                )}
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3 pt-6 border-t border-neutral-100 dark:border-white/5">
-                  <div className="bg-neutral-50 dark:bg-white/5 p-3 rounded-2xl group/stat">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Ghost size={14} className="text-strawberry-500 group-hover/stat:scale-110 transition-transform" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Fav Mob</span>
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-3 pt-6 border-t border-neutral-100 dark:border-white/5">
+                    <div className="bg-neutral-50 dark:bg-white/5 p-3 rounded-2xl group/stat">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Ghost size={14} className="text-strawberry-500 group-hover/stat:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Fav Mob</span>
+                      </div>
+                      <span className="text-xs font-black italic truncate block">{profile.favorite_mob || '---'}</span>
                     </div>
-                    <span className="text-xs font-black italic truncate block">{profile.favorite_mob || '---'}</span>
-                  </div>
-                  <div className="bg-neutral-50 dark:bg-white/5 p-3 rounded-2xl group/stat">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Blocks size={14} className="text-strawberry-500 group-hover/stat:scale-110 transition-transform" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Fav Block</span>
+                    <div className="bg-neutral-50 dark:bg-white/5 p-3 rounded-2xl group/stat">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Blocks size={14} className="text-strawberry-500 group-hover/stat:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Fav Block</span>
+                      </div>
+                      <span className="text-xs font-black italic truncate block">{profile.favorite_block || '---'}</span>
                     </div>
-                    <span className="text-xs font-black italic truncate block">{profile.favorite_block || '---'}</span>
-                  </div>
-                  <div className="bg-neutral-50 dark:bg-white/5 p-3 rounded-2xl group/stat">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Palette size={14} className="text-strawberry-500 group-hover/stat:scale-110 transition-transform" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Fav Color</span>
+                    <div className="bg-neutral-50 dark:bg-white/5 p-3 rounded-2xl group/stat">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Palette size={14} className="text-strawberry-500 group-hover/stat:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Fav Color</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: profile.favorite_color || '#e35a7f' }} />
+                        <span className="text-xs font-black italic truncate block uppercase">{profile.favorite_color || '---'}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: profile.favorite_color || '#e35a7f' }} />
-                      <span className="text-xs font-black italic truncate block uppercase">{profile.favorite_color || '---'}</span>
+                    <div className="bg-neutral-50 dark:bg-white/5 p-3 rounded-2xl group/stat">
+                      <div className="flex items-center gap-2 mb-1">
+                        <MonitorPlay size={14} className="text-strawberry-500 group-hover/stat:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Edition</span>
+                      </div>
+                      <span className="text-xs font-black italic truncate block capitalize">{profile.minecraft_edition || '---'}</span>
                     </div>
-                  </div>
-                  <div className="bg-neutral-50 dark:bg-white/5 p-3 rounded-2xl group/stat">
-                    <div className="flex items-center gap-2 mb-1">
-                      <MonitorPlay size={14} className="text-strawberry-500 group-hover/stat:scale-110 transition-transform" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Edition</span>
-                    </div>
-                    <span className="text-xs font-black italic truncate block capitalize">{profile.minecraft_edition || '---'}</span>
                   </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </Link>
           ))}
         </div>
       )}

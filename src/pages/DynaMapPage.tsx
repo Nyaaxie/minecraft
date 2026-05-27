@@ -8,17 +8,17 @@ const DynaMapPage = () => {
   return (
     <div className="h-[calc(100vh-6rem)] w-full flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between px-2">
+      <div className="flex items-center justify-between px-2 mb-4">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-strawberry-600 rounded-2xl text-white shadow-lg shadow-strawberry-600/20">
-            <MapIcon size={24} />
+          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600">
+            <MapIcon size={32} />
           </div>
           <div>
-            <h1 className="text-3xl font-black italic uppercase tracking-tighter">
-              Live <span className="text-strawberry-600">Map</span>
+            <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
+              Live Map
             </h1>
-            <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-              Real-time server satellite imagery active
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
+              Watch our cozy world bloom!
             </p>
           </div>
         </div>
@@ -34,7 +34,7 @@ const DynaMapPage = () => {
         />
         <div className="absolute inset-0 pointer-events-none border-[12px] border-black/5 rounded-[2.5rem]" />
       </div>
-    </div>
+    </div >
   );
 };
 

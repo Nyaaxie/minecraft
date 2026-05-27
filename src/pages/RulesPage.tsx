@@ -39,7 +39,7 @@ const RulesPage = () => {
           <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20">
             <ShieldCheck className="text-strawberry-600" size={32} />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Server Rules</h1>
+          <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Rules</h1>
         </div>
 
         {loading ? (

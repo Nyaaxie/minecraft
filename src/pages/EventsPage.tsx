@@ -76,12 +76,19 @@ const EventsPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6 space-y-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2">
-        <div className="space-y-4">
-          <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
-            Community<span className="text-strawberry-600">Events</span>
-          </h1>
-          <p className="text-neutral-500 max-w-xl font-medium uppercase tracking-tight text-sm italic leading-relaxed">Tournaments, gatherings, and server-wide celebrations on StrawberrySMP.</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2 mb-12">
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600">
+            <Calendar size={32} />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
+              Events
+            </h1>
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
+              sweet activities sprouting soon!
+            </p>
+          </div>
         </div>
         {profile?.role === 'admin' && (
           <button
@@ -112,8 +119,8 @@ const EventsPage = () => {
                 <div className="flex justify-between items-start gap-4">
                   <h3 className="text-xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white leading-tight">{event.title}</h3>
                   <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest italic shrink-0 ${event.status === 'upcoming' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-500' :
-                      event.status === 'ongoing' ? 'bg-green-500/10 text-green-600 dark:text-green-500' :
-                        'bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-400'
+                    event.status === 'ongoing' ? 'bg-green-500/10 text-green-600 dark:text-green-500' :
+                      'bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-400'
                     }`}>
                     {event.status}
                   </span>
@@ -122,22 +129,22 @@ const EventsPage = () => {
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 italic line-clamp-3 leading-relaxed">"{event.description || 'Accessing mission brief...'}"</p>
 
                 <div className="space-y-3 pt-4 border-t border-neutral-100 dark:border-white/5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
-                    <Clock size={16} className="text-strawberry-600" />
-                    <span>{new Date(event.start_time).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
+                      <Clock size={16} className="text-strawberry-600" />
+                      <span>{new Date(event.start_time).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
+                      <Users size={16} className="text-strawberry-600" />
+                      <span>{(event as any).rsvpCount} Joined</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-                    <Users size={16} className="text-strawberry-600" />
-                    <span>{(event as any).rsvpCount} Joined</span>
-                  </div>
-                </div>
-                {event.location && (
-                  <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
-                    <MapPin size={16} className="text-strawberry-600" />
-                    <span>{event.location}</span>
-                  </div>
-                )}
+                  {event.location && (
+                    <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
+                      <MapPin size={16} className="text-strawberry-600" />
+                      <span>{event.location}</span>
+                    </div>
+                  )}
                 </div>              </div>
 
               <div className="bg-neutral-50 dark:bg-white/5 p-6 border-t border-neutral-100 dark:border-white/5 flex items-center justify-between">

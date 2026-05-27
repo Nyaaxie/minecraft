@@ -262,17 +262,37 @@ export const dbService = {
   },
 
   // --- Suggestions ---
+  async getSuggestions() {
+    const { data, error } = await supabase.from('suggestions').select('*, profiles!user_id(username)').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
   async createSuggestion(suggestion: { user_id: string; title: string; description: string }) {
     const { data, error } = await supabase.from('suggestions').insert(suggestion).select().single();
     if (error) throw error;
     return data;
   },
+  async deleteSuggestion(id: string) {
+    const { error } = await supabase.from('suggestions').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
 
   // --- Help Requests ---
+  async getHelpRequests() {
+    const { data, error } = await supabase.from('help_requests').select('*, profiles!user_id(username)').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
   async createHelpRequest(request: { user_id: string; subject: string; message: string }) {
     const { data, error } = await supabase.from('help_requests').insert(request).select().single();
     if (error) throw error;
     return data;
+  },
+  async deleteHelpRequest(id: string) {
+    const { error } = await supabase.from('help_requests').delete().eq('id', id);
+    if (error) throw error;
+    return true;
   },
 
   // --- Commands ---

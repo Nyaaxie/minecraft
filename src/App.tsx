@@ -17,6 +17,7 @@ const EventsPage = lazy(() => import('./pages/EventsPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const PublicProfilePage = lazy(() => import('./pages/PublicProfilePage'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const DynaMapPage = lazy(() => import('./pages/DynaMapPage'));
 const PluginsPage = lazy(() => import('./pages/PluginsPage'));
@@ -114,6 +115,7 @@ function App() {
               <Route path="/messages" element={<ProtectedRoute><DashboardLayout><MessagesPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><NotificationsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfilePage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/profile/:id" element={<ProtectedRoute><DashboardLayout><PublicProfilePage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/rules" element={<ProtectedRoute><DashboardLayout><RulesPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/help" element={<ProtectedRoute><DashboardLayout><HelpPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/suggestions" element={<ProtectedRoute><DashboardLayout><SuggestionsPage /></DashboardLayout></ProtectedRoute>} />

@@ -14,7 +14,7 @@ import BadgeChip from '../components/BadgeChip';
 import {
   Loader2, Trash2, Award, Calendar, Megaphone, ShieldCheck,
   Users, CheckSquare, Bell, Tag, BookOpen, Puzzle, Terminal,
-  GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw, Info,
+  GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw, Info, MessageSquare, Sparkle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sortBadges } from '../utils/badgeUtils';
@@ -23,8 +23,9 @@ import { sortBadges } from '../utils/badgeUtils';
 
 type TabKey =
   | 'users' | 'approvals' | 'announcements' | 'events'
-  | 'rules' | 'reminders' | 'versions' | 'categories'
-  | 'badges' | 'commands' | 'guides' | 'plugins' | 'serverInfo';
+  | 'rules' | 'reminders' | 'versions'
+  | 'badges' | 'commands' | 'guides' | 'plugins' | 'serverInfo'
+  | 'suggestions' | 'helpRequests';
 
 const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'users', label: 'Users', icon: Users },
@@ -34,12 +35,13 @@ const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'rules', label: 'Rules', icon: ShieldCheck },
   { key: 'reminders', label: 'Reminders', icon: Bell },
   { key: 'versions', label: 'Versions', icon: GitBranch },
-  { key: 'categories', label: 'Categories', icon: Tag },
   { key: 'badges', label: 'Badges', icon: Award },
   { key: 'commands', label: 'Commands', icon: Terminal },
   { key: 'guides', label: 'Guides', icon: BookOpen },
   { key: 'plugins', label: 'Plugins', icon: Puzzle },
   { key: 'serverInfo', label: 'Server Info', icon: Info },
+  { key: 'suggestions', label: 'Suggestions', icon: Sparkle },
+  { key: 'helpRequests', label: 'Help Requests', icon: MessageSquare },
 ];
 
 // ─── Shared UI ─────────────────────────────────────────────────────────────
@@ -860,6 +862,66 @@ const VersionsTab = ({ onAdd, onEdit }: { onAdd: () => void; onEdit: (v: any) =>
   );
 };
 
+// ─── Suggestions/Help Requests Tab ──────────────────────────────────────────
+
+const SuggestionsTab = ({ suggestions, onRefresh }: { suggestions: any[]; onRefresh: () => void }) => {
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try { await dbService.deleteSuggestion(deleteTarget.id); toast.success('Suggestion deleted'); setDeleteTarget(null); onRefresh(); }
+    catch { toast.error('Failed to delete suggestion'); }
+  };
+
+  return (
+    <>
+      <SectionHeader icon={Sparkle} title="Suggestions" count={suggestions.length} />
+      {suggestions.length === 0 ? <EmptyState icon={Sparkle} label="No suggestions yet" /> : suggestions.map(s => (
+        <div key={s.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start mb-2">
+              <p className="font-bold text-sm">{s.title}</p>
+              <span className="text-[10px] font-black uppercase text-neutral-400">{s.profiles?.username}</span>
+            </div>
+            <p className="text-xs text-neutral-500">{s.description}</p>
+          </div>
+          <RowActions onDelete={() => setDeleteTarget(s)} />
+        </div>
+      ))}
+      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label="suggestion" />
+    </>
+  );
+};
+
+const HelpRequestsTab = ({ helpRequests, onRefresh }: { helpRequests: any[]; onRefresh: () => void }) => {
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try { await dbService.deleteHelpRequest(deleteTarget.id); toast.success('Help request deleted'); setDeleteTarget(null); onRefresh(); }
+    catch { toast.error('Failed to delete help request'); }
+  };
+
+  return (
+    <>
+      <SectionHeader icon={MessageSquare} title="Help Requests" count={helpRequests.length} />
+      {helpRequests.length === 0 ? <EmptyState icon={MessageSquare} label="No help requests" /> : helpRequests.map(h => (
+        <div key={h.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start mb-2">
+              <p className="font-bold text-sm">{h.subject}</p>
+              <span className="text-[10px] font-black uppercase text-neutral-400">{h.profiles?.username}</span>
+            </div>
+            <p className="text-xs text-neutral-500">{h.message}</p>
+          </div>
+          <RowActions onDelete={() => setDeleteTarget(h)} />
+        </div>
+      ))}
+      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label="help request" />
+    </>
+  );
+};
+
 // ─── ROOT PANEL ────────────────────────────────────────────────────────────
 
 const AdminPanel = () => {
@@ -873,6 +935,8 @@ const AdminPanel = () => {
   const [guides, setGuides] = useState<any[]>([]);
   const [plugins, setPlugins] = useState<any[]>([]);
   const [serverInfo, setServerInfo] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [helpRequests, setHelpRequests] = useState<any[]>([]);
   const { refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('users');
@@ -881,7 +945,7 @@ const AdminPanel = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [p, e, r, rem, b, c, g, pl] = await Promise.all([
+      const [p, e, r, rem, b, c, g, pl, s, h] = await Promise.all([
         dbService.getAllProfiles(true) as any,
         dbService.getEvents(),
         adminService.getRules(),
@@ -890,9 +954,12 @@ const AdminPanel = () => {
         dbService.getCommands(),
         dbService.getGuides(),
         dbService.getPlugins(),
+        dbService.getSuggestions(),
+        dbService.getHelpRequests(),
       ]);
       setProfiles(p); setEvents(e); setRules(r); setReminders(rem);
       setBadges(b); setCommands(c); setGuides(g); setPlugins(pl);
+      setSuggestions(s); setHelpRequests(h);
       // Fetch server info
       const info = await adminService.getServerInfo();
       setServerInfo(info);
@@ -974,12 +1041,13 @@ const AdminPanel = () => {
             {activeTab === 'rules' && <RulesTab rules={rules} onRefresh={fetchData} />}
             {activeTab === 'reminders' && <RemindersTab reminders={reminders} onRefresh={fetchData} />}
             {activeTab === 'versions' && <VersionsTab onAdd={() => setModal({ isOpen: true, type: 'version' })} onEdit={v => setModal({ isOpen: true, type: 'edit-version', data: v })} />}
-            {activeTab === 'categories' && <CategoriesTab />}
             {activeTab === 'badges' && <BadgesTab badges={badges} onRefresh={fetchData} onAdd={() => setModal({ isOpen: true, type: 'badge' })} onEdit={b => setModal({ isOpen: true, type: 'edit-badge', data: b })} />}
             {activeTab === 'commands' && <CommandsTab commands={commands} onRefresh={fetchData} />}
             {activeTab === 'guides' && <GuidesTab guides={guides} onRefresh={fetchData} />}
             {activeTab === 'plugins' && <PluginsTab plugins={plugins} onRefresh={fetchData} />}
             {activeTab === 'serverInfo' && <ServerInfoTab serverInfo={serverInfo} onSave={async (data) => { await adminService.upsertServerInfo(data); toast.success('Saved'); fetchData(); }} />}
+            {activeTab === 'suggestions' && <SuggestionsTab suggestions={suggestions} onRefresh={fetchData} />}
+            {activeTab === 'helpRequests' && <HelpRequestsTab helpRequests={helpRequests} onRefresh={fetchData} />}
           </motion.div>
         </AnimatePresence>
       )}

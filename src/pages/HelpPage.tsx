@@ -159,29 +159,48 @@ const HelpPage = () => {
       color: '#ef4444',
       count: data.commands.length,
       content: (
-        <div className="grid md:grid-cols-2 gap-3 mt-4">
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
           {data.commands.length === 0 ? (
-            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest col-span-2 py-4 text-center italic">No commands registered yet.</p>
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest col-span-2 py-8 text-center italic">
+              No commands registered yet.
+            </p>
           ) : data.commands.map((cmd: any) => (
             <div
               key={cmd.id}
-              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-4 border border-neutral-100 dark:border-white/5"
+              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-5 border border-neutral-100 dark:border-white/5 hover:border-red-500/30 transition-all"
             >
-              <code className="text-strawberry-600 font-bold bg-strawberry-500/10 px-2 py-1 rounded-md text-sm">
-                {cmd.name}
-              </code>
+              {/* Command name */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                  <Terminal size={14} className="text-red-500" />
+                </div>
+                <code className="text-strawberry-600 font-black bg-strawberry-500/10 px-2.5 py-1 rounded-lg text-sm tracking-tight">
+                  {cmd.name}
+                </code>
+              </div>
+
               {cmd.syntax && (
-                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-2">
-                  {cmd.syntax}
-                </p>
+                <div className="mb-2">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 mr-1.5">Syntax:</span>
+                  <code className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                    {cmd.syntax}
+                  </code>
+                </div>
               )}
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 whitespace-pre-line max-h-32 overflow-y-auto pr-1">
+
+              <div className="h-px bg-neutral-200 dark:bg-white/5 mb-3" />
+
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed line-clamp-3">
                 {cmd.description}
               </p>
+
               {cmd.permission && (
-                <p className="text-[9px] font-black uppercase tracking-widest text-neutral-300 dark:text-neutral-600 mt-2 font-mono">
-                  {cmd.permission}
-                </p>
+                <div className="mt-3 flex items-center gap-1.5">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400">Permission:</span>
+                  <code className="text-[9px] font-bold text-neutral-400 dark:text-neutral-500 font-mono">
+                    {cmd.permission}
+                  </code>
+                </div>
               )}
             </div>
           ))}
@@ -195,27 +214,48 @@ const HelpPage = () => {
       color: '#8b5cf6',
       count: data.plugins.length,
       content: (
-        <div className="grid md:grid-cols-2 gap-3 mt-4">
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
           {data.plugins.length === 0 ? (
-            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest col-span-2 py-4 text-center italic">No plugins listed yet.</p>
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest col-span-2 py-8 text-center italic">
+              No plugins listed yet.
+            </p>
           ) : data.plugins.map((plugin: any) => (
             <div
               key={plugin.id}
-              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-4 border border-neutral-100 dark:border-white/5"
+              className="group bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-5 border border-neutral-100 dark:border-white/5 hover:border-violet-500/30 transition-all"
             >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-sm">
-                  {plugin.name}
-                </h3>
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
+                    <Puzzle size={14} className="text-violet-500" />
+                  </div>
+                  <h3 className="font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-sm leading-tight">
+                    {plugin.name}
+                  </h3>
+                </div>
                 {plugin.version && (
-                  <span className="text-[9px] font-black bg-neutral-200 dark:bg-white/10 text-neutral-500 px-1.5 py-0.5 rounded-md shrink-0">
+                  <span className="text-[9px] font-black bg-violet-500/10 text-violet-500 px-2 py-1 rounded-lg shrink-0 tracking-widest uppercase">
                     v{plugin.version}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1.5 whitespace-pre-line max-h-32 overflow-y-auto pr-1">
+
+              {/* Divider */}
+              <div className="h-px bg-neutral-200 dark:bg-white/5 mb-3" />
+
+              {/* Description — no scroll, just clamped with expand */}
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed line-clamp-4">
                 {plugin.description}
               </p>
+
+              {plugin.category && (
+                <div className="mt-3">
+                  <span className="text-[9px] font-black bg-neutral-200 dark:bg-white/10 text-neutral-500 dark:text-neutral-400 px-2 py-1 rounded-lg uppercase tracking-widest">
+                    {plugin.category}
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -228,25 +268,36 @@ const HelpPage = () => {
       color: '#10b981',
       count: data.guides.length,
       content: (
-        <div className="grid gap-3 mt-4">
+        <div className="flex flex-col gap-4 mt-4">
           {data.guides.length === 0 ? (
-            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest py-4 text-center italic">No guides published yet.</p>
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest py-8 text-center italic">
+              No guides published yet.
+            </p>
           ) : data.guides.map((guide: any) => (
             <div
               key={guide.id}
-              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-4 border border-neutral-100 dark:border-white/5"
+              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-5 border border-neutral-100 dark:border-white/5 hover:border-emerald-500/30 transition-all"
             >
-              <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                <h3 className="font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-sm">
-                  {guide.title}
-                </h3>
+              {/* Guide header */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <BookOpen size={14} className="text-emerald-500" />
+                  </div>
+                  <h3 className="font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-sm leading-tight">
+                    {guide.title}
+                  </h3>
+                </div>
                 {guide.category && (
-                  <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-md uppercase tracking-widest">
+                  <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-600 px-2 py-1 rounded-lg uppercase tracking-widest shrink-0">
                     {guide.category}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 whitespace-pre-line max-h-48 overflow-y-auto pr-1">
+
+              <div className="h-px bg-neutral-200 dark:bg-white/5 mb-3" />
+
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed whitespace-pre-line">
                 {guide.content}
               </p>
             </div>
@@ -275,7 +326,7 @@ const HelpPage = () => {
           </div>
           <div>
             <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white leading-none">
-              Help Center
+              Help
             </h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
               Commands, plugins & guides

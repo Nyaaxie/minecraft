@@ -18,6 +18,7 @@ import {
   UsersRound,
   ShoppingBag,
   ShieldCheck,
+  Server,
   Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -68,7 +69,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       items: [
         { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
         { icon: Calendar, label: 'Events', to: '/events' },
-        { icon: LayoutDashboard, label: 'Server Info', to: '/server-info' },
+        { icon: Server, label: 'Server Info', to: '/server-info' },
         { icon: ShieldCheck, label: 'Rules', to: '/rules' },
         { icon: Info, label: 'Help', to: '/help' },
       ]
@@ -118,7 +119,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <nav className="flex-1 space-y-6 overflow-y-auto pr-2 -mr-2 hide-scrollbar">
           {menuGroups.map((group) => (
             <div key={group.title}>
-              <h4 className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-2">{group.title}</h4>
+              <h4 className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-2 flex items-center gap-2">
+                {group.title === 'Explore' && <LayoutDashboard size={12} />}
+                {group.title === 'Community' && <UsersRound size={12} />}
+                {group.title === 'Administration' && <Settings size={12} />}
+                {group.title}
+              </h4>
               <div className="space-y-1">
                 {group.items.map((item) => (
                   <SidebarItem
@@ -169,7 +175,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="p-2 bg-strawberry-600 rounded-xl text-white shadow-lg shadow-strawberry-600/20">
             <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
           </div>
-          <span className="font-black italic uppercase tracking-tighter text-lg">Strawberry<span className="text-strawberry-600">SMP</span></span>
+          <span className="font-genty font-bold italic text-lg tracking-tight">Strawberry<span className="text-strawberry-600">SMP</span></span>
         </div>
         <div className="flex items-center gap-2">
           <NotificationCenter />
