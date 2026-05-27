@@ -1,37 +1,127 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { HelpCircle, Terminal, Puzzle, BookOpen, ArrowLeft, Loader2, Send } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { HelpCircle, Terminal, Puzzle, BookOpen, ArrowLeft, Loader2, Send, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
 import { useAuthStore } from '../store/useAuthStore';
 
+// ─── Section Card ───────────────────────────────────────────────────────────
+
+const SectionCard = ({
+  id,
+  icon: Icon,
+  title,
+  count,
+  color,
+  isOpen,
+  onToggle,
+  children,
+}: {
+  id: string;
+  icon: React.ElementType;
+  title: string;
+  count: number;
+  color: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) => (
+  <div className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-white/5 shadow-sm overflow-hidden">
+    {/* Header / trigger */}
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center justify-between gap-4 px-7 py-6 group text-left transition-colors hover:bg-neutral-50 dark:hover:bg-white/[0.02]"
+    >
+      <div className="flex items-center gap-4 min-w-0">
+        <div
+          className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+          style={{ backgroundColor: `${color}15`, border: `1px solid ${color}30` }}
+        >
+          <Icon size={20} style={{ color }} />
+        </div>
+        <div className="min-w-0">
+          <h2 className="text-xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white leading-none">
+            {title}
+          </h2>
+          <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-0.5">
+            {count} {count === 1 ? 'item' : 'items'}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <span
+          className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl transition-colors"
+          style={{
+            backgroundColor: isOpen ? `${color}15` : undefined,
+            color: isOpen ? color : undefined,
+          }}
+        >
+          {isOpen ? 'Collapse' : 'View all'}
+        </span>
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        >
+          <ChevronDown size={18} className="text-neutral-400" />
+        </motion.div>
+      </div>
+    </button>
+
+    {/* Expandable content */}
+    <AnimatePresence initial={false}>
+      {isOpen && (
+        <motion.div
+          key="content"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          style={{ overflow: 'hidden' }}
+        >
+          <div className="px-7 pb-7 pt-2 border-t border-neutral-100 dark:border-white/5">
+            {children}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
+
+// ─── HelpPage ───────────────────────────────────────────────────────────────
+
 const HelpPage = () => {
-  const [data, setData] = useState<{ commands: any[]; plugins: any[]; guides: any[] }>({ commands: [], plugins: [], guides: [] });
+  const [data, setData] = useState<{ commands: any[]; plugins: any[]; guides: any[] }>({
+    commands: [],
+    plugins: [],
+    guides: [],
+  });
   const [loading, setLoading] = useState(true);
+  const [openSection, setOpenSection] = useState<string | null>(null);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuthStore();
 
+  const toggle = (id: string) => setOpenSection(prev => (prev === id ? null : id));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-        toast.error('You must be logged in to submit a help request.');
-        return;
+      toast.error('You must be logged in to submit a help request.');
+      return;
     }
     setIsSubmitting(true);
-    
     try {
-        await dbService.createHelpRequest({ user_id: user.id, subject, message });
-        toast.success('Help request submitted successfully! We will get back to you soon.');
-        setSubject('');
-        setMessage('');
+      await dbService.createHelpRequest({ user_id: user.id, subject, message });
+      toast.success("Help request submitted! We'll get back to you soon.");
+      setSubject('');
+      setMessage('');
     } catch (err) {
-        console.error(err);
-        toast.error('Failed to submit help request.');
+      console.error(err);
+      toast.error('Failed to submit help request.');
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -54,104 +144,218 @@ const HelpPage = () => {
   }, []);
 
   if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-strawberry-600" size={48} /></div>;
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="animate-spin text-strawberry-600" size={48} />
+      </div>
+    );
   }
+
+  const SECTIONS = [
+    {
+      id: 'commands',
+      icon: Terminal,
+      title: 'Commands',
+      color: '#ef4444',
+      count: data.commands.length,
+      content: (
+        <div className="grid md:grid-cols-2 gap-3 mt-4">
+          {data.commands.length === 0 ? (
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest col-span-2 py-4 text-center italic">No commands registered yet.</p>
+          ) : data.commands.map((cmd: any) => (
+            <div
+              key={cmd.id}
+              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-4 border border-neutral-100 dark:border-white/5"
+            >
+              <code className="text-strawberry-600 font-bold bg-strawberry-500/10 px-2 py-1 rounded-md text-sm">
+                {cmd.name}
+              </code>
+              {cmd.syntax && (
+                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-2">
+                  {cmd.syntax}
+                </p>
+              )}
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 whitespace-pre-line max-h-32 overflow-y-auto pr-1">
+                {cmd.description}
+              </p>
+              {cmd.permission && (
+                <p className="text-[9px] font-black uppercase tracking-widest text-neutral-300 dark:text-neutral-600 mt-2 font-mono">
+                  {cmd.permission}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: 'plugins',
+      icon: Puzzle,
+      title: 'Plugins',
+      color: '#8b5cf6',
+      count: data.plugins.length,
+      content: (
+        <div className="grid md:grid-cols-2 gap-3 mt-4">
+          {data.plugins.length === 0 ? (
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest col-span-2 py-4 text-center italic">No plugins listed yet.</p>
+          ) : data.plugins.map((plugin: any) => (
+            <div
+              key={plugin.id}
+              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-4 border border-neutral-100 dark:border-white/5"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-sm">
+                  {plugin.name}
+                </h3>
+                {plugin.version && (
+                  <span className="text-[9px] font-black bg-neutral-200 dark:bg-white/10 text-neutral-500 px-1.5 py-0.5 rounded-md shrink-0">
+                    v{plugin.version}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1.5 whitespace-pre-line max-h-32 overflow-y-auto pr-1">
+                {plugin.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: 'guides',
+      icon: BookOpen,
+      title: 'Guides',
+      color: '#10b981',
+      count: data.guides.length,
+      content: (
+        <div className="grid gap-3 mt-4">
+          {data.guides.length === 0 ? (
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest py-4 text-center italic">No guides published yet.</p>
+          ) : data.guides.map((guide: any) => (
+            <div
+              key={guide.id}
+              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-4 border border-neutral-100 dark:border-white/5"
+            >
+              <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                <h3 className="font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-sm">
+                  {guide.title}
+                </h3>
+                {guide.category && (
+                  <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-md uppercase tracking-widest">
+                    {guide.category}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 whitespace-pre-line max-h-48 overflow-y-auto pr-1">
+                {guide.content}
+              </p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
-      <Link to="/dashboard" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group mb-8">
+      <Link
+        to="/dashboard"
+        className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group mb-8"
+      >
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
         Back to Dashboard
       </Link>
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-12"
-      >
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+
+        {/* Page header */}
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20">
             <HelpCircle className="text-strawberry-600" size={32} />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Help Center</h1>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white leading-none">
+              Help Center
+            </h1>
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
+              Commands, plugins & guides
+            </p>
+          </div>
         </div>
 
-        <section id="commands" className="space-y-6">
-          <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-3">
-            <Terminal className="text-strawberry-600" /> Commands
-          </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {data.commands.map((cmd: any) => (
-              <div key={cmd.id} className="bg-white dark:bg-neutral-900 p-6 rounded-2xl border border-neutral-200 dark:border-white/5">
-                <code className="text-strawberry-600 font-bold bg-strawberry-500/10 px-2 py-1 rounded-md">{cmd.name}</code>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 whitespace-pre-line max-h-40 overflow-y-auto pr-2">{cmd.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* The 3 accordion section cards */}
+        <div className="space-y-3">
+          {SECTIONS.map((section, i) => (
+            <motion.div
+              key={section.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07 }}
+            >
+              <SectionCard
+                id={section.id}
+                icon={section.icon}
+                title={section.title}
+                count={section.count}
+                color={section.color}
+                isOpen={openSection === section.id}
+                onToggle={() => toggle(section.id)}
+              >
+                {section.content}
+              </SectionCard>
+            </motion.div>
+          ))}
+        </div>
 
-        <section id="plugins" className="space-y-6">
-          <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-3">
-            <Puzzle className="text-strawberry-600" /> Plugins
-          </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {data.plugins.map((plugin: any) => (
-              <div key={plugin.id} className="bg-white dark:bg-neutral-900 p-6 rounded-2xl border border-neutral-200 dark:border-white/5">
-                <h3 className="font-bold text-neutral-900 dark:text-white">{plugin.name}</h3>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1 whitespace-pre-line max-h-40 overflow-y-auto pr-2">{plugin.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="guides" className="space-y-6">
-          <h2 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-3">
-            <BookOpen className="text-strawberry-600" /> Guides
-          </h2>
-          <div className="grid gap-4">
-            {data.guides.map((guide: any) => (
-              <div key={guide.id} className="bg-white dark:bg-neutral-900 p-6 rounded-2xl border border-neutral-200 dark:border-white/5">
-                <h3 className="font-bold text-neutral-900 dark:text-white">{guide.title}</h3>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1 whitespace-pre-line max-h-60 overflow-y-auto pr-2">{guide.content}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-neutral-900 p-12 rounded-[3rem] border border-neutral-200 dark:border-white/5 shadow-sm space-y-8">
-          <h2 className="text-2xl font-black italic uppercase tracking-tighter">Need more help?</h2>
+        {/* Help request form */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-neutral-900 p-10 rounded-[2.5rem] border border-neutral-200 dark:border-white/5 shadow-sm space-y-6"
+        >
           <div>
-            <label htmlFor="subject" className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2 uppercase tracking-widest">Subject</label>
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter">Need more help?</h2>
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">Send us a request and we'll get back to you.</p>
+          </div>
+          <div>
+            <label htmlFor="subject" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
+              Subject
+            </label>
             <input
               type="text"
               id="subject"
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 outline-none"
+              onChange={e => setSubject(e.target.value)}
+              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all"
               required
               placeholder="What do you need help with?"
             />
           </div>
           <div>
-            <label htmlFor="message" className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2 uppercase tracking-widest">Message</label>
+            <label htmlFor="message" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
+              Message
+            </label>
             <textarea
               id="message"
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={e => setMessage(e.target.value)}
               rows={5}
-              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 outline-none resize-none"
+              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all resize-none"
               required
-              placeholder="Describe your issue..."
+              placeholder="Describe your issue in detail..."
             />
           </div>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-4 bg-strawberry-600 text-white rounded-2xl font-black italic uppercase tracking-widest shadow-lg shadow-strawberry-600/30 hover:bg-strawberry-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            className="w-full py-4 bg-strawberry-600 text-white rounded-2xl font-black italic uppercase tracking-widest shadow-lg shadow-strawberry-600/20 hover:bg-strawberry-700 active:scale-[0.99] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {isSubmitting ? <Loader2 className="animate-spin" /> : <><Send size={20} /> Send Request</>}
+            {isSubmitting
+              ? <Loader2 className="animate-spin" size={18} />
+              : <><Send size={16} /> Send Request</>
+            }
           </button>
         </form>
+
       </motion.div>
     </div>
   );

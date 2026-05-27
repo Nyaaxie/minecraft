@@ -32,6 +32,12 @@ export const dbService = {
     return data;
   },
 
+  async deleteProfile(id: string) {
+    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
   async uploadAvatar(userId: string, file: File) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/${Math.random()}.${fileExt}`;
@@ -201,32 +207,12 @@ export const dbService = {
   },
 
   async notifyAllUsers(title: string, message: string, type: 'event' | 'announcement' | 'message' | 'system', link?: string) {
-    import.meta.env.DEV && console.log('dbService: [NOTIFY] Starting notifyAllUsers...');
-
     try {
       const { data: profiles, error } = await supabase.from('profiles').select('id');
-
-      if (error) {
-        console.error('dbService: [NOTIFY] Failed to fetch profiles:', error);
-        return;
-      }
-
-      import.meta.env.DEV && console.log(`dbService: [NOTIFY] Found ${profiles.length} profiles to notify.`);
-
-      const notifications = profiles.map(p => ({
-        profile_id: p.id,
-        title,
-        message,
-        type,
-        link
-      }));
-
+      if (error) throw error;
+      const notifications = profiles.map(p => ({ profile_id: p.id, title, message, type, link }));
       const { error: insertError } = await supabase.from('notifications').insert(notifications);
-      if (insertError) {
-        console.error('dbService: [NOTIFY] Bulk insert error:', insertError);
-        throw insertError;
-      }
-      import.meta.env.DEV && console.log('dbService: [NOTIFY] Finished processing all notifications.');
+      if (insertError) throw insertError;
     } catch (err) {
       console.error('dbService: [NOTIFY] Unexpected error:', err);
     }
@@ -296,7 +282,10 @@ export const dbService = {
     return data;
   },
   async createCommand(command: { name: string; description: string }) {
-    const { data, error } = await supabase.from('commands').insert(command).select().single();
+    const { data, error } = await supabase.from('commands').insert({
+      ...command,
+      created_at: new Date().toISOString()
+    }).select().single();
     if (error) throw error;
     return data;
   },
@@ -318,7 +307,10 @@ export const dbService = {
     return data;
   },
   async createGuide(guide: { title: string; content: string }) {
-    const { data, error } = await supabase.from('guides').insert(guide).select().single();
+    const { data, error } = await supabase.from('guides').insert({
+      ...guide,
+      created_at: new Date().toISOString()
+    }).select().single();
     if (error) throw error;
     return data;
   },

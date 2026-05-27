@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
 import { adminService } from '../services/adminService';
@@ -9,7 +9,7 @@ import AddEditBadgeModal from '../components/AddEditBadgeModal';
 import AssignBadgesModal from '../components/AssignBadgesModal';
 import { useMinecraftVersions } from '../hooks/useMinecraftVersions';
 import { useAuthStore } from '../store/useAuthStore';
-import type { Profile, Event, Rule, Reminder, Badge } from '../types/database.types';
+import type { Profile, Event, Rule, Reminder, Badge, UserRole } from '../types/database.types';
 import BadgeChip from '../components/BadgeChip';
 import {
   Loader2, Trash2, Award, Calendar, Megaphone, ShieldCheck,
@@ -201,23 +201,33 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
   const [form, setForm] = useState({ role: '', username: '' });
   const [saving, setSaving] = useState(false);
-  const ROLES = ['member', 'moderator', 'admin'];
+  const ROLES: UserRole[] = ['player', 'admin'];
 
   const filtered = profiles.filter(p => p.username?.toLowerCase().includes(search.toLowerCase()));
 
-  const openEdit = (p: Profile) => { setForm({ role: p.role || 'member', username: p.username || '' }); setEditTarget(p); };
+  const openEdit = (p: Profile) => { setForm({ role: p.role || 'player', username: p.username || '' }); setEditTarget(p); };
 
   const handleSave = async () => {
     if (!editTarget) return;
     setSaving(true);
-    try { await dbService.updateProfile(editTarget.id, { role: form.role, username: form.username }); toast.success('User updated'); setEditTarget(null); onRefresh(); }
+    try {
+      await dbService.updateProfile(editTarget.id, { role: form.role as UserRole, username: form.username });
+      toast.success('User updated');
+      setEditTarget(null);
+      onRefresh();
+    }
     catch { toast.error('Failed to update user'); }
     finally { setSaving(false); }
   };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    try { await dbService.deleteProfile(deleteTarget.id); toast.success('User deleted'); setDeleteTarget(null); onRefresh(); }
+    try {
+      await dbService.deleteProfile(deleteTarget.id);
+      toast.success('User deleted');
+      setDeleteTarget(null);
+      onRefresh();
+    }
     catch { toast.error('Failed to delete user'); }
   };
 
@@ -228,12 +238,14 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
         <div key={p.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0">
-              {p.avatar_url ? <img src={p.avatar_url} alt={p.username} className="w-full h-full object-cover" /> : <Users size={16} className="text-neutral-400" />}
+              {/* Fix: convert null to undefined for alt prop */}
+              {p.avatar_url ? <img src={p.avatar_url} alt={p.username ?? undefined} className="w-full h-full object-cover" /> : <Users size={16} className="text-neutral-400" />}
             </div>
             <div className="min-w-0">
               <p className="text-sm font-black italic uppercase tracking-tight truncate">{p.username}</p>
-              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${p.role === 'admin' ? 'bg-strawberry-500/10 text-strawberry-600' : p.role === 'moderator' ? 'bg-blue-500/10 text-blue-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
-                {p.role || 'member'}
+              {/* Fix: cast role to any to allow comparison with string literals beyond the strict UserRole union */}
+              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${(p.role as string) === 'admin' ? 'bg-strawberry-500/10 text-strawberry-600' : (p.role as string) === 'moderator' ? 'bg-blue-500/10 text-blue-500' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
+                {p.role || 'player'}
               </span>
             </div>
           </div>
@@ -264,6 +276,7 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
 // ─── EVENTS TAB ────────────────────────────────────────────────────────────
 
 const EventsTab = ({ events, onRefresh }: { events: Event[]; onRefresh: () => void }) => {
+  const { profile } = useAuthStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Event | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Event | null>(null);
@@ -277,7 +290,19 @@ const EventsTab = ({ events, onRefresh }: { events: Event[]; onRefresh: () => vo
     setSaving(true);
     try {
       if (editTarget) { await dbService.updateEvent(editTarget.id, form); toast.success('Event updated'); }
-      else { await dbService.createEvent(form); toast.success('Event created'); }
+      else {
+        // Fix: supply all required fields for Omit<Event, 'id' | 'created_at'>
+        await dbService.createEvent({
+          title: form.title,
+          description: form.description || null,
+          location: form.location || null,
+          status: 'upcoming',
+          start_time: form.date || new Date().toISOString(),
+          end_time: null,
+          created_by: profile?.id ?? '',
+        });
+        toast.success('Event created');
+      }
       setModalOpen(false); onRefresh();
     } catch { toast.error('Failed to save event'); }
     finally { setSaving(false); }
@@ -318,6 +343,7 @@ const EventsTab = ({ events, onRefresh }: { events: Event[]; onRefresh: () => vo
 // ─── RULES TAB ─────────────────────────────────────────────────────────────
 
 const RulesTab = ({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => void }) => {
+  const { profile } = useAuthStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Rule | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Rule | null>(null);
@@ -331,7 +357,19 @@ const RulesTab = ({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => void }
     setSaving(true);
     try {
       if (editTarget) { await adminService.updateRule(editTarget.id, form); toast.success('Rule updated'); }
-      else { await adminService.createRule(form); toast.success('Rule created'); }
+      else {
+        // Fix: supply all required fields for Omit<Rule, 'id' | 'updated_at'>
+        await adminService.createRule({
+          title: form.title,
+          content: form.content,
+          priority: form.order,
+          created_by: profile?.id ?? null,
+          is_pinned: false,
+          is_visible: true,
+          category: null,
+        });
+        toast.success('Rule created');
+      }
       setModalOpen(false); onRefresh();
     } catch { toast.error('Failed to save rule'); }
     finally { setSaving(false); }
@@ -371,6 +409,7 @@ const RulesTab = ({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => void }
 // ─── REMINDERS TAB ─────────────────────────────────────────────────────────
 
 const RemindersTab = ({ reminders, onRefresh }: { reminders: Reminder[]; onRefresh: () => void }) => {
+  const { profile } = useAuthStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Reminder | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null);
@@ -384,7 +423,20 @@ const RemindersTab = ({ reminders, onRefresh }: { reminders: Reminder[]; onRefre
     setSaving(true);
     try {
       if (editTarget) { await adminService.updateReminder(editTarget.id, form); toast.success('Reminder updated'); }
-      else { await adminService.createReminder(form); toast.success('Reminder created'); }
+      else {
+        // Fix: supply all required fields for Omit<Reminder, 'id' | 'created_at'>
+        await adminService.createReminder({
+          title: form.title,
+          message: form.message,
+          scheduled_at: null,
+          expires_at: null,
+          is_important: false,
+          target_role: null,
+          target_user_id: null,
+          created_by: profile?.id ?? null,
+        });
+        toast.success('Reminder created');
+      }
       setModalOpen(false); onRefresh();
     } catch { toast.error('Failed to save reminder'); }
     finally { setSaving(false); }
@@ -537,6 +589,7 @@ const GuidesTab = ({ guides, onRefresh }: { guides: any[]; onRefresh: () => void
 // ─── PLUGINS TAB ───────────────────────────────────────────────────────────
 
 const PluginsTab = ({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => void }) => {
+  const { profile } = useAuthStore();
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
@@ -553,7 +606,19 @@ const PluginsTab = ({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => v
     setSaving(true);
     try {
       if (editTarget) { await dbService.updatePlugin(editTarget.id, form); toast.success('Plugin updated'); }
-      else { await dbService.createPlugin(form); toast.success('Plugin created'); }
+      else {
+        // Fix: supply all required fields for Omit<Plugin, 'id' | 'created_at' | 'updated_at'>
+        await dbService.createPlugin({
+          name: form.name,
+          description: form.description || null,
+          version: form.version || null,
+          icon_url: null,
+          category: null,
+          is_visible: true,
+          created_by: profile?.id ?? null,
+        });
+        toast.success('Plugin created');
+      }
       setModalOpen(false); onRefresh();
     } catch { toast.error('Failed to save plugin'); }
     finally { setSaving(false); }
@@ -638,7 +703,8 @@ const CategoriesTab = () => {
 
   const fetchCats = async () => {
     setLoading(true);
-    try { setCategories(await dbService.getCategories()); }
+    // Fix: use correct method name getShopCategories
+    try { setCategories(await dbService.getShopCategories()); }
     catch { toast.error('Failed to load categories'); }
     finally { setLoading(false); }
   };
@@ -651,8 +717,9 @@ const CategoriesTab = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (editTarget) { await dbService.updateCategory(editTarget.id, form); toast.success('Category updated'); }
-      else { await dbService.createCategory(form); toast.success('Category created'); }
+      // Fix: use correct method names updateShopCategory / createShopCategory
+      if (editTarget) { await dbService.updateShopCategory(editTarget.id, form); toast.success('Category updated'); }
+      else { await dbService.createShopCategory({ ...form, icon_url: null }); toast.success('Category created'); }
       setModalOpen(false); fetchCats();
     } catch { toast.error('Failed to save category'); }
     finally { setSaving(false); }
@@ -660,7 +727,8 @@ const CategoriesTab = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    try { await dbService.deleteCategory(deleteTarget.id); toast.success('Category deleted'); setDeleteTarget(null); fetchCats(); }
+    // Fix: use correct method name deleteShopCategory
+    try { await dbService.deleteShopCategory(deleteTarget.id); toast.success('Category deleted'); setDeleteTarget(null); fetchCats(); }
     catch { toast.error('Failed to delete category'); }
   };
 
@@ -695,6 +763,56 @@ const CategoriesTab = () => {
         <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Category description..." /></div>
       </CrudModal>
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'category'} />
+    </>
+  );
+};
+
+// ─── VERSIONS TAB ──────────────────────────────────────────────────────────
+
+const VersionsTab = ({ onAdd, onEdit }: { onAdd: () => void; onEdit: (v: any) => void }) => {
+  const { versions, loading, refetch } = useMinecraftVersions();
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const { error } = await (await import('../services/supabase')).supabase
+        .from('minecraft_versions')
+        .delete()
+        .eq('id', deleteTarget.id);
+      if (error) throw error;
+      toast.success('Version deleted');
+      setDeleteTarget(null);
+      refetch();
+    } catch { toast.error('Failed to delete version'); }
+  };
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-strawberry-600" size={28} /></div>;
+
+  return (
+    <>
+      <SectionHeader icon={GitBranch} title="Versions" count={versions?.length} onAdd={onAdd} addLabel="Add Version" />
+      {!versions?.length ? <EmptyState icon={GitBranch} label="No versions added" /> : versions.map((v: any) => (
+        <div key={v.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-strawberry-500/10 flex items-center justify-center shrink-0">
+              <GitBranch size={13} className="text-strawberry-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-black italic uppercase tracking-tight truncate">{v.version_string}</p>
+              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                {v.is_recommended && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-green-500/10 text-green-500">Recommended</span>}
+                {v.is_supported && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-500">Supported</span>}
+                {v.maintenance_mode && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-600">Maintenance</span>}
+                {v.supports_java && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-white/5 text-neutral-400">Java</span>}
+                {v.supports_bedrock && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-white/5 text-neutral-400">Bedrock</span>}
+              </div>
+            </div>
+          </div>
+          <RowActions onEdit={() => onEdit(v)} onDelete={() => setDeleteTarget(v)} />
+        </div>
+      ))}
+      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.version_string || 'version'} />
     </>
   );
 };
@@ -808,12 +926,7 @@ const AdminPanel = () => {
             {activeTab === 'events' && <EventsTab events={events} onRefresh={fetchData} />}
             {activeTab === 'rules' && <RulesTab rules={rules} onRefresh={fetchData} />}
             {activeTab === 'reminders' && <RemindersTab reminders={reminders} onRefresh={fetchData} />}
-            {activeTab === 'versions' && (
-              <>
-                <SectionHeader icon={GitBranch} title="Versions" onAdd={() => setModal({ isOpen: true, type: 'version' })} addLabel="Add Version" />
-                <div className={cardCls}><div className="flex items-center gap-3 text-neutral-400"><GitBranch size={14} className="text-strawberry-600" /><span className="text-xs font-black uppercase tracking-widest italic">Manage Minecraft versions</span></div></div>
-              </>
-            )}
+            {activeTab === 'versions' && <VersionsTab onAdd={() => setModal({ isOpen: true, type: 'version' })} onEdit={v => setModal({ isOpen: true, type: 'edit-version', data: v })} />}
             {activeTab === 'categories' && <CategoriesTab />}
             {activeTab === 'badges' && <BadgesTab badges={badges} onRefresh={fetchData} onAdd={() => setModal({ isOpen: true, type: 'badge' })} onEdit={b => setModal({ isOpen: true, type: 'edit-badge', data: b })} />}
             {activeTab === 'commands' && <CommandsTab commands={commands} onRefresh={fetchData} />}
