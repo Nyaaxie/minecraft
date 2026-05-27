@@ -108,7 +108,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
           </motion.div>
-          <span className="font-genty font-bold italic text-base tracking-tight flex-1 min-w-0">
+          <span style={{ fontFamily: "'Genty', serif" }} className="text-xl font-black italic tracking-tighter text-neutral-900 dark:text-white flex-1 min-w-0">
             Strawberry<span className="text-strawberry-600">SMP</span>
           </span>
           <div className="hidden lg:flex items-center shrink-0 -mr-1">
@@ -175,7 +175,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="p-2 bg-strawberry-600 rounded-xl text-white shadow-lg shadow-strawberry-600/20">
             <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
           </div>
-          <span className="font-genty font-bold italic text-lg tracking-tight">Strawberry<span className="text-strawberry-600">SMP</span></span>
+          <span style={{ fontFamily: "'Genty', serif" }} className="text-xl font-black italic tracking-tighter text-neutral-900 dark:text-white flex-1 min-w-0">
+            Strawberry<span className="text-strawberry-600">SMP</span>
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <NotificationCenter />
@@ -211,10 +213,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 <div className="p-2.5 bg-strawberry-600 rounded-2xl text-white shadow-lg shadow-strawberry-600/30">
                   <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
                 </div>
-                <span className="text-2xl font-black tracking-tighter italic uppercase text-neutral-900 dark:text-white">
+                <span style={{ fontFamily: "'Genty', serif" }} className="text-xl font-black italic tracking-tighter text-neutral-900 dark:text-white flex-1 min-w-0">
                   Strawberry<span className="text-strawberry-600">SMP</span>
-                </span>
-              </div>
+                </span>              </div>
 
               <nav className="flex-1 space-y-6 overflow-y-auto hide-scrollbar">
                 {menuGroups.map((group) => (
