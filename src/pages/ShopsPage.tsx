@@ -58,17 +58,16 @@ const ShopCard = React.memo(({ shop, currentUserId, isAdmin }: {
           <div className="w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0 border border-neutral-200 dark:border-white/5 group-hover:scale-105 transition-transform duration-500">
             <Store size={24} className="text-strawberry-600" />
           </div>
-          <div className="min-w-0">
-            <h3 className="text-lg font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white group-hover/link:text-strawberry-600 transition-colors truncate">
+          <div className="min-w-0 flex-grow">
+            <h3 className="text-lg font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white group-hover/link:text-strawberry-600 transition-colors break-words">
               {shop.name}
             </h3>
-            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-0.5">Shopfront</p>
           </div>
         </Link>
 
         {/* Description Section */}
         <Link to={`/shops/${shop.id}`} className="flex-grow">
-          <p className="text-center text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed italic line-clamp-2 px-2">
+          <p className="text-center text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed italic px-2 break-words">
             "{shop.description || 'Welcome to my storefront.'}"
           </p>
         </Link>

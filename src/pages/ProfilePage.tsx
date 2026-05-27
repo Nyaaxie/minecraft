@@ -36,7 +36,7 @@ const StatCard = ({ onClick, label, value, icon: Icon, isEdition }: { onClick: (
       <Icon size={16} className="text-strawberry-600" />
       <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 group-hover/stat:text-strawberry-600 transition-colors">{label}</span>
     </div>
-    <span className={`font-black italic uppercase text-neutral-900 dark:text-white truncate max-w-full ${isEdition ? 'text-lg' : 'text-xs'}`}>{value}</span>
+    <span className={`font-black italic uppercase text-neutral-900 dark:text-white break-words w-full ${isEdition ? 'text-lg' : 'text-xs'}`}>{value}</span>
   </div>
 );
 
@@ -194,7 +194,7 @@ const ProfilePage = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <StatCard onClick={() => openFullInfo('Rank Designation', profile?.role === 'admin' ? 'ADMIN' : 'BERRY')} label="Rank" value={profile?.role === 'admin' ? 'ADMIN' : 'BERRY'} icon={Shield} />
               <StatCard onClick={() => openFullInfo('Date Joined', profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A')} label="Joined" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'} icon={Calendar} />
               {formData.minecraft_edition && <StatCard isEdition={true} onClick={() => openFullInfo('Client Edition', formData.minecraft_edition || '')} label="Edition" value={formData.minecraft_edition} icon={MonitorPlay} />}
