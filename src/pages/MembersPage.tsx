@@ -115,11 +115,13 @@ const MembersPage: React.FC = () => {
           const badgeNames = p.user_badges.map(ub => ub.badges?.name.toLowerCase().trim()).filter(Boolean);
           let bestRank = 998;
 
-          BADGE_ORDER.forEach((name, index) => {
-            if (badgeNames.includes(name) && index < bestRank) {
+          badgeNames.forEach(badgeName => {
+            const index = BADGE_ORDER.findIndex(orderedName => badgeName.includes(orderedName));
+            if (index !== -1 && index < bestRank) {
               bestRank = index;
             }
           });
+          
           return bestRank;
         };
 

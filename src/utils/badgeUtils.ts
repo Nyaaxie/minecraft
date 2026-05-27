@@ -2,7 +2,8 @@ import type { Badge } from '../types/database.types';
 
 export const BADGE_ORDER = [
   'berry owner',
-  'unbreaking loyalty',
+  'unbreaking berry',
+  'loyalty berry',
   'berry',
   'salingkitkit'
 ];

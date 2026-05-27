@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { dbService } from '../services/dbService';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 import type { PlayerShop, ShopItem } from '../types/database.types';
-import { Loader2, Store, Edit, Package, ArrowLeft, Trash2, User, AlertCircle, Plus, } from 'lucide-react';
+import { Loader2, Store, Edit, Package, ArrowLeft, Trash2, User, AlertCircle, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
@@ -17,66 +17,86 @@ const ShopItemCard = ({ item, canManage, onEdit, onDelete, }: {
   onDelete: (id: string) => void,
   addToCart: (item: ShopItem) => void
 }) => {
-  const itemImageUrl = getMinecraftItemImageUrl(item.minecraft_item_id, { size: 64 });
+  const itemImageUrl = getMinecraftItemImageUrl(item.minecraft_item_id, { size: 96 });
+
+  // Helper to extract level or special type from NBT (Potions only)
+  const getItemMetadata = (value: string) => {
+    if (value.includes('potion')) {
+      if (value.includes('strong_') || value.includes('strong')) return 'Level II';
+      if (value.includes('long_') || value.includes('long')) return 'Extended';
+    }
+    return null;
+  };
+
+  const metadata = getItemMetadata(item.minecraft_item_id);
+  const nameParts = item.item_name.split(':');
+  const mainName = nameParts[0];
+  const subName = nameParts.length > 1 ? nameParts[1].trim() : null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl shadow-neutral-900/5 flex flex-col group hover:border-strawberry-500/30 hover:shadow-strawberry-500/10 transition-all duration-300 relative h-full"
+      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl shadow-neutral-900/5 flex flex-col group hover:border-strawberry-500/30 hover:shadow-strawberry-500/10 transition-all duration-300 relative h-full p-5"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-strawberry-500/0 via-transparent to-strawberry-500/0 group-hover:from-strawberry-500/5 transition-all duration-500 pointer-events-none rounded-3xl" />
+      {/* Admin Controls */}
+      {canManage && (
+        <div className="absolute top-3 right-3 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onClick={() => onEdit(item.id)} className="p-1.5 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-lg text-neutral-500 hover:text-strawberry-600 shadow-sm transition-all">
+            <Edit size={12} />
+          </button>
+          <button onClick={() => onDelete(item.id)} className="p-1.5 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-lg text-neutral-500 hover:text-red-500 shadow-sm transition-all">
+            <Trash2 size={12} />
+          </button>
+        </div>
+      )}
 
-      <div className="relative p-5">
-        {canManage && (
-          <div className="absolute top-4 right-4 flex gap-1.5 z-10">
-            <button
-              onClick={() => onEdit(item.id)}
-              className="p-2 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-400 hover:text-strawberry-600 hover:bg-strawberry-50 dark:hover:bg-strawberry-500/10 transition-all"
-              title="Edit Item"
-            >
-              <Edit size={13} />
-            </button>
-            <button
-              onClick={() => onDelete(item.id)}
-              className="p-2 bg-neutral-100 dark:bg-white/5 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
-              title="Delete Item"
-            >
-              <Trash2 size={13} />
-            </button>
-          </div>
-        )}
-
-        <div className="flex items-center gap-3">
-          <div className="w-[4.5rem] h-[4.5rem] bg-neutral-100 dark:bg-neutral-800/80 rounded-2xl flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-white/5 shadow-inner group-hover:scale-105 transition-transform duration-500 shrink-0">
-            <img
-              src={itemImageUrl}
-              alt={item.item_name}
-              className="w-11 h-11 object-contain drop-shadow-lg"
-              onError={(e) => { e.currentTarget.src = 'https://api.minecraftitems.xyz/api/item/stone?size=64'; }}
-            />
-          </div>
-
-          <div className={`flex-1 min-w-0 ${canManage ? 'pr-12' : ''}`}>
-            <h3 className="text-sm font-black italic uppercase tracking-tight leading-tight group-hover:text-strawberry-600 transition-colors truncate">
-              {item.item_name}
-            </h3>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 bg-strawberry-500/10 px-2 py-0.5 rounded-lg">
-                {item.quantity} Units
-              </span>
-            </div>
-          </div>
+      {/* Top Row: Image (Left) and Name (Right) - Left Aligned */}
+      <div className="flex items-center justify-start gap-4 mb-6">
+        <div className="w-16 h-16 bg-neutral-50 dark:bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-neutral-100 dark:border-white/5 group-hover:scale-105 transition-transform duration-500">
+          <img
+            src={itemImageUrl}
+            alt={item.item_name}
+            className="w-12 h-12 object-contain drop-shadow-xl filter brightness-110"
+            onError={(e) => { e.currentTarget.src = 'https://api.minecraftitems.xyz/api/item/stone?size=96'; }}
+          />
+        </div>
+        <div className="min-w-0 flex flex-col items-start text-left">
+          <h3 className="text-base font-black italic uppercase tracking-tighter leading-tight text-neutral-900 dark:text-white group-hover:text-strawberry-600 transition-colors line-clamp-2">
+            {mainName}
+          </h3>
+          {subName && (
+            <p className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 mt-1 line-clamp-1 italic">
+              {subName}
+            </p>
+          )}
+          {metadata && (
+             <span className="inline-block mt-2 text-[8px] font-black uppercase tracking-widest text-neutral-400 bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded-lg">
+                {metadata}
+             </span>
+          )}
         </div>
       </div>
 
-      <div className="px-5 pb-5 mt-auto">
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl">
-          <span className="text-[11px] font-black italic uppercase tracking-widest text-neutral-500">Price</span>
-          <span className="text-[11px] font-black italic uppercase tracking-widest text-neutral-900 dark:text-white">
-            {item.price} {item.currency}
+      {/* Bottom Row: Quantity (Left) and Price (Right) */}
+      <div className="mt-auto flex items-center justify-between gap-4 pt-4 border-t border-neutral-100 dark:border-white/5">
+        <div className="flex flex-col">
+          <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400 mb-0.5">Quantity</span>
+          <span className="text-xs font-black italic text-neutral-700 dark:text-neutral-300">
+            {item.quantity} pcs
           </span>
+        </div>
+        <div className="text-right">
+          <span className="text-[8px] font-black uppercase tracking-widest text-neutral-400 mb-0.5">Trade Value</span>
+          <div className="flex items-center justify-end gap-1.5">
+            <span className="text-sm font-black italic tracking-tighter text-strawberry-600">
+              {item.price}
+            </span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">
+              {item.currency}
+            </span>
+          </div>
         </div>
       </div>
     </motion.div>

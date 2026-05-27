@@ -8,7 +8,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import { useDebounce } from '../hooks/useDebounce';
 
-const ShopCard = React.memo(({ shop, currentUserId, isAdmin, onDelete }: {
+const ShopCard = React.memo(({ shop, currentUserId, isAdmin }: {
   shop: PlayerShop & { profiles: { username: string; avatar_url: string } | null },
   currentUserId?: string,
   isAdmin: boolean,
@@ -24,64 +24,53 @@ const ShopCard = React.memo(({ shop, currentUserId, isAdmin, onDelete }: {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-xl shadow-neutral-900/5 flex flex-col h-full hover:border-strawberry-500/30 transition-all group overflow-hidden relative"
+      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2rem] p-6 shadow-xl shadow-neutral-900/5 flex flex-col h-full hover:border-strawberry-500/30 transition-all group overflow-hidden relative"
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-strawberry-500/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-strawberry-500/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
 
       <div className="relative z-10 flex flex-col h-full">
-        <div className="flex items-start justify-between mb-6">
-          <Link to={`/shops/${shop.id}`} className="group/title">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 rounded-[1.5rem] bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-neutral-900 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                <Store size={32} className="text-strawberry-600" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white group-hover/title:text-strawberry-600 transition-colors">{shop.name}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="h-5 w-5 rounded-full overflow-hidden border border-white dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800">
-                    {ownerAvatar ? (
-                      <img src={ownerAvatar} alt={ownerUsername} className="h-full w-full object-cover" loading="lazy" />
-                    ) : (
-                      <User size={12} className="m-auto text-neutral-400" />
-                    )}
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">{ownerUsername}</span>
-                </div>
-              </div>
+        {/* Header Row: Owner (Left) and Edit (Right) */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 rounded-full overflow-hidden border border-white dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800">
+              {ownerAvatar ? (
+                <img src={ownerAvatar} alt={ownerUsername} className="h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <User size={12} className="m-auto text-neutral-400" />
+              )}
             </div>
-          </Link>
+            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">{ownerUsername}</span>
+          </div>
 
           {canManage && (
-            <div className="flex gap-2">
-              <Link
-                to={`/shops/edit/${shop.id}`}
-                className="p-2.5 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 rounded-xl transition-all"
-                title="Edit Shop"
-              >
-                <Edit size={16} />
-              </Link>
-              <button
-                onClick={() => onDelete(shop.id)}
-                className="p-2.5 bg-neutral-100 dark:bg-white/5 hover:bg-red-500/10 hover:text-red-600 rounded-xl transition-all"
-                title="Delete Shop"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
+            <Link
+              to={`/shops/edit/${shop.id}`}
+              className="p-2 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+              title="Edit Shop"
+            >
+              <Edit size={14} />
+            </Link>
           )}
         </div>
 
-        <Link to={`/shops/${shop.id}`} className="flex-grow flex flex-col">
-          <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed mb-8 italic line-clamp-3">
-            "{shop.description || 'No description provided.'}"
-          </p>
-
-          <div className="mt-auto pt-6 border-t border-neutral-100 dark:border-white/5 flex justify-between items-center">
-            <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest italic ${shop.is_active ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'}`}>
-              {shop.is_active ? 'Open' : 'Closed'}
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Est. {new Date(shop.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+        {/* Main Shop Row: Icon and Title */}
+        <Link to={`/shops/${shop.id}`} className="flex items-center gap-4 mb-5 group/link">
+          <div className="w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0 border border-neutral-200 dark:border-white/5 group-hover:scale-105 transition-transform duration-500">
+            <Store size={24} className="text-strawberry-600" />
           </div>
+          <div className="min-w-0">
+            <h3 className="text-lg font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white group-hover/link:text-strawberry-600 transition-colors truncate">
+              {shop.name}
+            </h3>
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-0.5">Shopfront</p>
+          </div>
+        </Link>
+
+        {/* Description Section */}
+        <Link to={`/shops/${shop.id}`} className="flex-grow">
+          <p className="text-center text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed italic line-clamp-2 px-2">
+            "{shop.description || 'Welcome to my storefront.'}"
+          </p>
         </Link>
       </div>
     </motion.div>
