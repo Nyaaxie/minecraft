@@ -122,7 +122,7 @@ export const dbService = {
   async createEvent(event: Omit<Event, 'id' | 'created_at'>) {
     const { data, error } = await supabase.from('events').insert(event).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Event Scheduled', `New event: ${event.title}`, 'event', '/events');
+    await this.notifyAllUsers('New Event Scheduled', `New event: ${event.title}`, 'event', '/events', event.created_by);
     return data;
   },
 
@@ -206,9 +206,13 @@ export const dbService = {
     return data;
   },
 
-  async notifyAllUsers(title: string, message: string, type: 'event' | 'announcement' | 'message' | 'system', link?: string) {
+  async notifyAllUsers(title: string, message: string, type: 'event' | 'announcement' | 'message' | 'system', link?: string, excludeUserId?: string) {
     try {
-      const { data: profiles, error } = await supabase.from('profiles').select('id');
+      let query = supabase.from('profiles').select('id');
+      if (excludeUserId) {
+        query = query.neq('id', excludeUserId);
+      }
+      const { data: profiles, error } = await query;
       if (error) throw error;
       const notifications = profiles.map(p => ({ profile_id: p.id, title, message, type, link }));
       const { error: insertError } = await supabase.from('notifications').insert(notifications);
@@ -228,7 +232,7 @@ export const dbService = {
   async createAnnouncement(announcement: Omit<Announcement, 'id' | 'created_at'>) {
     const { data, error } = await supabase.from('announcements').insert(announcement).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Announcement', announcement.title, 'announcement', '/dashboard');
+    await this.notifyAllUsers('New Announcement', announcement.title, 'announcement', '/dashboard', announcement.created_by);
     return data;
   },
 
@@ -257,9 +261,10 @@ export const dbService = {
   async createReminder(reminder: Omit<Reminder, 'id' | 'created_at'>) {
     const { data, error } = await supabase.from('reminders').insert(reminder).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Reminder', reminder.title, 'system', '/server-info');
+    await this.notifyAllUsers('New Reminder', reminder.title, 'system', '/server-info', reminder.created_by || undefined);
     return data;
   },
+
 
   // --- Suggestions ---
   async getSuggestions() {
@@ -369,14 +374,16 @@ export const dbService = {
   async createPlugin(plugin: Omit<Plugin, 'id' | 'created_at' | 'updated_at'>) {
     const { data, error } = await supabase.from('plugins').insert(plugin).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Plugin Available', plugin.name, 'system', '/plugins');
+    await this.notifyAllUsers('New Plugin Available', plugin.name, 'system', '/plugins', plugin.created_by || undefined);
     return data;
   },
+
   async updatePlugin(id: string, updates: Partial<Plugin>) {
     const { data, error } = await supabase.from('plugins').update(updates).eq('id', id).select().single();
     if (error) throw error;
     return data;
   },
+
   async deletePlugin(id: string) {
     const { error } = await supabase.from('plugins').delete().eq('id', id);
     if (error) throw error;
@@ -446,9 +453,10 @@ export const dbService = {
   async createPlayerShop(shop: Omit<PlayerShop, 'id' | 'created_at' | 'updated_at'>) {
     const { data, error } = await supabase.from('player_shops').insert(shop).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Shop Opened', `A new shop has been opened: ${shop.name}`, 'system', `/shops/${data.id}`);
+    await this.notifyAllUsers('New Shop Opened', `A new shop has been opened: ${shop.name}`, 'system', `/shops/${data.id}`, shop.owner_id);
     return data;
   },
+
   async updatePlayerShop(id: string, updates: Partial<PlayerShop>) {
     const { data, error } = await supabase.from('player_shops').update(updates).eq('id', id).select().single();
     if (error) throw error;
@@ -476,10 +484,10 @@ export const dbService = {
     if (error) throw error;
     return data;
   },
-  async createShopItem(item: Omit<ShopItem, 'id' | 'created_at' | 'updated_at'>) {
+  async createShopItem(item: Omit<ShopItem, 'id' | 'created_at' | 'updated_at'>, creatorId?: string) {
     const { data, error } = await supabase.from('shop_items').insert(item).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Shop Item', `A new item has been added: ${item.item_name}`, 'system', `/shops/${item.shop_id}`);
+    await this.notifyAllUsers('New Shop Item', `A new item has been added: ${item.item_name}`, 'system', `/shops/${item.shop_id}`, creatorId);
     return data;
   },
   async updateShopItem(id: string, updates: Partial<ShopItem>) {

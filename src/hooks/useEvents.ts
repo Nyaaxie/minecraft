@@ -20,13 +20,14 @@ export const useEvents = () => {
 
       if (error) throw error;
       
-      const processedEvents = data.map(event => ({
+      const processedEvents = (data || []).map(event => ({
         ...event,
-        rsvpCount: event.event_rsvps[0]?.count || 0
+        rsvpCount: (event as any).event_rsvps?.[0]?.count || 0
       }));
 
-      setEvents(processedEvents || []);
+      setEvents(processedEvents);
     } catch (err: any) {
+      console.error('useEvents Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

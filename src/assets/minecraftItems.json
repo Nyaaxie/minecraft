@@ -3786,5 +3786,609 @@
   {
     "label": "Music Disc (Precipice)",
     "value": "music_disc_precipice"
+  },
+  {
+    "label": "Enchanted Book: Protection I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:protection',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Protection II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:protection',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Protection III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:protection',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Protection IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:protection',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Fire Protection I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fire_protection',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Fire Protection II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fire_protection',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Fire Protection III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fire_protection',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Fire Protection IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fire_protection',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Feather Falling I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:feather_falling',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Feather Falling II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:feather_falling',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Feather Falling III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:feather_falling',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Feather Falling IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:feather_falling',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Blast Protection I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:blast_protection',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Blast Protection II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:blast_protection',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Blast Protection III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:blast_protection',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Blast Protection IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:blast_protection',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Projectile Protection I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:projectile_protection',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Projectile Protection II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:projectile_protection',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Projectile Protection III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:projectile_protection',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Projectile Protection IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:projectile_protection',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Respiration I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:respiration',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Respiration II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:respiration',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Respiration III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:respiration',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Aqua Affinity",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:aqua_affinity',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Thorns I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:thorns',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Thorns II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:thorns',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Thorns III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:thorns',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Depth Strider I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:depth_strider',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Depth Strider II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:depth_strider',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Depth Strider III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:depth_strider',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Frost Walker I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:frost_walker',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Frost Walker II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:frost_walker',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Binding Curse",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:binding_curse',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Sharpness I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:sharpness',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Sharpness II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:sharpness',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Sharpness III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:sharpness',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Sharpness IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:sharpness',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Sharpness V",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:sharpness',lvl:5}]}"
+  },
+  {
+    "label": "Enchanted Book: Smite I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:smite',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Smite II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:smite',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Smite III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:smite',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Smite IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:smite',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Smite V",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:smite',lvl:5}]}"
+  },
+  {
+    "label": "Enchanted Book: Bane of Arthropods I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:bane_of_arthropods',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Bane of Arthropods II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:bane_of_arthropods',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Bane of Arthropods III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:bane_of_arthropods',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Bane of Arthropods IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:bane_of_arthropods',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Bane of Arthropods V",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:bane_of_arthropods',lvl:5}]}"
+  },
+  {
+    "label": "Enchanted Book: Knockback I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:knockback',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Knockback II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:knockback',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Fire Aspect I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fire_aspect',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Fire Aspect II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fire_aspect',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Looting I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:looting',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Looting II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:looting',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Looting III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:looting',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Sweeping Edge I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:sweeping_edge',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Sweeping Edge II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:sweeping_edge',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Sweeping Edge III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:sweeping_edge',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Efficiency I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:efficiency',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Efficiency II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:efficiency',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Efficiency III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:efficiency',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Efficiency IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:efficiency',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Efficiency V",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:efficiency',lvl:5}]}"
+  },
+  {
+    "label": "Enchanted Book: Silk Touch",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:silk_touch',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Unbreaking I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:unbreaking',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Unbreaking II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:unbreaking',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Unbreaking III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:unbreaking',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Fortune I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fortune',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Fortune II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fortune',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Fortune III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:fortune',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Power I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:power',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Power II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:power',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Power III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:power',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Power IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:power',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Power V",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:power',lvl:5}]}"
+  },
+  {
+    "label": "Enchanted Book: Punch I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:punch',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Punch II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:punch',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Flame",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:flame',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Infinity",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:infinity',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Luck of the Sea I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:luck_of_the_sea',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Luck of the Sea II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:luck_of_the_sea',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Luck of the Sea III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:luck_of_the_sea',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Lure I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:lure',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Lure II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:lure',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Lure III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:lure',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Mending",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:mending',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Vanishing Curse",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:vanishing_curse',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Impaling I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:impaling',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Impaling II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:impaling',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Impaling III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:impaling',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Impaling IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:impaling',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Impaling V",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:impaling',lvl:5}]}"
+  },
+  {
+    "label": "Enchanted Book: Riptide I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:riptide',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Riptide II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:riptide',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Riptide III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:riptide',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Loyalty I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:loyalty',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Loyalty II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:loyalty',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Loyalty III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:loyalty',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Channeling",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:channeling',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Multishot",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:multishot',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Piercing I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:piercing',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Piercing II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:piercing',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Piercing III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:piercing',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Piercing IV",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:piercing',lvl:4}]}"
+  },
+  {
+    "label": "Enchanted Book: Quick Charge I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:quick_charge',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Quick Charge II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:quick_charge',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Quick Charge III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:quick_charge',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Soul Speed I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:soul_speed',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Soul Speed II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:soul_speed',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Soul Speed III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:soul_speed',lvl:3}]}"
+  },
+  {
+    "label": "Enchanted Book: Swift Sneak I",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:swift_sneak',lvl:1}]}"
+  },
+  {
+    "label": "Enchanted Book: Swift Sneak II",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:swift_sneak',lvl:2}]}"
+  },
+  {
+    "label": "Enchanted Book: Swift Sneak III",
+    "value": "enchanted_book{StoredEnchantments:[{id:'minecraft:swift_sneak',lvl:3}]}"
+  },
+  {
+    "label": "Potion of Fire Resistance",
+    "value": "potion{Potion:'minecraft:fire_resistance'}"
+  },
+  {
+    "label": "Potion of Fire Resistance (Extended)",
+    "value": "potion{Potion:'minecraft:long_fire_resistance'}"
+  },
+  {
+    "label": "Potion of Harming",
+    "value": "potion{Potion:'minecraft:instant_damage'}"
+  },
+  {
+    "label": "Potion of Harming II",
+    "value": "potion{Potion:'minecraft:strong_instant_damage'}"
+  },
+  {
+    "label": "Potion of Healing",
+    "value": "potion{Potion:'minecraft:instant_health'}"
+  },
+  {
+    "label": "Potion of Healing II",
+    "value": "potion{Potion:'minecraft:strong_instant_health'}"
+  },
+  {
+    "label": "Potion of Invisibility",
+    "value": "potion{Potion:'minecraft:invisibility'}"
+  },
+  {
+    "label": "Potion of Invisibility (Extended)",
+    "value": "potion{Potion:'minecraft:long_invisibility'}"
+  },
+  {
+    "label": "Potion of Leaping",
+    "value": "potion{Potion:'minecraft:leaping'}"
+  },
+  {
+    "label": "Potion of Leaping II",
+    "value": "potion{Potion:'minecraft:strong_leaping'}"
+  },
+  {
+    "label": "Potion of Leaping (Extended)",
+    "value": "potion{Potion:'minecraft:long_leaping'}"
+  },
+  {
+    "label": "Potion of Luck",
+    "value": "potion{Potion:'minecraft:luck'}"
+  },
+  {
+    "label": "Potion of Night Vision",
+    "value": "potion{Potion:'minecraft:night_vision'}"
+  },
+  {
+    "label": "Potion of Night Vision (Extended)",
+    "value": "potion{Potion:'minecraft:long_night_vision'}"
+  },
+  {
+    "label": "Potion of Poison",
+    "value": "potion{Potion:'minecraft:poison'}"
+  },
+  {
+    "label": "Potion of Poison II",
+    "value": "potion{Potion:'minecraft:strong_poison'}"
+  },
+  {
+    "label": "Potion of Poison (Extended)",
+    "value": "potion{Potion:'minecraft:long_poison'}"
+  },
+  {
+    "label": "Potion of Regeneration",
+    "value": "potion{Potion:'minecraft:regeneration'}"
+  },
+  {
+    "label": "Potion of Regeneration II",
+    "value": "potion{Potion:'minecraft:strong_regeneration'}"
+  },
+  {
+    "label": "Potion of Regeneration (Extended)",
+    "value": "potion{Potion:'minecraft:long_regeneration'}"
+  },
+  {
+    "label": "Potion of Slowness",
+    "value": "potion{Potion:'minecraft:slowness'}"
+  },
+  {
+    "label": "Potion of Slowness IV",
+    "value": "potion{Potion:'minecraft:strong_slowness'}"
+  },
+  {
+    "label": "Potion of Slowness (Extended)",
+    "value": "potion{Potion:'minecraft:long_slowness'}"
+  },
+  {
+    "label": "Potion of Slow Falling",
+    "value": "potion{Potion:'minecraft:slow_falling'}"
+  },
+  {
+    "label": "Potion of Slow Falling (Extended)",
+    "value": "potion{Potion:'minecraft:long_slow_falling'}"
+  },
+  {
+    "label": "Potion of Strength",
+    "value": "potion{Potion:'minecraft:strength'}"
+  },
+  {
+    "label": "Potion of Strength II",
+    "value": "potion{Potion:'minecraft:strong_strength'}"
+  },
+  {
+    "label": "Potion of Strength (Extended)",
+    "value": "potion{Potion:'minecraft:long_strength'}"
+  },
+  {
+    "label": "Potion of Swiftness",
+    "value": "potion{Potion:'minecraft:swiftness'}"
+  },
+  {
+    "label": "Potion of Swiftness II",
+    "value": "potion{Potion:'minecraft:strong_swiftness'}"
+  },
+  {
+    "label": "Potion of Swiftness (Extended)",
+    "value": "potion{Potion:'minecraft:long_swiftness'}"
+  },
+  {
+    "label": "Potion of Turtle Master",
+    "value": "potion{Potion:'minecraft:turtle_master'}"
+  },
+  {
+    "label": "Potion of Turtle Master II",
+    "value": "potion{Potion:'minecraft:strong_turtle_master'}"
+  },
+  {
+    "label": "Potion of Turtle Master (Extended)",
+    "value": "potion{Potion:'minecraft:long_turtle_master'}"
+  },
+  {
+    "label": "Potion of Water Breathing",
+    "value": "potion{Potion:'minecraft:water_breathing'}"
+  },
+  {
+    "label": "Potion of Water Breathing (Extended)",
+    "value": "potion{Potion:'minecraft:long_water_breathing'}"
+  },
+  {
+    "label": "Potion of Weakness",
+    "value": "potion{Potion:'minecraft:weakness'}"
+  },
+  {
+    "label": "Potion of Weakness (Extended)",
+    "value": "potion{Potion:'minecraft:long_weakness'}"
   }
 ]

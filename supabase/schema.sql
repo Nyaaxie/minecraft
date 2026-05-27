@@ -130,6 +130,12 @@ CREATE POLICY "Admins can manage events" ON events FOR ALL USING (
     )
 );
 
+-- Event RSVPs Policies
+CREATE POLICY "RSVPs are viewable by everyone" ON event_rsvps FOR
+SELECT USING (true);
+
+CREATE POLICY "Users can manage their own RSVPs" ON event_rsvps FOR ALL USING (auth.uid () = profile_id);
+
 -- 8. Rules table
 CREATE TABLE rules (
     id UUID DEFAULT gen_random_uuid () PRIMARY KEY,

@@ -21,9 +21,23 @@ export const getMinecraftItemImageUrl = (
   }
 ): string => {
   const base = "https://api.minecraftitems.xyz/api/item";
-  const normalizedItemId = itemId.replace(/^minecraft:/, '').toLowerCase();
+  
+  // Extract base item ID and NBT data if present (e.g., "enchanted_book{...}")
+  let baseId = itemId.replace(/^minecraft:/, '');
+  let nbt = '';
+  
+  const nbtStartIndex = baseId.indexOf('{');
+  if (nbtStartIndex !== -1) {
+    nbt = baseId.substring(nbtStartIndex);
+    baseId = baseId.substring(0, nbtStartIndex);
+  }
+  
+  const normalizedItemId = baseId.toLowerCase();
 
   const params = new URLSearchParams();
+  if (nbt) {
+    params.append('nbt', nbt);
+  }
   if (options?.size) {
     params.append('size', options.size.toString());
   }

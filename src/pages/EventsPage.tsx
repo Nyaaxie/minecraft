@@ -10,12 +10,13 @@ import {
   X,
   Loader2,
   Trash2,
-  Users
+  Users,
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const EventsPage = () => {
-  const { events, loading, refetch } = useEvents();
+  const { events, loading, error, refetch } = useEvents();
   const { profile } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -99,6 +100,24 @@ const EventsPage = () => {
           </button>
         )}
       </div>
+
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-red-500/10 border border-red-500/20 p-12 rounded-[3rem] text-center"
+        >
+          <AlertCircle className="mx-auto text-red-500 mb-6" size={48} />
+          <h2 className="text-xl font-black italic uppercase tracking-tighter text-red-600 mb-2">Transmission Interrupted</h2>
+          <p className="text-red-500/70 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-md mx-auto">{error}</p>
+          <button
+            onClick={() => refetch()}
+            className="px-8 py-3 bg-red-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/20"
+          >
+            Reconnect
+          </button>
+        </motion.div>
+      )}
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkle, ArrowLeft, Loader2, Send } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Sparkle, Loader2, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
 import { useAuthStore } from '../store/useAuthStore';
@@ -36,11 +35,6 @@ const SuggestionsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
-      <Link to="/server-info" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group mb-8">
-        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-        Back to Server Info
-      </Link>
-      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

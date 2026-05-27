@@ -113,11 +113,24 @@ const PublicProfilePage = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Color', value: profile.favorite_color || '---', icon: Palette, isColor: true },
-          { label: 'Edition', value: profile.minecraft_edition || '---', icon: MonitorPlay },
+          { 
+            label: 'Edition', 
+            value: profile.minecraft_edition 
+              ? profile.minecraft_edition.charAt(0).toUpperCase() + profile.minecraft_edition.slice(1) 
+              : '---', 
+            icon: MonitorPlay 
+          },
           { label: 'Birthmonth', value: profile.birthmonth || '---', icon: Calendar },
+          { 
+            label: 'Joined', 
+            value: profile.join_date 
+              ? new Date(profile.join_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+              : '---', 
+            icon: Calendar 
+          },
         ].map((item, i) => (
           <div key={i} className="p-6 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-3xl shadow-sm hover:border-strawberry-500/30 transition-all flex flex-col items-center text-center">
             <div className="flex flex-col items-center gap-2 mb-2 text-strawberry-600">

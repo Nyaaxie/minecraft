@@ -144,7 +144,7 @@ const AdminShopItemPage = () => {
     try {
       if (!isManageable || !shopId) { toast.error('Unauthorized.'); setIsSaving(false); return; }
       if (item) { await dbService.updateShopItem(item.id, formData); toast.success('Shop item updated!'); } 
-      else { await dbService.createShopItem({ ...formData, shop_id: shopId }); toast.success('Shop item added!'); }
+      else { await dbService.createShopItem({ ...formData, shop_id: shopId }, user?.id); toast.success('Shop item added!'); }
       navigate(`/shops/${shopId}`);
     } catch (err) { toast.error('Failed to save shop item'); } finally { setIsSaving(false); }
   };

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Terminal, Puzzle, BookOpen, ArrowLeft, Loader2, Send, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { HelpCircle, Terminal, Puzzle, BookOpen, Loader2, Send, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
 import { useAuthStore } from '../store/useAuthStore';
@@ -309,14 +308,6 @@ const HelpPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
-      <Link
-        to="/server-info"
-        className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-strawberry-600 transition-colors group mb-8"
-      >
-        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-        Back to Server Info
-      </Link>
-
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
 
         {/* Page header */}
