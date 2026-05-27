@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { dbService } from '../services/dbService';
 import type { PlayerShop } from '../types/database.types';
-import { Search, Store, RefreshCw, Edit, Trash2, User } from 'lucide-react';
+import { Search, Store, RefreshCw, Edit, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
@@ -146,7 +146,7 @@ const ShopsPage = () => {
   const filteredShops = shops.filter(shop => {
     const ownerUsername = shop.profiles?.username || '';
     const shopItems = items.filter(item => item.shop_id === shop.id);
-    
+
     return shop.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       shop.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
