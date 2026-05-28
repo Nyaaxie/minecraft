@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
 import { adminService } from '../services/adminService';
@@ -14,7 +14,8 @@ import BadgeChip from '../components/BadgeChip';
 import {
   Loader2, Trash2, Award, Calendar, Megaphone, ShieldCheck,
   Users, CheckSquare, Bell, BookOpen, Puzzle, Terminal,
-  GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw, Info, MessageSquare, Sparkle,
+  GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw,
+  Info, MessageSquare, Sparkle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sortBadges } from '../utils/badgeUtils';
@@ -26,6 +27,16 @@ type TabKey =
   | 'rules' | 'reminders' | 'versions'
   | 'badges' | 'commands' | 'guides' | 'plugins' | 'serverInfo'
   | 'suggestions' | 'helpRequests';
+
+type ModalState =
+  | { type: 'none' }
+  | { type: 'version' }
+  | { type: 'edit-version'; data: any }
+  | { type: 'announcement' }
+  | { type: 'edit-announcement'; data: any }
+  | { type: 'badge' }
+  | { type: 'edit-badge'; data: Badge }
+  | { type: 'assign-badges'; data: Profile };
 
 const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'users', label: 'Users', icon: Users },
@@ -44,7 +55,7 @@ const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'helpRequests', label: 'Help Requests', icon: MessageSquare },
 ];
 
-// ─── Shared UI ─────────────────────────────────────────────────────────────
+// ─── Shared constants ───────────────────────────────────────────────────────
 
 const cardCls =
   'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm p-4';
@@ -54,17 +65,13 @@ const inputCls =
 
 const labelCls = 'text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block';
 
-/** Animated spring modal */
-const CrudModal = ({
+// ─── Shared UI ─────────────────────────────────────────────────────────────
+
+const CrudModal = memo(({
   open, onClose, title, icon: Icon, onSubmit, submitting, children,
 }: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  icon: React.ElementType;
-  onSubmit: () => void;
-  submitting?: boolean;
-  children: React.ReactNode;
+  open: boolean; onClose: () => void; title: string; icon: React.ElementType;
+  onSubmit: () => void; submitting?: boolean; children: React.ReactNode;
 }) => (
   <AnimatePresence>
     {open && (
@@ -110,10 +117,9 @@ const CrudModal = ({
       </>
     )}
   </AnimatePresence>
-);
+));
 
-/** Confirm delete dialog */
-const ConfirmDelete = ({ open, onClose, onConfirm, label }: {
+const ConfirmDelete = memo(({ open, onClose, onConfirm, label }: {
   open: boolean; onClose: () => void; onConfirm: () => void; label: string;
 }) => (
   <AnimatePresence>
@@ -139,10 +145,9 @@ const ConfirmDelete = ({ open, onClose, onConfirm, label }: {
       </>
     )}
   </AnimatePresence>
-);
+));
 
-/** Section header with optional Add button and search */
-const SectionHeader = ({ icon: Icon, title, count, onAdd, addLabel = 'Add', search, onSearch }: {
+const SectionHeader = memo(({ icon: Icon, title, count, onAdd, addLabel = 'Add', search, onSearch }: {
   icon: React.ElementType; title: string; count?: number;
   onAdd?: () => void; addLabel?: string; search?: string; onSearch?: (v: string) => void;
 }) => (
@@ -158,7 +163,12 @@ const SectionHeader = ({ icon: Icon, title, count, onAdd, addLabel = 'Add', sear
       {onSearch !== undefined && (
         <div className="relative">
           <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-          <input value={search} onChange={e => onSearch(e.target.value)} placeholder="Search..." className="pl-8 pr-3 py-2 text-[11px] font-bold bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-xl w-40 focus:outline-none focus:border-strawberry-500/50 transition-all" />
+          <input
+            value={search}
+            onChange={e => onSearch(e.target.value)}
+            placeholder="Search..."
+            className="pl-8 pr-3 py-2 text-[11px] font-bold bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-xl w-40 focus:outline-none focus:border-strawberry-500/50 transition-all"
+          />
         </div>
       )}
       {onAdd && (
@@ -168,9 +178,9 @@ const SectionHeader = ({ icon: Icon, title, count, onAdd, addLabel = 'Add', sear
       )}
     </div>
   </div>
-);
+));
 
-const RowActions = ({ onEdit, onDelete }: { onEdit?: () => void; onDelete?: () => void }) => (
+const RowActions = memo(({ onEdit, onDelete }: { onEdit?: () => void; onDelete?: () => void }) => (
   <div className="flex items-center gap-1.5 shrink-0">
     {onEdit && (
       <button onClick={onEdit} className="p-2 rounded-xl bg-neutral-100 dark:bg-white/5 text-neutral-400 hover:text-strawberry-600 hover:bg-strawberry-500/10 transition-all">
@@ -183,28 +193,32 @@ const RowActions = ({ onEdit, onDelete }: { onEdit?: () => void; onDelete?: () =
       </button>
     )}
   </div>
-);
+));
 
-const EmptyState = ({ icon: Icon, label }: { icon: React.ElementType; label: string }) => (
+const EmptyState = memo(({ icon: Icon, label }: { icon: React.ElementType; label: string }) => (
   <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 rounded-3xl p-16 text-center space-y-4">
     <div className="w-16 h-16 rounded-full bg-neutral-100 dark:bg-white/5 flex items-center justify-center mx-auto">
       <Icon className="text-neutral-300 dark:text-neutral-600" size={28} />
     </div>
     <p className="text-xs font-black uppercase tracking-widest text-neutral-400 italic">{label}</p>
   </div>
-);
+));
 
-const ServerInfoTab = ({ serverInfo, onSave }: { serverInfo: any[], onSave: (data: any[]) => void }) => {
+// ─── SERVER INFO TAB ────────────────────────────────────────────────────────
+// Fix: sync local state when prop changes
+
+const ServerInfoTab = ({ serverInfo, onSave }: { serverInfo: any[]; onSave: (data: any[]) => void }) => {
   const [data, setData] = useState(serverInfo);
 
-  const updateItem = (index: number, key: string, value: string) => {
-    const newData = [...data];
-    newData[index][key] = value;
-    setData(newData);
-  };
+  // Sync when parent data changes (e.g. after refresh)
+  useEffect(() => { setData(serverInfo); }, [serverInfo]);
 
-  const addItem = () => setData([...data, { label: '', value: '' }]);
-  const deleteItem = (index: number) => setData(data.filter((_, i) => i !== index));
+  const updateItem = useCallback((index: number, key: string, value: string) => {
+    setData(prev => prev.map((item, i) => i === index ? { ...item, [key]: value } : item));
+  }, []);
+
+  const addItem = useCallback(() => setData(prev => [...prev, { label: '', value: '' }]), []);
+  const deleteItem = useCallback((index: number) => setData(prev => prev.filter((_, i) => i !== index)), []);
 
   return (
     <>
@@ -218,14 +232,18 @@ const ServerInfoTab = ({ serverInfo, onSave }: { serverInfo: any[], onSave: (dat
           </div>
         ))}
       </div>
-      <button onClick={() => onSave(data)} className="mt-4 px-6 py-2.5 rounded-xl bg-strawberry-600 text-white font-black italic uppercase tracking-widest text-[10px]">Save Changes</button>
+      <button onClick={() => onSave(data)} className="mt-4 px-6 py-2.5 rounded-xl bg-strawberry-600 text-white font-black italic uppercase tracking-widest text-[10px]">
+        Save Changes
+      </button>
     </>
   );
 };
 
 // ─── USERS TAB ─────────────────────────────────────────────────────────────
 
-const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
+const ROLES: UserRole[] = ['player', 'admin'];
+
+const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
   profiles: Profile[]; onRefresh: () => void; onAssignBadges: (p: Profile) => void;
 }) => {
   const [search, setSearch] = useState('');
@@ -233,13 +251,18 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
   const [form, setForm] = useState({ role: '', username: '' });
   const [saving, setSaving] = useState(false);
-  const ROLES: UserRole[] = ['player', 'admin'];
 
-  const filtered = profiles.filter(p => p.username?.toLowerCase().includes(search.toLowerCase()));
-  const admins = filtered.filter(p => p.role === 'admin');
-  const players = filtered.filter(p => p.role !== 'admin');
+  const filtered = useMemo(
+    () => profiles.filter(p => p.username?.toLowerCase().includes(search.toLowerCase())),
+    [profiles, search]
+  );
+  const admins = useMemo(() => filtered.filter(p => p.role === 'admin'), [filtered]);
+  const players = useMemo(() => filtered.filter(p => p.role !== 'admin'), [filtered]);
 
-  const openEdit = (p: Profile) => { setForm({ role: p.role || 'player', username: p.username || '' }); setEditTarget(p); };
+  const openEdit = useCallback((p: Profile) => {
+    setForm({ role: p.role || 'player', username: p.username || '' });
+    setEditTarget(p);
+  }, []);
 
   const handleSave = async () => {
     if (!editTarget) return;
@@ -249,8 +272,7 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
       toast.success('User updated');
       setEditTarget(null);
       onRefresh();
-    }
-    catch { toast.error('Failed to update user'); }
+    } catch { toast.error('Failed to update user'); }
     finally { setSaving(false); }
   };
 
@@ -261,31 +283,35 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
       toast.success('User deleted');
       setDeleteTarget(null);
       onRefresh();
-    }
-    catch { toast.error('Failed to delete user'); }
+    } catch { toast.error('Failed to delete user'); }
   };
 
-  const UserRow = ({ p }: { p: Profile }) => (
-    <div key={p.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+  const UserRow = useCallback(({ p }: { p: Profile }) => (
+    <div className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0">
-          {p.avatar_url ? <img src={p.avatar_url} alt={p.username ?? undefined} className="w-full h-full object-cover" /> : <Users size={16} className="text-neutral-400" />}
+          {p.avatar_url
+            ? <img src={p.avatar_url} alt={p.username ?? undefined} className="w-full h-full object-cover" />
+            : <Users size={16} className="text-neutral-400" />}
         </div>
         <div className="min-w-0">
           <p className="text-sm font-black italic uppercase tracking-tight truncate">{p.username}</p>
-          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${(p.role as string) === 'admin' ? 'bg-strawberry-500/10 text-strawberry-600' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
+          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${p.role === 'admin' ? 'bg-strawberry-500/10 text-strawberry-600' : 'bg-neutral-100 dark:bg-white/5 text-neutral-400'}`}>
             {p.role || 'player'}
           </span>
         </div>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
-        <button onClick={() => onAssignBadges(p)} className="flex items-center gap-1.5 px-3 py-2 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 text-neutral-400 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest italic">
+        <button
+          onClick={() => onAssignBadges(p)}
+          className="flex items-center gap-1.5 px-3 py-2 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 text-neutral-400 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest italic"
+        >
           <Award size={11} /> Badges
         </button>
         <RowActions onEdit={() => openEdit(p)} onDelete={() => setDeleteTarget(p)} />
       </div>
     </div>
-  );
+  ), [openEdit, onAssignBadges]);
 
   return (
     <>
@@ -294,11 +320,15 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
         <>
           <div className="mb-6">
             <h3 className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-3 px-2">Admins</h3>
-            {admins.length === 0 ? <p className="text-[10px] text-neutral-500 px-4 italic">No admins</p> : admins.map(p => <UserRow key={p.id} p={p} />)}
+            {admins.length === 0
+              ? <p className="text-[10px] text-neutral-500 px-4 italic">No admins</p>
+              : admins.map(p => <UserRow key={p.id} p={p} />)}
           </div>
           <div>
             <h3 className="text-xs font-black uppercase tracking-widest text-neutral-400 mb-3 px-2">Players</h3>
-            {players.length === 0 ? <p className="text-[10px] text-neutral-500 px-4 italic">No players</p> : players.map(p => <UserRow key={p.id} p={p} />)}
+            {players.length === 0
+              ? <p className="text-[10px] text-neutral-500 px-4 italic">No players</p>
+              : players.map(p => <UserRow key={p.id} p={p} />)}
           </div>
         </>
       )}
@@ -308,7 +338,10 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
           <label className={labelCls}>Role</label>
           <div className="flex gap-2 flex-wrap">
             {ROLES.map(r => (
-              <button key={r} onClick={() => setForm(f => ({ ...f, role: r }))} className={`px-4 py-2 rounded-xl text-[10px] font-black italic uppercase tracking-widest transition-all ${form.role === r ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500'}`}>{r}</button>
+              <button key={r} onClick={() => setForm(f => ({ ...f, role: r }))}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black italic uppercase tracking-widest transition-all ${form.role === r ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500'}`}>
+                {r}
+              </button>
             ))}
           </div>
         </div>
@@ -316,11 +349,11 @@ const UsersTab = ({ profiles, onRefresh, onAssignBadges }: {
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.username || 'user'} />
     </>
   );
-};
+});
 
 // ─── EVENTS TAB ────────────────────────────────────────────────────────────
 
-const EventsTab = ({ events, onRefresh }: { events: Event[]; onRefresh: () => void }) => {
+const EventsTab = memo(({ events, onRefresh }: { events: Event[]; onRefresh: () => void }) => {
   const { profile } = useAuthStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Event | null>(null);
@@ -328,15 +361,19 @@ const EventsTab = ({ events, onRefresh }: { events: Event[]; onRefresh: () => vo
   const [form, setForm] = useState({ title: '', description: '', date: '', location: '' });
   const [saving, setSaving] = useState(false);
 
-  const openAdd = () => { setForm({ title: '', description: '', date: '', location: '' }); setEditTarget(null); setModalOpen(true); };
-  const openEdit = (e: Event) => { setForm({ title: e.title || '', description: (e as any).description || '', date: (e as any).date || '', location: (e as any).location || '' }); setEditTarget(e); setModalOpen(true); };
+  const openAdd = useCallback(() => { setForm({ title: '', description: '', date: '', location: '' }); setEditTarget(null); setModalOpen(true); }, []);
+  const openEdit = useCallback((e: Event) => {
+    setForm({ title: e.title || '', description: (e as any).description || '', date: (e as any).date || '', location: (e as any).location || '' });
+    setEditTarget(e); setModalOpen(true);
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (editTarget) { await dbService.updateEvent(editTarget.id, form); toast.success('Event updated'); }
-      else {
-        // Fix: supply all required fields for Omit<Event, 'id' | 'created_at'>
+      if (editTarget) {
+        await dbService.updateEvent(editTarget.id, form);
+        toast.success('Event updated');
+      } else {
         await dbService.createEvent({
           title: form.title,
           description: form.description || null,
@@ -383,11 +420,11 @@ const EventsTab = ({ events, onRefresh }: { events: Event[]; onRefresh: () => vo
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.title || 'event'} />
     </>
   );
-};
+});
 
 // ─── RULES TAB ─────────────────────────────────────────────────────────────
 
-const RulesTab = ({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => void }) => {
+const RulesTab = memo(({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => void }) => {
   const { profile } = useAuthStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Rule | null>(null);
@@ -395,24 +432,15 @@ const RulesTab = ({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => void }
   const [form, setForm] = useState({ title: '', content: '', order: 0 });
   const [saving, setSaving] = useState(false);
 
-  const openAdd = () => { setForm({ title: '', content: '', order: rules.length + 1 }); setEditTarget(null); setModalOpen(true); };
-  const openEdit = (r: Rule) => { setForm({ title: r.title || '', content: (r as any).content || '', order: (r as any).order || 0 }); setEditTarget(r); setModalOpen(true); };
+  const openAdd = useCallback(() => { setForm({ title: '', content: '', order: rules.length + 1 }); setEditTarget(null); setModalOpen(true); }, [rules.length]);
+  const openEdit = useCallback((r: Rule) => { setForm({ title: r.title || '', content: (r as any).content || '', order: (r as any).order || 0 }); setEditTarget(r); setModalOpen(true); }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       if (editTarget) { await adminService.updateRule(editTarget.id, form); toast.success('Rule updated'); }
       else {
-        // Fix: supply all required fields for Omit<Rule, 'id' | 'updated_at'>
-        await adminService.createRule({
-          title: form.title,
-          content: form.content,
-          priority: form.order,
-          created_by: profile?.id ?? null,
-          is_pinned: false,
-          is_visible: true,
-          category: null,
-        });
+        await adminService.createRule({ title: form.title, content: form.content, priority: form.order, created_by: profile?.id ?? null, is_pinned: false, is_visible: true, category: null });
         toast.success('Rule created');
       }
       setModalOpen(false); onRefresh();
@@ -449,11 +477,11 @@ const RulesTab = ({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => void }
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.title || 'rule'} />
     </>
   );
-};
+});
 
 // ─── REMINDERS TAB ─────────────────────────────────────────────────────────
 
-const RemindersTab = ({ reminders, onRefresh }: { reminders: Reminder[]; onRefresh: () => void }) => {
+const RemindersTab = memo(({ reminders, onRefresh }: { reminders: Reminder[]; onRefresh: () => void }) => {
   const { profile } = useAuthStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Reminder | null>(null);
@@ -461,25 +489,15 @@ const RemindersTab = ({ reminders, onRefresh }: { reminders: Reminder[]; onRefre
   const [form, setForm] = useState({ title: '', message: '', interval_minutes: 60 });
   const [saving, setSaving] = useState(false);
 
-  const openAdd = () => { setForm({ title: '', message: '', interval_minutes: 60 }); setEditTarget(null); setModalOpen(true); };
-  const openEdit = (r: Reminder) => { setForm({ title: r.title || '', message: (r as any).message || '', interval_minutes: (r as any).interval_minutes || 60 }); setEditTarget(r); setModalOpen(true); };
+  const openAdd = useCallback(() => { setForm({ title: '', message: '', interval_minutes: 60 }); setEditTarget(null); setModalOpen(true); }, []);
+  const openEdit = useCallback((r: Reminder) => { setForm({ title: r.title || '', message: (r as any).message || '', interval_minutes: (r as any).interval_minutes || 60 }); setEditTarget(r); setModalOpen(true); }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       if (editTarget) { await adminService.updateReminder(editTarget.id, form); toast.success('Reminder updated'); }
       else {
-        // Fix: supply all required fields for Omit<Reminder, 'id' | 'created_at'>
-        await adminService.createReminder({
-          title: form.title,
-          message: form.message,
-          scheduled_at: null,
-          expires_at: null,
-          is_important: false,
-          target_role: null,
-          target_user_id: null,
-          created_by: profile?.id ?? null,
-        });
+        await adminService.createReminder({ title: form.title, message: form.message, scheduled_at: null, expires_at: null, is_important: false, target_role: null, target_user_id: null, created_by: profile?.id ?? null });
         toast.success('Reminder created');
       }
       setModalOpen(false); onRefresh();
@@ -516,11 +534,11 @@ const RemindersTab = ({ reminders, onRefresh }: { reminders: Reminder[]; onRefre
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.title || 'reminder'} />
     </>
   );
-};
+});
 
 // ─── COMMANDS TAB ──────────────────────────────────────────────────────────
 
-const CommandsTab = ({ commands, onRefresh }: { commands: any[]; onRefresh: () => void }) => {
+const CommandsTab = memo(({ commands, onRefresh }: { commands: any[]; onRefresh: () => void }) => {
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
@@ -528,10 +546,13 @@ const CommandsTab = ({ commands, onRefresh }: { commands: any[]; onRefresh: () =
   const [form, setForm] = useState({ name: '', description: '', syntax: '', permission: '' });
   const [saving, setSaving] = useState(false);
 
-  const filtered = commands.filter(c => c.name?.toLowerCase().includes(search.toLowerCase()) || c.description?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = useMemo(
+    () => commands.filter(c => c.name?.toLowerCase().includes(search.toLowerCase()) || c.description?.toLowerCase().includes(search.toLowerCase())),
+    [commands, search]
+  );
 
-  const openAdd = () => { setForm({ name: '', description: '', syntax: '', permission: '' }); setEditTarget(null); setModalOpen(true); };
-  const openEdit = (c: any) => { setForm({ name: c.name || '', description: c.description || '', syntax: c.syntax || '', permission: c.permission || '' }); setEditTarget(c); setModalOpen(true); };
+  const openAdd = useCallback(() => { setForm({ name: '', description: '', syntax: '', permission: '' }); setEditTarget(null); setModalOpen(true); }, []);
+  const openEdit = useCallback((c: any) => { setForm({ name: c.name || '', description: c.description || '', syntax: c.syntax || '', permission: c.permission || '' }); setEditTarget(c); setModalOpen(true); }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -573,11 +594,11 @@ const CommandsTab = ({ commands, onRefresh }: { commands: any[]; onRefresh: () =
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'command'} />
     </>
   );
-};
+});
 
 // ─── GUIDES TAB ────────────────────────────────────────────────────────────
 
-const GuidesTab = ({ guides, onRefresh }: { guides: any[]; onRefresh: () => void }) => {
+const GuidesTab = memo(({ guides, onRefresh }: { guides: any[]; onRefresh: () => void }) => {
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
@@ -585,10 +606,10 @@ const GuidesTab = ({ guides, onRefresh }: { guides: any[]; onRefresh: () => void
   const [form, setForm] = useState({ title: '', content: '', category: '' });
   const [saving, setSaving] = useState(false);
 
-  const filtered = guides.filter(g => g.title?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = useMemo(() => guides.filter(g => g.title?.toLowerCase().includes(search.toLowerCase())), [guides, search]);
 
-  const openAdd = () => { setForm({ title: '', content: '', category: '' }); setEditTarget(null); setModalOpen(true); };
-  const openEdit = (g: any) => { setForm({ title: g.title || '', content: g.content || '', category: g.category || '' }); setEditTarget(g); setModalOpen(true); };
+  const openAdd = useCallback(() => { setForm({ title: '', content: '', category: '' }); setEditTarget(null); setModalOpen(true); }, []);
+  const openEdit = useCallback((g: any) => { setForm({ title: g.title || '', content: g.content || '', category: g.category || '' }); setEditTarget(g); setModalOpen(true); }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -629,11 +650,11 @@ const GuidesTab = ({ guides, onRefresh }: { guides: any[]; onRefresh: () => void
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.title || 'guide'} />
     </>
   );
-};
+});
 
 // ─── PLUGINS TAB ───────────────────────────────────────────────────────────
 
-const PluginsTab = ({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => void }) => {
+const PluginsTab = memo(({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => void }) => {
   const { profile } = useAuthStore();
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -642,26 +663,20 @@ const PluginsTab = ({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => v
   const [form, setForm] = useState({ name: '', description: '', version: '', url: '' });
   const [saving, setSaving] = useState(false);
 
-  const filtered = plugins.filter(p => p.name?.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = useMemo(
+    () => plugins.filter(p => p.name?.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase())),
+    [plugins, search]
+  );
 
-  const openAdd = () => { setForm({ name: '', description: '', version: '', url: '' }); setEditTarget(null); setModalOpen(true); };
-  const openEdit = (p: any) => { setForm({ name: p.name || '', description: p.description || '', version: p.version || '', url: p.url || '' }); setEditTarget(p); setModalOpen(true); };
+  const openAdd = useCallback(() => { setForm({ name: '', description: '', version: '', url: '' }); setEditTarget(null); setModalOpen(true); }, []);
+  const openEdit = useCallback((p: any) => { setForm({ name: p.name || '', description: p.description || '', version: p.version || '', url: p.url || '' }); setEditTarget(p); setModalOpen(true); }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       if (editTarget) { await dbService.updatePlugin(editTarget.id, form); toast.success('Plugin updated'); }
       else {
-        // Fix: supply all required fields for Omit<Plugin, 'id' | 'created_at' | 'updated_at'>
-        await dbService.createPlugin({
-          name: form.name,
-          description: form.description || null,
-          version: form.version || null,
-          icon_url: null,
-          category: null,
-          is_visible: true,
-          created_by: profile?.id ?? null,
-        });
+        await dbService.createPlugin({ name: form.name, description: form.description || null, version: form.version || null, icon_url: null, category: null, is_visible: true, created_by: profile?.id ?? null });
         toast.success('Plugin created');
       }
       setModalOpen(false); onRefresh();
@@ -702,14 +717,15 @@ const PluginsTab = ({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => v
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'plugin'} />
     </>
   );
-};
+});
 
 // ─── BADGES TAB ────────────────────────────────────────────────────────────
 
-const BadgesTab = ({ badges, onRefresh, onAdd, onEdit }: {
+const BadgesTab = memo(({ badges, onRefresh, onAdd, onEdit }: {
   badges: Badge[]; onRefresh: () => void; onAdd: () => void; onEdit: (b: Badge) => void;
 }) => {
   const [deleteTarget, setDeleteTarget] = useState<Badge | null>(null);
+  const sorted = useMemo(() => sortBadges(badges), [badges]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -722,7 +738,7 @@ const BadgesTab = ({ badges, onRefresh, onAdd, onEdit }: {
       <SectionHeader icon={Award} title="Badges" count={badges.length} onAdd={onAdd} addLabel="New Badge" />
       {badges.length === 0 ? <EmptyState icon={Award} label="No badges created" /> : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {sortBadges(badges).map(b => (
+          {sorted.map(b => (
             <div key={b.id} className={`${cardCls} flex items-center justify-between gap-3`}>
               <BadgeChip badge={b} />
               <RowActions onEdit={() => onEdit(b)} onDelete={() => setDeleteTarget(b)} />
@@ -733,13 +749,11 @@ const BadgesTab = ({ badges, onRefresh, onAdd, onEdit }: {
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={(deleteTarget as any)?.name || 'badge'} />
     </>
   );
-};
-
-// ... (rest of the file content)
+});
 
 // ─── VERSIONS TAB ──────────────────────────────────────────────────────────
 
-const VersionsTab = ({ onAdd, onEdit }: { onAdd: () => void; onEdit: (v: any) => void }) => {
+const VersionsTab = memo(({ onAdd, onEdit }: { onAdd: () => void; onEdit: (v: any) => void }) => {
   const { versions, loading, refetch } = useMinecraftVersions();
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
 
@@ -747,9 +761,7 @@ const VersionsTab = ({ onAdd, onEdit }: { onAdd: () => void; onEdit: (v: any) =>
     if (!deleteTarget) return;
     try {
       const { error } = await (await import('../services/supabase')).supabase
-        .from('minecraft_versions')
-        .delete()
-        .eq('id', deleteTarget.id);
+        .from('minecraft_versions').delete().eq('id', deleteTarget.id);
       if (error) throw error;
       toast.success('Version deleted');
       setDeleteTarget(null);
@@ -785,11 +797,11 @@ const VersionsTab = ({ onAdd, onEdit }: { onAdd: () => void; onEdit: (v: any) =>
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.version_string || 'version'} />
     </>
   );
-};
+});
 
-// ─── Suggestions/Help Requests Tab ──────────────────────────────────────────
+// ─── SUGGESTIONS & HELP REQUESTS ───────────────────────────────────────────
 
-const SuggestionsTab = ({ suggestions, onRefresh }: { suggestions: any[]; onRefresh: () => void }) => {
+const SuggestionsTab = memo(({ suggestions, onRefresh }: { suggestions: any[]; onRefresh: () => void }) => {
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
 
   const handleDelete = async () => {
@@ -816,9 +828,9 @@ const SuggestionsTab = ({ suggestions, onRefresh }: { suggestions: any[]; onRefr
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label="suggestion" />
     </>
   );
-};
+});
 
-const HelpRequestsTab = ({ helpRequests, onRefresh }: { helpRequests: any[]; onRefresh: () => void }) => {
+const HelpRequestsTab = memo(({ helpRequests, onRefresh }: { helpRequests: any[]; onRefresh: () => void }) => {
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
 
   const handleDelete = async () => {
@@ -845,12 +857,14 @@ const HelpRequestsTab = ({ helpRequests, onRefresh }: { helpRequests: any[]; onR
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label="help request" />
     </>
   );
-};
+});
 
 // ─── ROOT PANEL ────────────────────────────────────────────────────────────
 
 const AdminPanel = () => {
   const { profile: currentAdminProfile } = useAuthStore();
+
+  // Data state
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
@@ -862,15 +876,20 @@ const AdminPanel = () => {
   const [serverInfo, setServerInfo] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [helpRequests, setHelpRequests] = useState<any[]>([]);
+
   const { refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('users');
-  const [modal, setModal] = useState<{ isOpen: boolean; type: string; data?: any }>({ isOpen: false, type: '' });
 
-  const fetchData = async () => {
+  // Typed modal state — avoids unnecessary re-renders from a single object
+  const [modal, setModal] = useState<ModalState>({ type: 'none' });
+  const closeModal = useCallback(() => setModal({ type: 'none' }), []);
+
+  // Stable fetchData with useCallback so it can safely be in useEffect deps
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [p, e, r, rem, b, c, g, pl, s, h] = await Promise.all([
+      const [p, e, r, rem, b, c, g, pl, s, h, info] = await Promise.all([
         dbService.getAllProfiles(true) as any,
         dbService.getEvents(),
         adminService.getRules(),
@@ -881,31 +900,65 @@ const AdminPanel = () => {
         dbService.getPlugins(),
         dbService.getSuggestions(),
         dbService.getHelpRequests(),
+        adminService.getServerInfo(),
       ]);
-      setProfiles(p); setEvents(e); setRules(r); setReminders(rem);
-      setBadges(b); setCommands(c); setGuides(g); setPlugins(pl);
-      setSuggestions(s); setHelpRequests(h);
-      // Fetch server info
-      const info = await adminService.getServerInfo();
-      setServerInfo(info);
+      setProfiles(p); setEvents(e); setRules(r);
+      setReminders(rem); setBadges(b); setCommands(c);
+      setGuides(g); setPlugins(pl); setSuggestions(s);
+      setHelpRequests(h); setServerInfo(info);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load admin data');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Stable modal openers
+  const openAssignBadges = useCallback((p: Profile) => setModal({ type: 'assign-badges', data: p }), []);
+  const openEditBadge = useCallback((b: Badge) => setModal({ type: 'edit-badge', data: b }), []);
+  const openEditVersion = useCallback((v: any) => setModal({ type: 'edit-version', data: v }), []);
+  const openVersion = useCallback(() => setModal({ type: 'version' }), []);
+  const openBadge = useCallback(() => setModal({ type: 'badge' }), []);
+  const openAnnouncement = useCallback(() => setModal({ type: 'announcement' }), []);
+
+  const handleSaveServerInfo = useCallback(async (data: any[]) => {
+    await adminService.upsertServerInfo(data);
+    toast.success('Saved');
+    fetchData();
+  }, [fetchData]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20 px-3 sm:px-6">
 
-      {/* Legacy modals for badges, assign, versions, announcements */}
-      <AddVersionModal isOpen={modal.isOpen && (modal.type === 'version' || modal.type === 'edit-version')} onClose={() => setModal({ isOpen: false, type: '' })} onVersionAdded={refetchVersions} version={modal.type === 'edit-version' ? modal.data : undefined} />
-      <AnnouncementModal isOpen={modal.isOpen && (modal.type === 'announcement' || modal.type === 'edit-announcement')} onClose={() => setModal({ isOpen: false, type: '' })} onSaved={() => fetchData()} announcement={modal.type === 'edit-announcement' ? modal.data : undefined} />
-      <AddEditBadgeModal isOpen={modal.isOpen && (modal.type === 'badge' || modal.type === 'edit-badge')} onClose={() => setModal({ isOpen: false, type: '' })} onSave={fetchData} editingBadge={modal.type === 'edit-badge' ? modal.data : undefined} />
-      <AssignBadgesModal isOpen={modal.isOpen && modal.type === 'assign-badges'} onClose={() => setModal({ isOpen: false, type: '' })} userProfile={modal.data} assignedBy={currentAdminProfile?.id || null} onBadgesUpdated={fetchData} />
+      {/* Modals */}
+      <AddVersionModal
+        isOpen={modal.type === 'version' || modal.type === 'edit-version'}
+        onClose={closeModal}
+        onVersionAdded={refetchVersions}
+        version={modal.type === 'edit-version' ? modal.data : undefined}
+      />
+      <AnnouncementModal
+        isOpen={modal.type === 'announcement' || modal.type === 'edit-announcement'}
+        onClose={closeModal}
+        onSaved={fetchData}
+        announcement={modal.type === 'edit-announcement' ? modal.data : undefined}
+      />
+      <AddEditBadgeModal
+        isOpen={modal.type === 'badge' || modal.type === 'edit-badge'}
+        onClose={closeModal}
+        onSave={fetchData}
+        editingBadge={modal.type === 'edit-badge' ? modal.data : undefined}
+      />
+      <AssignBadgesModal
+        isOpen={modal.type === 'assign-badges'}
+        onClose={closeModal}
+        userProfile={modal.type === 'assign-badges' ? modal.data : null}
+        assignedBy={currentAdminProfile?.id || null}
+        onBadgesUpdated={fetchData}
+      />
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="pt-4 flex items-center justify-between gap-4">
@@ -934,7 +987,10 @@ const AdminPanel = () => {
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest italic whitespace-nowrap shrink-0 transition-all duration-200 ${active ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30' : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 text-neutral-500 dark:text-neutral-400 hover:text-strawberry-600 hover:border-strawberry-500/30'}`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest italic whitespace-nowrap shrink-0 transition-all duration-200 ${active
+                    ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30'
+                    : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 text-neutral-500 dark:text-neutral-400 hover:text-strawberry-600 hover:border-strawberry-500/30'
+                  }`}
               >
                 <Icon size={12} />
                 {label}
@@ -953,24 +1009,35 @@ const AdminPanel = () => {
         </div>
       ) : (
         <AnimatePresence mode="wait">
-          <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
-            {activeTab === 'users' && <UsersTab profiles={profiles} onRefresh={fetchData} onAssignBadges={p => setModal({ isOpen: true, type: 'assign-badges', data: p })} />}
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+          >
+            {activeTab === 'users' && <UsersTab profiles={profiles} onRefresh={fetchData} onAssignBadges={openAssignBadges} />}
             {activeTab === 'approvals' && <AdminApprovalPanel />}
             {activeTab === 'announcements' && (
               <>
-                <SectionHeader icon={Megaphone} title="Announcements" onAdd={() => setModal({ isOpen: true, type: 'announcement' })} addLabel="New Announcement" />
-                <div className={cardCls}><div className="flex items-center gap-3 text-neutral-400"><Megaphone size={16} className="text-strawberry-600" /><span className="text-xs font-black uppercase tracking-widest italic">Manage server announcements</span></div></div>
+                <SectionHeader icon={Megaphone} title="Announcements" onAdd={openAnnouncement} addLabel="New Announcement" />
+                <div className={cardCls}>
+                  <div className="flex items-center gap-3 text-neutral-400">
+                    <Megaphone size={16} className="text-strawberry-600" />
+                    <span className="text-xs font-black uppercase tracking-widest italic">Manage server announcements</span>
+                  </div>
+                </div>
               </>
             )}
             {activeTab === 'events' && <EventsTab events={events} onRefresh={fetchData} />}
             {activeTab === 'rules' && <RulesTab rules={rules} onRefresh={fetchData} />}
             {activeTab === 'reminders' && <RemindersTab reminders={reminders} onRefresh={fetchData} />}
-            {activeTab === 'versions' && <VersionsTab onAdd={() => setModal({ isOpen: true, type: 'version' })} onEdit={v => setModal({ isOpen: true, type: 'edit-version', data: v })} />}
-            {activeTab === 'badges' && <BadgesTab badges={badges} onRefresh={fetchData} onAdd={() => setModal({ isOpen: true, type: 'badge' })} onEdit={b => setModal({ isOpen: true, type: 'edit-badge', data: b })} />}
+            {activeTab === 'versions' && <VersionsTab onAdd={openVersion} onEdit={openEditVersion} />}
+            {activeTab === 'badges' && <BadgesTab badges={badges} onRefresh={fetchData} onAdd={openBadge} onEdit={openEditBadge} />}
             {activeTab === 'commands' && <CommandsTab commands={commands} onRefresh={fetchData} />}
             {activeTab === 'guides' && <GuidesTab guides={guides} onRefresh={fetchData} />}
             {activeTab === 'plugins' && <PluginsTab plugins={plugins} onRefresh={fetchData} />}
-            {activeTab === 'serverInfo' && <ServerInfoTab serverInfo={serverInfo} onSave={async (data) => { await adminService.upsertServerInfo(data); toast.success('Saved'); fetchData(); }} />}
+            {activeTab === 'serverInfo' && <ServerInfoTab serverInfo={serverInfo} onSave={handleSaveServerInfo} />}
             {activeTab === 'suggestions' && <SuggestionsTab suggestions={suggestions} onRefresh={fetchData} />}
             {activeTab === 'helpRequests' && <HelpRequestsTab helpRequests={helpRequests} onRefresh={fetchData} />}
           </motion.div>

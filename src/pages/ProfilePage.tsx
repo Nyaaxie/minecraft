@@ -240,7 +240,7 @@ const ProfilePage = () => {
                 <input type="text" name="username" value={formData.username || ''} onChange={handleChange} className={inputCls} placeholder="System identification..." />
               </div>
               <div className="space-y-1">
-                <label className={labelCls}><Gamepad2 size={14} className="text-strawberry-500" /> Minecraft Identity</label>
+                <label className={labelCls}><Gamepad2 size={14} className="text-strawberry-500" /> Java Username</label>
                 <input type="text" name="minecraft_username" value={formData.minecraft_username || ''} onChange={handleChange} className={inputCls} placeholder="In-game handle..." />
               </div>
               <div className="space-y-1">

@@ -10,14 +10,18 @@ import { useAuthStore } from '../store/useAuthStore';
 import Select from 'react-select';
 import { minecraftItems } from '../utils/minecraftItems';
 
+// Fix: Flatten the nested items structure for React-Select and lookup
+const flatItems = Array.isArray(minecraftItems[0]) ? (minecraftItems as any[]).flat() : minecraftItems as any[];
+const typedFlatItems = flatItems as { label: string; value: string }[];
+
 const AdminShopItemForm = ({ item, onSubmit, onCancel, isSaving }: { 
   item?: ShopItem; 
   onSubmit: (item: Omit<ShopItem, 'id' | 'created_at' | 'updated_at' | 'shop_id'>) => void;
   onCancel: () => void;
   isSaving: boolean;
 }) => {
-  const [selectedItem, setSelectedItem] = useState(
-    item ? minecraftItems.find(i => i.value === item.minecraft_item_id) : null
+  const [selectedItem, setSelectedItem] = useState<{ label: string; value: string } | null>(
+    item ? typedFlatItems.find(i => i.value === item.minecraft_item_id) || null : null
   );
   const [price, setPrice] = useState(item?.price.toString() || '');
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1');
@@ -76,9 +80,9 @@ const AdminShopItemForm = ({ item, onSubmit, onCancel, isSaving }: {
         <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Select Minecraft Item</label>
         <div className="flex items-center gap-4">
           <div className="flex-grow">
-            <Select options={minecraftItems} value={selectedItem} onChange={setSelectedItem} styles={selectStyles} placeholder="Search for an item..." required />
+            <Select options={typedFlatItems} value={selectedItem} onChange={(newValue) => setSelectedItem(newValue as { label: string; value: string } | null)} styles={selectStyles} placeholder="Search for an item..." required />
           </div>
-          {itemImageUrl && <img src={itemImageUrl} alt="Item Preview" className="w-12 h-12 object-contain bg-neutral-100 dark:bg-neutral-800 rounded-xl p-1" />}
+          {itemImageUrl && <img src={itemImageUrl} alt="Item Preview" className="w-12 h-12 object-contain bg-neutral-100 dark:bg-neutral-800 rounded-xl p-1" onError={(e) => { e.currentTarget.src = 'https://minecraftitems.xyz/api/item/stone?size=64'; }} />}
         </div>
       </div>
       <div>
