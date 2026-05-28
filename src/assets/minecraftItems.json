@@ -4390,5 +4390,813 @@
   {
     "label": "Potion of Weakness (Extended)",
     "value": "potion{Potion:'minecraft:long_weakness'}"
+  },
+  {
+    "label": "Small Amethyst Bud",
+    "value": "small_amethyst_bud"
+  },
+  {
+    "label": "Medium Amethyst Bud",
+    "value": "medium_amethyst_bud"
+  },
+  {
+    "label": "Large Amethyst Bud",
+    "value": "large_amethyst_bud"
+  },
+  {
+    "label": "Amethyst Cluster",
+    "value": "amethyst_cluster"
+  },
+  {
+    "label": "Exposed Cut Copper",
+    "value": "exposed_cut_copper"
+  },
+  {
+    "label": "Weathered Cut Copper",
+    "value": "weathered_cut_copper"
+  },
+  {
+    "label": "Oxidized Cut Copper",
+    "value": "oxidized_cut_copper"
+  },
+  {
+    "label": "Waxed Exposed Copper",
+    "value": "waxed_exposed_copper"
+  },
+  {
+    "label": "Waxed Weathered Copper",
+    "value": "waxed_weathered_copper"
+  },
+  {
+    "label": "Waxed Oxidized Copper",
+    "value": "waxed_oxidized_copper"
+  },
+  {
+    "label": "Waxed Exposed Cut Copper",
+    "value": "waxed_exposed_cut_copper"
+  },
+  {
+    "label": "Waxed Weathered Cut Copper",
+    "value": "waxed_weathered_cut_copper"
+  },
+  {
+    "label": "Waxed Oxidized Cut Copper",
+    "value": "waxed_oxidized_cut_copper"
+  },
+  {
+    "label": "Copper Grate",
+    "value": "copper_grate"
+  },
+  {
+    "label": "Exposed Copper Grate",
+    "value": "exposed_copper_grate"
+  },
+  {
+    "label": "Weathered Copper Grate",
+    "value": "weathered_copper_grate"
+  },
+  {
+    "label": "Oxidized Copper Grate",
+    "value": "oxidized_copper_grate"
+  },
+  {
+    "label": "Waxed Copper Grate",
+    "value": "waxed_copper_grate"
+  },
+  {
+    "label": "Waxed Exposed Copper Grate",
+    "value": "waxed_exposed_copper_grate"
+  },
+  {
+    "label": "Waxed Weathered Copper Grate",
+    "value": "waxed_weathered_copper_grate"
+  },
+  {
+    "label": "Waxed Oxidized Copper Grate",
+    "value": "waxed_oxidized_copper_grate"
+  },
+  {
+    "label": "Copper Bulb",
+    "value": "copper_bulb"
+  },
+  {
+    "label": "Exposed Copper Bulb",
+    "value": "exposed_copper_bulb"
+  },
+  {
+    "label": "Weathered Copper Bulb",
+    "value": "weathered_copper_bulb"
+  },
+  {
+    "label": "Oxidized Copper Bulb",
+    "value": "oxidized_copper_bulb"
+  },
+  {
+    "label": "Waxed Copper Bulb",
+    "value": "waxed_copper_bulb"
+  },
+  {
+    "label": "Waxed Exposed Copper Bulb",
+    "value": "waxed_exposed_copper_bulb"
+  },
+  {
+    "label": "Waxed Weathered Copper Bulb",
+    "value": "waxed_weathered_copper_bulb"
+  },
+  {
+    "label": "Waxed Oxidized Copper Bulb",
+    "value": "waxed_oxidized_copper_bulb"
+  },
+  {
+    "label": "Copper Door",
+    "value": "copper_door"
+  },
+  {
+    "label": "Exposed Copper Door",
+    "value": "exposed_copper_door"
+  },
+  {
+    "label": "Weathered Copper Door",
+    "value": "weathered_copper_door"
+  },
+  {
+    "label": "Oxidized Copper Door",
+    "value": "oxidized_copper_door"
+  },
+  {
+    "label": "Waxed Copper Door",
+    "value": "waxed_copper_door"
+  },
+  {
+    "label": "Waxed Exposed Copper Door",
+    "value": "waxed_exposed_copper_door"
+  },
+  {
+    "label": "Waxed Weathered Copper Door",
+    "value": "waxed_weathered_copper_door"
+  },
+  {
+    "label": "Waxed Oxidized Copper Door",
+    "value": "waxed_oxidized_copper_door"
+  },
+  {
+    "label": "Copper Trapdoor",
+    "value": "copper_trapdoor"
+  },
+  {
+    "label": "Exposed Copper Trapdoor",
+    "value": "exposed_copper_trapdoor"
+  },
+  {
+    "label": "Weathered Copper Trapdoor",
+    "value": "weathered_copper_trapdoor"
+  },
+  {
+    "label": "Oxidized Copper Trapdoor",
+    "value": "oxidized_copper_trapdoor"
+  },
+  {
+    "label": "Waxed Copper Trapdoor",
+    "value": "waxed_copper_trapdoor"
+  },
+  {
+    "label": "Waxed Exposed Copper Trapdoor",
+    "value": "waxed_exposed_copper_trapdoor"
+  },
+  {
+    "label": "Waxed Weathered Copper Trapdoor",
+    "value": "waxed_weathered_copper_trapdoor"
+  },
+  {
+    "label": "Waxed Oxidized Copper Trapdoor",
+    "value": "waxed_oxidized_copper_trapdoor"
+  },
+  {
+    "label": "Polished Tuff",
+    "value": "polished_tuff"
+  },
+  {
+    "label": "Tuff Bricks",
+    "value": "tuff_bricks"
+  },
+  {
+    "label": "Tuff Stairs",
+    "value": "tuff_stairs"
+  },
+  {
+    "label": "Tuff Brick Stairs",
+    "value": "tuff_brick_stairs"
+  },
+  {
+    "label": "Polished Tuff Stairs",
+    "value": "polished_tuff_stairs"
+  },
+  {
+    "label": "Tuff Slab",
+    "value": "tuff_slab"
+  },
+  {
+    "label": "Tuff Brick Slab",
+    "value": "tuff_brick_slab"
+  },
+  {
+    "label": "Polished Tuff Slab",
+    "value": "polished_tuff_slab"
+  },
+  {
+    "label": "Tuff Wall",
+    "value": "tuff_wall"
+  },
+  {
+    "label": "Tuff Brick Wall",
+    "value": "tuff_brick_wall"
+  },
+  {
+    "label": "Polished Tuff Wall",
+    "value": "polished_tuff_wall"
+  },
+  {
+    "label": "Chiseled Tuff",
+    "value": "chiseled_tuff"
+  },
+  {
+    "label": "Chiseled Tuff Bricks",
+    "value": "chiseled_tuff_bricks"
+  },
+  {
+    "label": "Stripped Oak Log",
+    "value": "stripped_oak_log"
+  },
+  {
+    "label": "Stripped Spruce Log",
+    "value": "stripped_spruce_log"
+  },
+  {
+    "label": "Stripped Birch Log",
+    "value": "stripped_birch_log"
+  },
+  {
+    "label": "Stripped Jungle Log",
+    "value": "stripped_jungle_log"
+  },
+  {
+    "label": "Stripped Acacia Log",
+    "value": "stripped_acacia_log"
+  },
+  {
+    "label": "Stripped Dark Oak Log",
+    "value": "stripped_dark_oak_log"
+  },
+  {
+    "label": "Stripped Mangrove Log",
+    "value": "stripped_mangrove_log"
+  },
+  {
+    "label": "Stripped Cherry Log",
+    "value": "stripped_cherry_log"
+  },
+  {
+    "label": "Stripped Crimson Stem",
+    "value": "stripped_crimson_stem"
+  },
+  {
+    "label": "Stripped Warped Stem",
+    "value": "stripped_warped_stem"
+  },
+  {
+    "label": "Stripped Bamboo Block",
+    "value": "stripped_bamboo_block"
+  },
+  {
+    "label": "Oak Wood",
+    "value": "oak_wood"
+  },
+  {
+    "label": "Spruce Wood",
+    "value": "spruce_wood"
+  },
+  {
+    "label": "Birch Wood",
+    "value": "birch_wood"
+  },
+  {
+    "label": "Jungle Wood",
+    "value": "jungle_wood"
+  },
+  {
+    "label": "Acacia Wood",
+    "value": "acacia_wood"
+  },
+  {
+    "label": "Dark Oak Wood",
+    "value": "dark_oak_wood"
+  },
+  {
+    "label": "Mangrove Wood",
+    "value": "mangrove_wood"
+  },
+  {
+    "label": "Cherry Wood",
+    "value": "cherry_wood"
+  },
+  {
+    "label": "Crimson Hyphae",
+    "value": "crimson_hyphae"
+  },
+  {
+    "label": "Warped Hyphae",
+    "value": "warped_hyphae"
+  },
+  {
+    "label": "Stripped Oak Wood",
+    "value": "stripped_oak_wood"
+  },
+  {
+    "label": "Stripped Spruce Wood",
+    "value": "stripped_spruce_wood"
+  },
+  {
+    "label": "Stripped Birch Wood",
+    "value": "stripped_birch_wood"
+  },
+  {
+    "label": "Stripped Jungle Wood",
+    "value": "stripped_jungle_wood"
+  },
+  {
+    "label": "Stripped Acacia Wood",
+    "value": "stripped_acacia_wood"
+  },
+  {
+    "label": "Stripped Dark Oak Wood",
+    "value": "stripped_dark_oak_wood"
+  },
+  {
+    "label": "Stripped Mangrove Wood",
+    "value": "stripped_mangrove_wood"
+  },
+  {
+    "label": "Stripped Cherry Wood",
+    "value": "stripped_cherry_wood"
+  },
+  {
+    "label": "Stripped Crimson Hyphae",
+    "value": "stripped_crimson_hyphae"
+  },
+  {
+    "label": "Stripped Warped Hyphae",
+    "value": "stripped_warped_hyphae"
+  },
+  {
+    "label": "Oak Sign",
+    "value": "oak_sign"
+  },
+  {
+    "label": "Spruce Sign",
+    "value": "spruce_sign"
+  },
+  {
+    "label": "Birch Sign",
+    "value": "birch_sign"
+  },
+  {
+    "label": "Jungle Sign",
+    "value": "jungle_sign"
+  },
+  {
+    "label": "Acacia Sign",
+    "value": "acacia_sign"
+  },
+  {
+    "label": "Dark Oak Sign",
+    "value": "dark_oak_sign"
+  },
+  {
+    "label": "Mangrove Sign",
+    "value": "mangrove_sign"
+  },
+  {
+    "label": "Cherry Sign",
+    "value": "cherry_sign"
+  },
+  {
+    "label": "Crimson Sign",
+    "value": "crimson_sign"
+  },
+  {
+    "label": "Warped Sign",
+    "value": "warped_sign"
+  },
+  {
+    "label": "Bamboo Sign",
+    "value": "bamboo_sign"
+  },
+  {
+    "label": "Oak Hanging Sign",
+    "value": "oak_hanging_sign"
+  },
+  {
+    "label": "Spruce Hanging Sign",
+    "value": "spruce_hanging_sign"
+  },
+  {
+    "label": "Birch Hanging Sign",
+    "value": "birch_hanging_sign"
+  },
+  {
+    "label": "Jungle Hanging Sign",
+    "value": "jungle_hanging_sign"
+  },
+  {
+    "label": "Acacia Hanging Sign",
+    "value": "acacia_hanging_sign"
+  },
+  {
+    "label": "Dark Oak Hanging Sign",
+    "value": "dark_oak_hanging_sign"
+  },
+  {
+    "label": "Mangrove Hanging Sign",
+    "value": "mangrove_hanging_sign"
+  },
+  {
+    "label": "Cherry Hanging Sign",
+    "value": "cherry_hanging_sign"
+  },
+  {
+    "label": "Crimson Hanging Sign",
+    "value": "crimson_hanging_sign"
+  },
+  {
+    "label": "Warped Hanging Sign",
+    "value": "warped_hanging_sign"
+  },
+  {
+    "label": "Bamboo Hanging Sign",
+    "value": "bamboo_hanging_sign"
+  },
+  {
+    "label": "Granite Stairs",
+    "value": "granite_stairs"
+  },
+  {
+    "label": "Polished Granite Stairs",
+    "value": "polished_granite_stairs"
+  },
+  {
+    "label": "Diorite Stairs",
+    "value": "diorite_stairs"
+  },
+  {
+    "label": "Polished Diorite Stairs",
+    "value": "polished_diorite_stairs"
+  },
+  {
+    "label": "Andesite Stairs",
+    "value": "andesite_stairs"
+  },
+  {
+    "label": "Polished Andesite Stairs",
+    "value": "polished_andesite_stairs"
+  },
+  {
+    "label": "Granite Slab",
+    "value": "granite_slab"
+  },
+  {
+    "label": "Polished Granite Slab",
+    "value": "polished_granite_slab"
+  },
+  {
+    "label": "Diorite Slab",
+    "value": "diorite_slab"
+  },
+  {
+    "label": "Polished Diorite Slab",
+    "value": "polished_diorite_slab"
+  },
+  {
+    "label": "Andesite Slab",
+    "value": "andesite_slab"
+  },
+  {
+    "label": "Polished Andesite Slab",
+    "value": "polished_andesite_slab"
+  },
+  {
+    "label": "Granite Wall",
+    "value": "granite_wall"
+  },
+  {
+    "label": "Diorite Wall",
+    "value": "diorite_wall"
+  },
+  {
+    "label": "Andesite Wall",
+    "value": "andesite_wall"
+  },
+  {
+    "label": "Polished Blackstone Stairs",
+    "value": "polished_blackstone_stairs"
+  },
+  {
+    "label": "Polished Blackstone Slab",
+    "value": "polished_blackstone_slab"
+  },
+  {
+    "label": "Polished Blackstone Wall",
+    "value": "polished_blackstone_wall"
+  },
+  {
+    "label": "Polished Blackstone Bricks Stairs",
+    "value": "polished_blackstone_brick_stairs"
+  },
+  {
+    "label": "Polished Blackstone Bricks Slab",
+    "value": "polished_blackstone_brick_slab"
+  },
+  {
+    "label": "Polished Blackstone Bricks Wall",
+    "value": "polished_blackstone_brick_wall"
+  },
+  {
+    "label": "Cracked Polished Blackstone Bricks",
+    "value": "cracked_polished_blackstone_bricks"
+  },
+  {
+    "label": "Soul Soil",
+    "value": "soul_soil"
+  },
+  {
+    "label": "Netherrack",
+    "value": "netherrack"
+  },
+  {
+    "label": "Crimson Nylium",
+    "value": "crimson_nylium"
+  },
+  {
+    "label": "Warped Nylium",
+    "value": "warped_nylium"
+  },
+  {
+    "label": "Shroomlight",
+    "value": "shroomlight"
+  },
+  {
+    "label": "Twisting Vines",
+    "value": "twisting_vines"
+  },
+  {
+    "label": "Twisting Vines Plant",
+    "value": "twisting_vines_plant"
+  },
+  {
+    "label": "Weeping Vines",
+    "value": "weeping_vines"
+  },
+  {
+    "label": "Weeping Vines Plant",
+    "value": "weeping_vines_plant"
+  },
+  {
+    "label": "Nether Sprouts",
+    "value": "nether_sprouts"
+  },
+  {
+    "label": "Crimson Roots",
+    "value": "crimson_roots"
+  },
+  {
+    "label": "Warped Roots",
+    "value": "warped_roots"
+  },
+  {
+    "label": "End Rod",
+    "value": "end_rod"
+  },
+  {
+    "label": "Purpur Stairs",
+    "value": "purpur_stairs"
+  },
+  {
+    "label": "Purpur Slab",
+    "value": "purpur_slab"
+  },
+  {
+    "label": "Tube Coral Block",
+    "value": "tube_coral_block"
+  },
+  {
+    "label": "Brain Coral Block",
+    "value": "brain_coral_block"
+  },
+  {
+    "label": "Bubble Coral Block",
+    "value": "bubble_coral_block"
+  },
+  {
+    "label": "Fire Coral Block",
+    "value": "fire_coral_block"
+  },
+  {
+    "label": "Horn Coral Block",
+    "value": "horn_coral_block"
+  },
+  {
+    "label": "Dead Tube Coral Block",
+    "value": "dead_tube_coral_block"
+  },
+  {
+    "label": "Dead Brain Coral Block",
+    "value": "dead_brain_coral_block"
+  },
+  {
+    "label": "Dead Bubble Coral Block",
+    "value": "dead_bubble_coral_block"
+  },
+  {
+    "label": "Dead Fire Coral Block",
+    "value": "dead_fire_coral_block"
+  },
+  {
+    "label": "Dead Horn Coral Block",
+    "value": "dead_horn_coral_block"
+  },
+  {
+    "label": "Tube Coral Fan",
+    "value": "tube_coral_fan"
+  },
+  {
+    "label": "Brain Coral Fan",
+    "value": "brain_coral_fan"
+  },
+  {
+    "label": "Bubble Coral Fan",
+    "value": "bubble_coral_fan"
+  },
+  {
+    "label": "Fire Coral Fan",
+    "value": "fire_coral_fan"
+  },
+  {
+    "label": "Horn Coral Fan",
+    "value": "horn_coral_fan"
+  },
+  {
+    "label": "Dead Tube Coral Fan",
+    "value": "dead_tube_coral_fan"
+  },
+  {
+    "label": "Dead Brain Coral Fan",
+    "value": "dead_brain_coral_fan"
+  },
+  {
+    "label": "Dead Bubble Coral Fan",
+    "value": "dead_bubble_coral_fan"
+  },
+  {
+    "label": "Dead Fire Coral Fan",
+    "value": "dead_fire_coral_fan"
+  },
+  {
+    "label": "Dead Horn Coral Fan",
+    "value": "dead_horn_coral_fan"
+  },
+  {
+    "label": "White Glazed Terracotta",
+    "value": "white_glazed_terracotta"
+  },
+  {
+    "label": "Light Gray Glazed Terracotta",
+    "value": "light_gray_glazed_terracotta"
+  },
+  {
+    "label": "Cyan Glazed Terracotta",
+    "value": "cyan_glazed_terracotta"
+  },
+  {
+    "label": "Purple Glazed Terracotta",
+    "value": "purple_glazed_terracotta"
+  },
+  {
+    "label": "Blue Glazed Terracotta",
+    "value": "blue_glazed_terracotta"
+  },
+  {
+    "label": "Brown Glazed Terracotta",
+    "value": "brown_glazed_terracotta"
+  },
+  {
+    "label": "Green Glazed Terracotta",
+    "value": "green_glazed_terracotta"
+  },
+  {
+    "label": "Red Glazed Terracotta",
+    "value": "red_glazed_terracotta"
+  },
+  {
+    "label": "Black Glazed Terracotta",
+    "value": "black_glazed_terracotta"
+  },
+  {
+    "label": "Netherite Upgrade Smithing Template",
+    "value": "netherite_upgrade_smithing_template"
+  },
+  {
+    "label": "Armor Trim Smithing Template",
+    "value": "armor_trim_smithing_template"
+  },
+  {
+    "label": "Disc Fragment",
+    "value": "disc_fragment_5"
+  },
+  {
+    "label": "Angler Pottery Sherd",
+    "value": "angler_pottery_sherd"
+  },
+  {
+    "label": "Archer Pottery Sherd",
+    "value": "archer_pottery_sherd"
+  },
+  {
+    "label": "Skull Pottery Sherd",
+    "value": "skull_pottery_sherd"
+  },
+  {
+    "label": "Flow Pottery Sherd",
+    "value": "flow_pottery_sherd"
+  },
+  {
+    "label": "Guster Pottery Sherd",
+    "value": "guster_pottery_sherd"
+  },
+  {
+    "label": "Scrape Pottery Sherd",
+    "value": "scrape_pottery_sherd"
+  },
+  {
+    "label": "Tide Pottery Sherd",
+    "value": "tide_pottery_sherd"
+  },
+  {
+    "label": "Silence Armor Trim Smithing Template",
+    "value": "silence_armor_trim_smithing_template"
+  },
+  {
+    "label": "Raiser Armor Trim Smithing Template",
+    "value": "raiser_armor_trim_smithing_template"
+  },
+  {
+    "label": "Shaper Armor Trim Smithing Template",
+    "value": "shaper_armor_trim_smithing_template"
+  },
+  {
+    "label": "Host Armor Trim Smithing Template",
+    "value": "host_armor_trim_smithing_template"
+  },
+  {
+    "label": "Wayfinder Armor Trim Smithing Template",
+    "value": "wayfinder_armor_trim_smithing_template"
+  },
+  {
+    "label": "Bolt Armor Trim Smithing Template",
+    "value": "bolt_armor_trim_smithing_template"
+  },
+  {
+    "label": "Flow Armor Trim Smithing Template",
+    "value": "flow_armor_trim_smithing_template"
+  },
+  {
+    "label": "Guster Armor Trim Smithing Template",
+    "value": "guster_armor_trim_smithing_template"
+  },
+  {
+    "label": "Breeze Spawn Egg",
+    "value": "breeze_spawn_egg"
+  },
+  {
+    "label": "Bogged Spawn Egg",
+    "value": "bogged_spawn_egg"
+  },
+  {
+    "label": "Wind Charge",
+    "value": "wind_charge"
+  },
+  {
+    "label": "Breeze Rod",
+    "value": "breeze_rod"
+  },
+  {
+    "label": "Mace",
+    "value": "mace"
+  },
+  {
+    "label": "Heavy Core",
+    "value": "heavy_core"
+  },
+  {
+    "label": "Wolf Armor",
+    "value": "wolf_armor"
   }
 ]
