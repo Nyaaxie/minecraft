@@ -236,7 +236,7 @@ const ProfilePage = () => {
             <div className="absolute top-0 left-0 w-1 bg-strawberry-600 h-full" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-1">
-                <label className={labelCls}><User size={14} className="text-strawberry-500" /> Username</label>
+                <label className={labelCls}><User size={14} className="text-strawberry-500" /> Nickname</label>
                 <input type="text" name="username" value={formData.username || ''} onChange={handleChange} className={inputCls} placeholder="System identification..." />
               </div>
               <div className="space-y-1">
@@ -244,7 +244,7 @@ const ProfilePage = () => {
                 <input type="text" name="minecraft_username" value={formData.minecraft_username || ''} onChange={handleChange} className={inputCls} placeholder="In-game handle..." />
               </div>
               <div className="space-y-1">
-                <label className={labelCls}><Gamepad2 size={14} className="text-strawberry-500" /> Bedrock Username</label>
+                <label className={labelCls}><Gamepad2 size={14} className="text-strawberry-500" /> Bedrock Gamertag</label>
                 <input type="text" name="bedrock_username" value={formData.bedrock_username || ''} onChange={handleChange} className={inputCls} placeholder="Bedrock handle..." />
               </div>
               <div className="space-y-1">
