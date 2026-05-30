@@ -13,7 +13,8 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const isSubmitting = useRef(false);
-  const { setUser, setProfile } = useAuthStore();
+  const setUser = useAuthStore(state => state.setUser);
+  const setProfile = useAuthStore(state => state.setProfile);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,12 +34,10 @@ const LoginPage = () => {
     }
 
     try {
-      console.time('login-auth-time');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      console.timeEnd('login-auth-time');
 
       if (error) throw error;
 

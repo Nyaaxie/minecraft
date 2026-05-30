@@ -15,8 +15,13 @@ const LoadingScreen = () => (
 );
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { setUser, setProfile, setLoading, user } = useAuthStore();
-  const { incrementUnreadCount } = useChatStore();
+  const setUser = useAuthStore(state => state.setUser);
+  const setProfile = useAuthStore(state => state.setProfile);
+  const setLoading = useAuthStore(state => state.setLoading);
+  const user = useAuthStore(state => state.user);
+  
+  const incrementUnreadCount = useChatStore(state => state.incrementUnreadCount);
+  
   const [initialized, setInitialized] = useState(false);
   const initializedRef = useRef(false);
 
@@ -29,8 +34,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('id', userId)
         .single();
       
-      if (error || !profile) {
-        console.warn('AuthProvider: Profile not found in database.');
+      if (error) {
+        // PGRST116 is the code for "no rows found" (profile doesn't exist)
+        if (error.code === 'PGRST116') {
+          setProfile(null);
+        } else {
+          console.error('AuthProvider: Database error fetching profile', error);
+          // Keep existing profile on other database errors
+        }
+        return null;
+      }
+
+      if (!profile) {
         setProfile(null);
         return null;
       }
@@ -39,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return profile;
     } catch (err) {
       console.error('AuthProvider: Profile fetch error', err);
-      setProfile(null);
+      // Keep existing profile on network/unexpected errors
       return null;
     }
   }, [setProfile]);
@@ -79,39 +94,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, updateStatus]);
 
   useEffect(() => {
-    // ── 1. Auth state change listener ────────────────────────────────────
-    // Fires on: tab focus (token refresh), sign-in, sign-out, SIGNED_IN on return
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (import.meta.env.DEV) console.log('AuthProvider: auth event', event);
+    if (initializedRef.current) return;
 
-      // During first load, initializeAuth() handles everything — skip here
-      // to avoid a race between the listener and the initial getSession call.
-      if (!initializedRef.current) return;
-
-      if (session) {
-        setUser(session.user);
-        // Force immediate fetch on SIGNED_IN
-        try {
-          await fetchAndSetProfile(session.user.id);
-        } catch (err) {
-          console.error('AuthProvider: profile re-fetch error', err);
-        }
-      } else {
-        setUser(null);
-        setProfile(null);
-      }
-    });
-
-    // ── 2. Initial auth check ────────────────────────────────────────────
-    // Use getSession() with a race against a short timeout so a hung network
-    // never leaves the user staring at the loading screen forever.
     const initializeAuth = async () => {
+      const TIMEOUT_SYMBOL = Symbol('timeout');
       try {
         // 6-second timeout — if Supabase hangs (bad connection, cold start),
-        // we resolve with null and let the user see the login page instead of
-        // being stuck on the spinner.
-        const timeout = new Promise<null>((resolve) =>
-          setTimeout(() => resolve(null), 6000)
+        // we resolve with the symbol and avoid clearing the store.
+        const timeout = new Promise<any>((resolve) =>
+          setTimeout(() => resolve(TIMEOUT_SYMBOL), 6000)
         );
 
         const sessionResult = await Promise.race([
@@ -119,7 +110,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           timeout,
         ]);
 
-        if (sessionResult) {
+        if (sessionResult === TIMEOUT_SYMBOL) {
+          // Timeout reached
+        } else if (sessionResult) {
           setUser(sessionResult.user);
 
           // Fetch profile + unread counts in parallel
@@ -133,6 +126,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               useChatStore.getState().setUnreadCount(convId, count as number);
             });
           }
+        } else {
+          // Explicitly no session from Supabase
+          setUser(null);
+          setProfile(null);
         }
       } catch (error) {
         console.error('AuthProvider: init error', error);
@@ -145,24 +142,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     initializeAuth();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [setUser, setProfile, setLoading, fetchAndSetProfile]);
 
   // ── Global message listener for unread badges + browser notifications ──
   // Kept here (not in MessagesPage) so it works even when the user is on
   // another page entirely.
+  const userId = user?.id;
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
 
     const sub = chatService.subscribeToAllMessages(async (msg) => {
-      if (!msg.conversation_id || msg.sender_id === user.id) return;
+      if (!msg.conversation_id || msg.sender_id === userId) return;
 
       // Check membership without a DB round-trip by reading from the chat store first
       const { conversations } = useChatStore.getState();
@@ -175,7 +169,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           .from('conversation_members')
           .select('conversation_id')
           .eq('conversation_id', msg.conversation_id)
-          .eq('profile_id', user.id);
+          .eq('profile_id', userId);
         isMember = !!(members && members.length > 0);
       }
 
@@ -192,7 +186,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => { sub.unsubscribe(); };
-  }, [user, incrementUnreadCount]);
+  }, [userId, incrementUnreadCount]);
 
   if (!initialized) return <LoadingScreen />;
 

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { User } from '@supabase/supabase-js';
 import type { Profile } from '../types/database.types';
+import { supabase } from '../services/supabase';
 
 interface AuthState {
   user: User | null;
@@ -12,23 +14,42 @@ interface AuthState {
   signOut: () => Promise<void>;
 }
 
-import { supabase } from '../services/supabase';
-
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  profile: null,
-  loading: true,
-  setUser: (user) => {
-    if (import.meta.env.DEV) console.log('useAuthStore: Setting user:', !!user);
-    set({ user });
-  },
-  setProfile: (profile) => {
-    if (import.meta.env.DEV) console.log('useAuthStore: Setting profile:', !!profile);
-    set({ profile });
-  },
-  setLoading: (loading) => set({ loading }),
-  signOut: async () => {
-    await supabase.auth.signOut();
-    set({ user: null, profile: null });
-  },
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      profile: null,
+      loading: true,
+      setUser: (user) => {
+        set({ user });
+      },
+      setProfile: (profile) => {
+        set({ profile });
+      },
+      setLoading: (loading) => set({ loading }),
+      signOut: async () => {
+        try {
+          await supabase.auth.signOut();
+        } catch (err) {
+          console.error('Sign out error:', err);
+        }
+        set({ user: null, profile: null });
+      },
+    }),
+    {
+      name: 'strawberry-auth',
+      storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: (state) => {
+        return (state, error) => {
+          if (error) {
+            console.error('useAuthStore: hydration error', error);
+          }
+        };
+      },
+      partialize: (state) => ({ 
+        user: state.user, 
+        profile: state.profile 
+      }),
+    }
+  )
+);

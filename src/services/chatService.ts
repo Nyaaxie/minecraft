@@ -84,7 +84,6 @@ export const chatService = {
       sender: Array.isArray(msg.sender) ? msg.sender[0] : msg.sender
     })) || [];
 
-        if (import.meta.env.DEV) console.log("Supabase Data in getMessages:", mappedData);
     return mappedData;
   },
   async sendMessage(conversationId: string, senderId: string, receiverId: string, content: string) {
@@ -228,7 +227,6 @@ export const chatService = {
   },
 
   subscribeToAllMessages(onMessage: (message: Message) => void) {
-    if (import.meta.env.DEV) console.log('chatService: Subscribing to all messages...');
     return supabase
       .channel(`schema-db-changes:${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', {
@@ -236,13 +234,10 @@ export const chatService = {
         schema: 'public',
         table: 'messages'
       }, (payload) => {
-        if (import.meta.env.DEV) console.log('chatService: Realtime event received:', payload);
         if (payload.eventType === 'INSERT') {
           onMessage(payload.new as Message);
         }
       })
-      .subscribe((status) => {
-        if (import.meta.env.DEV) console.log('chatService: Subscription status:', status);
-      });
+      .subscribe();
   },
 };

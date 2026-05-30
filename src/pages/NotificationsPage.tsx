@@ -45,6 +45,14 @@ const NotificationsPage = () => {
 
   useEffect(() => {
     fetchNotifications();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNotifications();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [fetchNotifications]);
 
   const handleCardClick = async (notification: Notification) => {

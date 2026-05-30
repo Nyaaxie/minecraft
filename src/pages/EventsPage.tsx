@@ -17,6 +17,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const EventsPage = () => {
   const { events, loading, error, refetch } = useEvents();
+  
+  React.useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refetch();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [refetch]);
+
   const { profile } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);

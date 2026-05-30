@@ -35,30 +35,74 @@ const SuggestionsPage = lazy(() => import('./pages/SuggestionsPage'));
 
 import DashboardLayout from './components/DashboardLayout';
 
-const LoadingScreen = () => (
-  <div className="flex items-center justify-center h-screen bg-neutral-950">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-12 h-12 border-4 border-strawberry-600 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-neutral-500 font-bold animate-pulse uppercase tracking-widest text-xs">Loading StrawberrySMP...</p>
+const LoadingScreen = () => {
+  const [showReset, setShowReset] = React.useState(false);
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => setShowReset(true), 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleForceReset = () => {
+    localStorage.removeItem('strawberry-auth');
+    window.location.href = '/login';
+  };
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-neutral-950">
+      <div className="flex flex-col items-center gap-6">
+        <div className="w-12 h-12 border-4 border-strawberry-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="text-center space-y-2">
+          <p className="text-neutral-500 font-bold animate-pulse uppercase tracking-widest text-xs">Loading StrawberrySMP...</p>
+          {showReset && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={handleForceReset}
+              className="text-[10px] text-strawberry-500 hover:text-strawberry-400 font-black uppercase tracking-[0.2em] pt-4 block underline decoration-strawberry-500/30 underline-offset-4"
+            >
+              Stuck? Click here to Reset
+            </motion.button>
+          )}
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const StatusPage = lazy(() => import('./pages/StatusPage'));
 
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
-  const { user, profile, loading, signOut } = useAuthStore();
+  const user = useAuthStore(state => state.user);
+  const profile = useAuthStore(state => state.profile);
+  const loading = useAuthStore(state => state.loading);
+  const signOut = useAuthStore(state => state.signOut);
   
-  // 1. Wait for auth to finish loading
+  // 1. If we are still initializing, show loading screen
   if (loading) return <LoadingScreen />;
   
-  // 2. If no user, definitely go to login
+  // 2. If initialization finished and no user, go to login
   if (!user) return <Navigate to="/login" replace />;
   
-  // 3. If profile missing, handle it
+  // 3. If we have a user but NO profile (meaning DB fetch returned null)
   if (!profile) {
-    setTimeout(() => { signOut(); }, 2000);
-    return <LoadingScreen />;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-neutral-950 text-center p-6">
+        <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 mb-6 border border-red-500/20">
+          <AlertCircle size={32} />
+        </div>
+        <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white mb-2">Profile Missing</h2>
+        <p className="text-neutral-400 text-sm max-w-xs mb-8 uppercase tracking-tight font-bold">
+          We found your account but couldn't load your berry profile. Try logging in again.
+        </p>
+        <button 
+          onClick={() => signOut()} 
+          className="px-8 py-3 bg-strawberry-600 text-white rounded-xl font-black italic uppercase tracking-widest text-xs hover:bg-strawberry-700 transition-all shadow-xl shadow-strawberry-600/20"
+        >
+          Return to Login
+        </button>
+      </div>
+    );
   }
 
   // 4. Registration Approval Check

@@ -35,7 +35,6 @@ export const useMinecraftVersions = () => {
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'minecraft_versions' },
         (_payload) => {
-          // console.log('Change received!', payload);
           fetchVersions(); // Refetch all versions on any change
         }
       )

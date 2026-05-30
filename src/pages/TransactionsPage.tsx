@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { dbService } from '../services/dbService';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
@@ -10,31 +10,39 @@ const TransactionsPage = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchTransactions = useCallback(async () => {
+    if (!user) return;
+    try {
+      setLoading(true);
+      const [bought, sold] = await Promise.all([
+        dbService.getShopTransactionsByBuyer(user.id),
+        dbService.getShopTransactionsBySeller(user.id)
+      ]);
+
+      const all = [
+        ...bought.map(t => ({ ...t, type: 'buy' })),
+        ...sold.map(t => ({ ...t, type: 'sell' }))
+      ].sort((a, b) => new Date(b.transaction_time).getTime() - new Date(a.transaction_time).getTime());
+
+      setTransactions(all);
+    } catch (err) {
+      console.error('Error fetching transactions:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
-    const fetchTransactions = async () => {
-      if (!user) return;
-      try {
-        setLoading(true);
-        const [bought, sold] = await Promise.all([
-          dbService.getShopTransactionsByBuyer(user.id),
-          dbService.getShopTransactionsBySeller(user.id)
-        ]);
+    fetchTransactions();
 
-        const all = [
-          ...bought.map(t => ({ ...t, type: 'buy' })),
-          ...sold.map(t => ({ ...t, type: 'sell' }))
-        ].sort((a, b) => new Date(b.transaction_time).getTime() - new Date(a.transaction_time).getTime());
-
-        setTransactions(all);
-      } catch (err) {
-        console.error('Error fetching transactions:', err);
-      } finally {
-        setLoading(false);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchTransactions();
       }
     };
-
-    fetchTransactions();
-  }, [user]);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [fetchTransactions]);
 
   const totalEarned = transactions
     .filter(t => t.type === 'sell')

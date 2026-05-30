@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import { dbService } from '../services/dbService';
@@ -29,30 +29,35 @@ const MembersPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'username' | 'recent' | 'badges' | 'newest'>('username');
   const [error, setError] = useState<string | null>(null);
 
+  const fetchAllData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [fetchedProfiles, fetchedBadges] = await Promise.all([
+        dbService.getAllProfiles(true), // Pass true to include banned users
+        dbService.getBadges(), // Fetch all available badges
+      ]);
+
+      // Cast fetchedProfiles to ProfileWithBadges[]
+      setProfiles(fetchedProfiles as unknown as ProfileWithBadges[]);
+      setAllBadges(sortBadges(fetchedBadges));
+    } catch (err) {
+      console.error('Failed to fetch data:', err);
+      setError('Failed to load members or badges. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchAllData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [fetchedProfiles, fetchedBadges] = await Promise.all([
-          dbService.getAllProfiles(true), // Pass true to include banned users
-          dbService.getBadges(), // Fetch all available badges
-        ]);
+    fetchAllData();
 
-        import.meta.env.DEV && console.log('Fetched profiles:', fetchedProfiles);
-
-        // Cast fetchedProfiles to ProfileWithBadges[]
-        setProfiles(fetchedProfiles as unknown as ProfileWithBadges[]);
-        setAllBadges(sortBadges(fetchedBadges));
-      } catch (err) {
-        console.error('Failed to fetch data:', err);
-        setError('Failed to load members or badges. Please try again later.');
-      } finally {
-        setLoading(false);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchAllData();
       }
     };
-
-    fetchAllData();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Subscribe to realtime profile changes (status, etc.)
     const channelId = `profiles-status:${Math.random().toString(36).substring(7)}`;
@@ -70,9 +75,10 @@ const MembersPage: React.FC = () => {
       .subscribe();
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       supabase.removeChannel(subscription);
     };
-  }, []);
+  }, [fetchAllData]);
 
   const filteredAndSortedProfiles = profiles
     .filter(profile => {

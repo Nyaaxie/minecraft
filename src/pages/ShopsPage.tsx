@@ -128,6 +128,14 @@ const ShopsPage = () => {
 
   useEffect(() => {
     fetchShops();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchShops();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [fetchShops]);
 
   const handleDeleteShop = async (id: string) => {
