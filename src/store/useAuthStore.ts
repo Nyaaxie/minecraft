@@ -39,8 +39,8 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'strawberry-auth',
       storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: (state) => {
-        return (state, error) => {
+      onRehydrateStorage: (_state) => {
+        return (_state, error) => {
           if (error) {
             console.error('useAuthStore: hydration error', error);
           }

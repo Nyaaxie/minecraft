@@ -4,6 +4,8 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { useAuthStore } from './store/useAuthStore';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import { AlertCircle } from 'lucide-react';
 
 // Lazy load pages for performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
