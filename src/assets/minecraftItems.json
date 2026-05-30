@@ -1920,10 +1920,6 @@
     "value": "pumpkin_pie"
   },
   {
-    "label": "Melon",
-    "value": "melon_slice"
-  },
-  {
     "label": "Melon Seeds",
     "value": "melon_seeds"
   },
@@ -5203,850 +5199,836 @@
     "label": "Wolf Armor",
     "value": "wolf_armor"
   },
-  [
-    {
-      "label": "Golden Carrot",
-      "value": "golden_carrot"
-    },
-    {
-      "label": "Bowl",
-      "value": "bowl"
-    },
-    {
-      "label": "Egg",
-      "value": "egg"
-    },
-    {
-      "label": "Fire Charge",
-      "value": "fire_charge"
-    },
-    {
-      "label": "Gold Nugget",
-      "value": "gold_nugget"
-    },
-    {
-      "label": "Iron Nugget",
-      "value": "iron_nugget"
-    },
-    {
-      "label": "Prismarine Crystals",
-      "value": "prismarine_crystals"
-    },
-    {
-      "label": "Prismarine Shard",
-      "value": "prismarine_shard"
-    },
-    {
-      "label": "Carrot on a Stick",
-      "value": "carrot_on_a_stick"
-    },
-    {
-      "label": "Warped Fungus on a Stick",
-      "value": "warped_fungus_on_a_stick"
-    },
-    {
-      "label": "Command Block Minecart",
-      "value": "command_block_minecart"
-    },
-    {
-      "label": "Dragon Head",
-      "value": "dragon_head"
-    },
-    {
-      "label": "Creeper Head",
-      "value": "creeper_head"
-    },
-    {
-      "label": "Zombie Head",
-      "value": "zombie_head"
-    },
-    {
-      "label": "Skeleton Skull",
-      "value": "skeleton_skull"
-    },
-    {
-      "label": "Wither Skeleton Skull",
-      "value": "wither_skeleton_skull"
-    },
-    {
-      "label": "Player Head",
-      "value": "player_head"
-    },
-    {
-      "label": "Piglin Head",
-      "value": "piglin_head"
-    },
-    {
-      "label": "Flower Banner Pattern",
-      "value": "flower_banner_pattern"
-    },
-    {
-      "label": "Creeper Banner Pattern",
-      "value": "creeper_banner_pattern"
-    },
-    {
-      "label": "Skull Banner Pattern",
-      "value": "skull_banner_pattern"
-    },
-    {
-      "label": "Mojang Banner Pattern",
-      "value": "mojang_banner_pattern"
-    },
-    {
-      "label": "Globe Banner Pattern",
-      "value": "globe_banner_pattern"
-    },
-    {
-      "label": "Piglin Banner Pattern",
-      "value": "piglin_banner_pattern"
-    },
-    {
-      "label": "Flow Banner Pattern",
-      "value": "flow_banner_pattern"
-    },
-    {
-      "label": "Guster Banner Pattern",
-      "value": "guster_banner_pattern"
-    },
-    {
-      "label": "Field Masoned Banner Pattern",
-      "value": "field_masoned_banner_pattern"
-    },
-    {
-      "label": "Bordure Indented Banner Pattern",
-      "value": "bordure_indented_banner_pattern"
-    },
-    {
-      "label": "Shulker Spawn Egg",
-      "value": "shulker_spawn_egg"
-    },
-    {
-      "label": "Skeleton Horse Spawn Egg",
-      "value": "skeleton_horse_spawn_egg"
-    },
-    {
-      "label": "Zombie Horse Spawn Egg",
-      "value": "zombie_horse_spawn_egg"
-    },
-    {
-      "label": "Stray Spawn Egg",
-      "value": "stray_spawn_egg"
-    },
-    {
-      "label": "Trader Llama Spawn Egg",
-      "value": "trader_llama_spawn_egg"
-    },
-    {
-      "label": "Wither Spawn Egg",
-      "value": "wither_spawn_egg"
-    },
-    {
-      "label": "Tadpole Bucket",
-      "value": "tadpole_bucket"
-    },
-    {
-      "label": "Music Disc (5)",
-      "value": "music_disc_5"
-    },
-    {
-      "label": "Slime Block",
-      "value": "slime_block"
-    },
-    {
-      "label": "Honey Block",
-      "value": "honey_block"
-    },
-    {
-      "label": "Hay Bale",
-      "value": "hay_block"
-    },
-    {
-      "label": "Coal Block",
-      "value": "coal_block"
-    },
-    {
-      "label": "Lapis Lazuli Block",
-      "value": "lapis_block"
-    },
-    {
-      "label": "Raw Iron Block",
-      "value": "raw_iron_block"
-    },
-    {
-      "label": "Raw Copper Block",
-      "value": "raw_copper_block"
-    },
-    {
-      "label": "Raw Gold Block",
-      "value": "raw_gold_block"
-    },
-    {
-      "label": "Cobweb",
-      "value": "cobweb"
-    },
-    {
-      "label": "Ladder",
-      "value": "ladder"
-    },
-    {
-      "label": "Glass Pane",
-      "value": "glass_pane"
-    },
-    {
-      "label": "Iron Bars",
-      "value": "iron_bars"
-    },
-    {
-      "label": "Chain",
-      "value": "chain"
-    },
-    {
-      "label": "Scaffolding",
-      "value": "scaffolding"
-    },
-    {
-      "label": "Muddy Mangrove Roots",
-      "value": "muddy_mangrove_roots"
-    },
-    {
-      "label": "Bamboo Mosaic Slab",
-      "value": "bamboo_mosaic_slab"
-    },
-    {
-      "label": "Bamboo Mosaic Stairs",
-      "value": "bamboo_mosaic_stairs"
-    },
-    {
-      "label": "Pale Oak Log",
-      "value": "pale_oak_log"
-    },
-    {
-      "label": "Pale Oak Planks",
-      "value": "pale_oak_planks"
-    },
-    {
-      "label": "Pale Oak Wood",
-      "value": "pale_oak_wood"
-    },
-    {
-      "label": "Stripped Pale Oak Log",
-      "value": "stripped_pale_oak_log"
-    },
-    {
-      "label": "Stripped Pale Oak Wood",
-      "value": "stripped_pale_oak_wood"
-    },
-    {
-      "label": "Pale Oak Leaves",
-      "value": "pale_oak_leaves"
-    },
-    {
-      "label": "Pale Oak Sapling",
-      "value": "pale_oak_sapling"
-    },
-    {
-      "label": "Pale Oak Door",
-      "value": "pale_oak_door"
-    },
-    {
-      "label": "Pale Oak Trapdoor",
-      "value": "pale_oak_trapdoor"
-    },
-    {
-      "label": "Pale Oak Fence",
-      "value": "pale_oak_fence"
-    },
-    {
-      "label": "Pale Oak Fence Gate",
-      "value": "pale_oak_fence_gate"
-    },
-    {
-      "label": "Pale Oak Stairs",
-      "value": "pale_oak_stairs"
-    },
-    {
-      "label": "Pale Oak Slab",
-      "value": "pale_oak_slab"
-    },
-    {
-      "label": "Pale Oak Button",
-      "value": "pale_oak_button"
-    },
-    {
-      "label": "Pale Oak Pressure Plate",
-      "value": "pale_oak_pressure_plate"
-    },
-    {
-      "label": "Pale Oak Sign",
-      "value": "pale_oak_sign"
-    },
-    {
-      "label": "Pale Oak Hanging Sign",
-      "value": "pale_oak_hanging_sign"
-    },
-    {
-      "label": "Pale Oak Boat",
-      "value": "pale_oak_boat"
-    },
-    {
-      "label": "Pale Oak Chest Boat",
-      "value": "pale_oak_chest_boat"
-    },
-    {
-      "label": "Pale Moss Block",
-      "value": "pale_moss_block"
-    },
-    {
-      "label": "Pale Moss Carpet",
-      "value": "pale_moss_carpet"
-    },
-    {
-      "label": "Pale Hanging Moss",
-      "value": "pale_hanging_moss"
-    },
-    {
-      "label": "Eyeblossom",
-      "value": "eyeblossom"
-    },
-    {
-      "label": "Closed Eyeblossom",
-      "value": "closed_eyeblossom"
-    },
-    {
-      "label": "Resin Clump",
-      "value": "resin_clump"
-    },
-    {
-      "label": "Resin Block",
-      "value": "resin_block"
-    },
-    {
-      "label": "Resin Bricks",
-      "value": "resin_bricks"
-    },
-    {
-      "label": "Resin Brick Stairs",
-      "value": "resin_brick_stairs"
-    },
-    {
-      "label": "Resin Brick Slab",
-      "value": "resin_brick_slab"
-    },
-    {
-      "label": "Resin Brick Wall",
-      "value": "resin_brick_wall"
-    },
-    {
-      "label": "Chiseled Resin Bricks",
-      "value": "chiseled_resin_bricks"
-    },
-    {
-      "label": "Creaking Heart",
-      "value": "creaking_heart"
-    },
-    {
-      "label": "Creaking Spawn Egg",
-      "value": "creaking_spawn_egg"
-    },
-    {
-      "label": "Armadillo Spawn Egg",
-      "value": "armadillo_spawn_egg"
-    },
-    {
-      "label": "Armadillo Scute",
-      "value": "armadillo_scute"
-    },
-    {
-      "label": "Camel Spawn Egg",
-      "value": "camel_spawn_egg"
-    },
-    {
-      "label": "Sniffer Spawn Egg",
-      "value": "sniffer_spawn_egg"
-    },
-    {
-      "label": "Sniffer Egg",
-      "value": "sniffer_egg"
-    },
-    {
-      "label": "Crafter",
-      "value": "crafter"
-    },
-    {
-      "label": "Trial Spawner",
-      "value": "trial_spawner"
-    },
-    {
-      "label": "Vault",
-      "value": "vault"
-    },
-    {
-      "label": "Trial Key",
-      "value": "trial_key"
-    },
-    {
-      "label": "Ominous Trial Key",
-      "value": "ominous_trial_key"
-    },
-    {
-      "label": "Ominous Bottle",
-      "value": "ominous_bottle"
-    },
-    {
-      "label": "Chipped Anvil",
-      "value": "chipped_anvil"
-    },
-    {
-      "label": "Damaged Anvil",
-      "value": "damaged_anvil"
-    },
-    {
-      "label": "Polished Blackstone Pressure Plate",
-      "value": "polished_blackstone_pressure_plate"
-    },
-    {
-      "label": "Red Sandstone",
-      "value": "red_sandstone"
-    },
-    {
-      "label": "Cut Red Sandstone",
-      "value": "cut_red_sandstone"
-    },
-    {
-      "label": "Chiseled Red Sandstone",
-      "value": "chiseled_red_sandstone"
-    },
-    {
-      "label": "Smooth Red Sandstone",
-      "value": "smooth_red_sandstone"
-    },
-    {
-      "label": "Red Sandstone Stairs",
-      "value": "red_sandstone_stairs"
-    },
-    {
-      "label": "Red Sandstone Slab",
-      "value": "red_sandstone_slab"
-    },
-    {
-      "label": "Red Sandstone Wall",
-      "value": "red_sandstone_wall"
-    },
-    {
-      "label": "Cut Sandstone",
-      "value": "cut_sandstone"
-    },
-    {
-      "label": "Chiseled Sandstone",
-      "value": "chiseled_sandstone"
-    },
-    {
-      "label": "Chiseled Quartz Block",
-      "value": "chiseled_quartz_block"
-    },
-    {
-      "label": "Quartz Pillar",
-      "value": "quartz_pillar"
-    },
-    {
-      "label": "Quartz Bricks",
-      "value": "quartz_bricks"
-    },
-    {
-      "label": "Prismarine Stairs",
-      "value": "prismarine_stairs"
-    },
-    {
-      "label": "Prismarine Brick Stairs",
-      "value": "prismarine_brick_stairs"
-    },
-    {
-      "label": "Dark Prismarine Stairs",
-      "value": "dark_prismarine_stairs"
-    },
-    {
-      "label": "Prismarine Slab",
-      "value": "prismarine_slab"
-    },
-    {
-      "label": "Prismarine Brick Slab",
-      "value": "prismarine_brick_slab"
-    },
-    {
-      "label": "Dark Prismarine Slab",
-      "value": "dark_prismarine_slab"
-    },
-    {
-      "label": "Prismarine Wall",
-      "value": "prismarine_wall"
-    },
-    {
-      "label": "Red Nether Bricks",
-      "value": "red_nether_bricks"
-    },
-    {
-      "label": "Red Nether Brick Stairs",
-      "value": "red_nether_brick_stairs"
-    },
-    {
-      "label": "Red Nether Brick Slab",
-      "value": "red_nether_brick_slab"
-    },
-    {
-      "label": "Red Nether Brick Wall",
-      "value": "red_nether_brick_wall"
-    },
-    {
-      "label": "Chiseled Nether Bricks",
-      "value": "chiseled_nether_bricks"
-    },
-    {
-      "label": "Cracked Nether Bricks",
-      "value": "cracked_nether_bricks"
-    },
-    {
-      "label": "Nether Brick Slab",
-      "value": "nether_brick_slab"
-    },
-    {
-      "label": "End Stone Brick Stairs",
-      "value": "end_stone_brick_stairs"
-    },
-    {
-      "label": "End Stone Brick Slab",
-      "value": "end_stone_brick_slab"
-    },
-    {
-      "label": "End Stone Brick Wall",
-      "value": "end_stone_brick_wall"
-    },
-    {
-      "label": "Brick Stairs",
-      "value": "brick_stairs"
-    },
-    {
-      "label": "Brick Slab",
-      "value": "brick_slab"
-    },
-    {
-      "label": "Brick Wall",
-      "value": "brick_wall"
-    },
-    {
-      "label": "Mossy Stone Brick Stairs",
-      "value": "mossy_stone_brick_stairs"
-    },
-    {
-      "label": "Mossy Stone Brick Slab",
-      "value": "mossy_stone_brick_slab"
-    },
-    {
-      "label": "Mossy Stone Brick Wall",
-      "value": "mossy_stone_brick_wall"
-    },
-    {
-      "label": "Smooth Stone Slab",
-      "value": "smooth_stone_slab"
-    },
-    {
-      "label": "Smooth Sandstone Stairs",
-      "value": "smooth_sandstone_stairs"
-    },
-    {
-      "label": "Smooth Sandstone Slab",
-      "value": "smooth_sandstone_slab"
-    },
-    {
-      "label": "Smooth Red Sandstone Stairs",
-      "value": "smooth_red_sandstone_stairs"
-    },
-    {
-      "label": "Smooth Red Sandstone Slab",
-      "value": "smooth_red_sandstone_slab"
-    },
-    {
-      "label": "Smooth Quartz Stairs",
-      "value": "smooth_quartz_stairs"
-    },
-    {
-      "label": "Smooth Quartz Slab",
-      "value": "smooth_quartz_slab"
-    },
-    {
-      "label": "Cobbled Deepslate Stairs",
-      "value": "cobbled_deepslate_stairs"
-    },
-    {
-      "label": "Cobbled Deepslate Slab",
-      "value": "cobbled_deepslate_slab"
-    },
-    {
-      "label": "Cobbled Deepslate Wall",
-      "value": "cobbled_deepslate_wall"
-    },
-    {
-      "label": "Polished Deepslate Stairs",
-      "value": "polished_deepslate_stairs"
-    },
-    {
-      "label": "Polished Deepslate Slab",
-      "value": "polished_deepslate_slab"
-    },
-    {
-      "label": "Polished Deepslate Wall",
-      "value": "polished_deepslate_wall"
-    },
-    {
-      "label": "Deepslate Tile Stairs",
-      "value": "deepslate_tile_stairs"
-    },
-    {
-      "label": "Deepslate Tile Slab",
-      "value": "deepslate_tile_slab"
-    },
-    {
-      "label": "Deepslate Tile Wall",
-      "value": "deepslate_tile_wall"
-    },
-    {
-      "label": "Cut Copper Stairs",
-      "value": "cut_copper_stairs"
-    },
-    {
-      "label": "Cut Copper Slab",
-      "value": "cut_copper_slab"
-    },
-    {
-      "label": "Exposed Cut Copper Stairs",
-      "value": "exposed_cut_copper_stairs"
-    },
-    {
-      "label": "Exposed Cut Copper Slab",
-      "value": "exposed_cut_copper_slab"
-    },
-    {
-      "label": "Weathered Cut Copper Stairs",
-      "value": "weathered_cut_copper_stairs"
-    },
-    {
-      "label": "Weathered Cut Copper Slab",
-      "value": "weathered_cut_copper_slab"
-    },
-    {
-      "label": "Oxidized Cut Copper Stairs",
-      "value": "oxidized_cut_copper_stairs"
-    },
-    {
-      "label": "Oxidized Cut Copper Slab",
-      "value": "oxidized_cut_copper_slab"
-    },
-    {
-      "label": "Waxed Cut Copper",
-      "value": "waxed_cut_copper"
-    },
-    {
-      "label": "Waxed Cut Copper Stairs",
-      "value": "waxed_cut_copper_stairs"
-    },
-    {
-      "label": "Waxed Cut Copper Slab",
-      "value": "waxed_cut_copper_slab"
-    },
-    {
-      "label": "Waxed Exposed Cut Copper Stairs",
-      "value": "waxed_exposed_cut_copper_stairs"
-    },
-    {
-      "label": "Waxed Exposed Cut Copper Slab",
-      "value": "waxed_exposed_cut_copper_slab"
-    },
-    {
-      "label": "Waxed Weathered Cut Copper Stairs",
-      "value": "waxed_weathered_cut_copper_stairs"
-    },
-    {
-      "label": "Waxed Weathered Cut Copper Slab",
-      "value": "waxed_weathered_cut_copper_slab"
-    },
-    {
-      "label": "Waxed Oxidized Cut Copper Stairs",
-      "value": "waxed_oxidized_cut_copper_stairs"
-    },
-    {
-      "label": "Waxed Oxidized Cut Copper Slab",
-      "value": "waxed_oxidized_cut_copper_slab"
-    },
-    {
-      "label": "Chiseled Copper",
-      "value": "chiseled_copper"
-    },
-    {
-      "label": "Exposed Chiseled Copper",
-      "value": "exposed_chiseled_copper"
-    },
-    {
-      "label": "Weathered Chiseled Copper",
-      "value": "weathered_chiseled_copper"
-    },
-    {
-      "label": "Oxidized Chiseled Copper",
-      "value": "oxidized_chiseled_copper"
-    },
-    {
-      "label": "Waxed Chiseled Copper",
-      "value": "waxed_chiseled_copper"
-    },
-    {
-      "label": "Waxed Exposed Chiseled Copper",
-      "value": "waxed_exposed_chiseled_copper"
-    },
-    {
-      "label": "Waxed Weathered Chiseled Copper",
-      "value": "waxed_weathered_chiseled_copper"
-    },
-    {
-      "label": "Waxed Oxidized Chiseled Copper",
-      "value": "waxed_oxidized_chiseled_copper"
-    },
-    {
-      "label": "End Rod",
-      "value": "end_rod"
-    },
-    {
-      "label": "Infested Stone",
-      "value": "infested_stone"
-    },
-    {
-      "label": "Infested Cobblestone",
-      "value": "infested_cobblestone"
-    },
-    {
-      "label": "Infested Stone Bricks",
-      "value": "infested_stone_bricks"
-    },
-    {
-      "label": "Infested Deepslate",
-      "value": "infested_deepslate"
-    },
-    {
-      "label": "Dirt Path",
-      "value": "dirt_path"
-    },
-    {
-      "label": "Farmland",
-      "value": "farmland"
-    },
-    {
-      "label": "Azalea Leaves",
-      "value": "azalea_leaves"
-    },
-    {
-      "label": "Flowering Azalea Leaves",
-      "value": "flowering_azalea_leaves"
-    },
-    {
-      "label": "Spruce Chest Boat",
-      "value": "spruce_chest_boat"
-    },
-    {
-      "label": "Birch Chest Boat",
-      "value": "birch_chest_boat"
-    },
-    {
-      "label": "Jungle Chest Boat",
-      "value": "jungle_chest_boat"
-    },
-    {
-      "label": "Acacia Chest Boat",
-      "value": "acacia_chest_boat"
-    },
-    {
-      "label": "Dark Oak Chest Boat",
-      "value": "dark_oak_chest_boat"
-    },
-    {
-      "label": "Mangrove Chest Boat",
-      "value": "mangrove_chest_boat"
-    },
-    {
-      "label": "Cherry Boat",
-      "value": "cherry_boat"
-    },
-    {
-      "label": "Cherry Chest Boat",
-      "value": "cherry_chest_boat"
-    },
-    {
-      "label": "Bamboo Raft",
-      "value": "bamboo_raft"
-    },
-    {
-      "label": "Bamboo Chest Raft",
-      "value": "bamboo_chest_raft"
-    },
-    {
-      "label": "Cherry Button",
-      "value": "cherry_button"
-    },
-    {
-      "label": "Cherry Pressure Plate",
-      "value": "cherry_pressure_plate"
-    },
-    {
-      "label": "Music Disc (Creator Music Box)",
-      "value": "music_disc_creator_music_box"
-    },
-    {
-      "label": "Music Disc (Tears)",
-      "value": "music_disc_tears"
-    },
-    {
-      "label": "Skull Pottery Sherd",
-      "value": "skull_pottery_sherd"
-    },
-    {
-      "label": "Tide Pottery Sherd",
-      "value": "tide_pottery_sherd"
-    },
-    {
-      "label": "Barrier",
-      "value": "barrier"
-    },
-    {
-      "label": "Light Block",
-      "value": "light"
-    },
-    {
-      "label": "Structure Block",
-      "value": "structure_block"
-    },
-    {
-      "label": "Structure Void",
-      "value": "structure_void"
-    },
-    {
-      "label": "Command Block",
-      "value": "command_block"
-    },
-    {
-      "label": "Repeating Command Block",
-      "value": "repeating_command_block"
-    },
-    {
-      "label": "Chain Command Block",
-      "value": "chain_command_block"
-    },
-    {
-      "label": "Jigsaw Block",
-      "value": "jigsaw"
-    },
-    {
-      "label": "Debug Stick",
-      "value": "debug_stick"
-    },
-    {
-      "label": "Knowledge Book",
-      "value": "knowledge_book"
-    }
-  ]
+  {
+    "label": "Golden Carrot",
+    "value": "golden_carrot"
+  },
+  {
+    "label": "Bowl",
+    "value": "bowl"
+  },
+  {
+    "label": "Egg",
+    "value": "egg"
+  },
+  {
+    "label": "Fire Charge",
+    "value": "fire_charge"
+  },
+  {
+    "label": "Gold Nugget",
+    "value": "gold_nugget"
+  },
+  {
+    "label": "Iron Nugget",
+    "value": "iron_nugget"
+  },
+  {
+    "label": "Prismarine Crystals",
+    "value": "prismarine_crystals"
+  },
+  {
+    "label": "Prismarine Shard",
+    "value": "prismarine_shard"
+  },
+  {
+    "label": "Carrot on a Stick",
+    "value": "carrot_on_a_stick"
+  },
+  {
+    "label": "Warped Fungus on a Stick",
+    "value": "warped_fungus_on_a_stick"
+  },
+  {
+    "label": "Command Block Minecart",
+    "value": "command_block_minecart"
+  },
+  {
+    "label": "Dragon Head",
+    "value": "dragon_head"
+  },
+  {
+    "label": "Creeper Head",
+    "value": "creeper_head"
+  },
+  {
+    "label": "Zombie Head",
+    "value": "zombie_head"
+  },
+  {
+    "label": "Skeleton Skull",
+    "value": "skeleton_skull"
+  },
+  {
+    "label": "Wither Skeleton Skull",
+    "value": "wither_skeleton_skull"
+  },
+  {
+    "label": "Player Head",
+    "value": "player_head"
+  },
+  {
+    "label": "Piglin Head",
+    "value": "piglin_head"
+  },
+  {
+    "label": "Flower Banner Pattern",
+    "value": "flower_banner_pattern"
+  },
+  {
+    "label": "Creeper Banner Pattern",
+    "value": "creeper_banner_pattern"
+  },
+  {
+    "label": "Skull Banner Pattern",
+    "value": "skull_banner_pattern"
+  },
+  {
+    "label": "Mojang Banner Pattern",
+    "value": "mojang_banner_pattern"
+  },
+  {
+    "label": "Globe Banner Pattern",
+    "value": "globe_banner_pattern"
+  },
+  {
+    "label": "Piglin Banner Pattern",
+    "value": "piglin_banner_pattern"
+  },
+  {
+    "label": "Flow Banner Pattern",
+    "value": "flow_banner_pattern"
+  },
+  {
+    "label": "Guster Banner Pattern",
+    "value": "guster_banner_pattern"
+  },
+  {
+    "label": "Field Masoned Banner Pattern",
+    "value": "field_masoned_banner_pattern"
+  },
+  {
+    "label": "Bordure Indented Banner Pattern",
+    "value": "bordure_indented_banner_pattern"
+  },
+  {
+    "label": "Shulker Spawn Egg",
+    "value": "shulker_spawn_egg"
+  },
+  {
+    "label": "Skeleton Horse Spawn Egg",
+    "value": "skeleton_horse_spawn_egg"
+  },
+  {
+    "label": "Zombie Horse Spawn Egg",
+    "value": "zombie_horse_spawn_egg"
+  },
+  {
+    "label": "Stray Spawn Egg",
+    "value": "stray_spawn_egg"
+  },
+  {
+    "label": "Trader Llama Spawn Egg",
+    "value": "trader_llama_spawn_egg"
+  },
+  {
+    "label": "Wither Spawn Egg",
+    "value": "wither_spawn_egg"
+  },
+  {
+    "label": "Tadpole Bucket",
+    "value": "tadpole_bucket"
+  },
+  {
+    "label": "Music Disc (5)",
+    "value": "music_disc_5"
+  },
+  {
+    "label": "Slime Block",
+    "value": "slime_block"
+  },
+  {
+    "label": "Honey Block",
+    "value": "honey_block"
+  },
+  {
+    "label": "Hay Bale",
+    "value": "hay_block"
+  },
+  {
+    "label": "Coal Block",
+    "value": "coal_block"
+  },
+  {
+    "label": "Lapis Lazuli Block",
+    "value": "lapis_block"
+  },
+  {
+    "label": "Raw Iron Block",
+    "value": "raw_iron_block"
+  },
+  {
+    "label": "Raw Copper Block",
+    "value": "raw_copper_block"
+  },
+  {
+    "label": "Raw Gold Block",
+    "value": "raw_gold_block"
+  },
+  {
+    "label": "Cobweb",
+    "value": "cobweb"
+  },
+  {
+    "label": "Ladder",
+    "value": "ladder"
+  },
+  {
+    "label": "Glass Pane",
+    "value": "glass_pane"
+  },
+  {
+    "label": "Iron Bars",
+    "value": "iron_bars"
+  },
+  {
+    "label": "Chain",
+    "value": "chain"
+  },
+  {
+    "label": "Scaffolding",
+    "value": "scaffolding"
+  },
+  {
+    "label": "Muddy Mangrove Roots",
+    "value": "muddy_mangrove_roots"
+  },
+  {
+    "label": "Bamboo Mosaic Slab",
+    "value": "bamboo_mosaic_slab"
+  },
+  {
+    "label": "Bamboo Mosaic Stairs",
+    "value": "bamboo_mosaic_stairs"
+  },
+  {
+    "label": "Pale Oak Log",
+    "value": "pale_oak_log"
+  },
+  {
+    "label": "Pale Oak Planks",
+    "value": "pale_oak_planks"
+  },
+  {
+    "label": "Pale Oak Wood",
+    "value": "pale_oak_wood"
+  },
+  {
+    "label": "Stripped Pale Oak Log",
+    "value": "stripped_pale_oak_log"
+  },
+  {
+    "label": "Stripped Pale Oak Wood",
+    "value": "stripped_pale_oak_wood"
+  },
+  {
+    "label": "Pale Oak Leaves",
+    "value": "pale_oak_leaves"
+  },
+  {
+    "label": "Pale Oak Sapling",
+    "value": "pale_oak_sapling"
+  },
+  {
+    "label": "Pale Oak Door",
+    "value": "pale_oak_door"
+  },
+  {
+    "label": "Pale Oak Trapdoor",
+    "value": "pale_oak_trapdoor"
+  },
+  {
+    "label": "Pale Oak Fence",
+    "value": "pale_oak_fence"
+  },
+  {
+    "label": "Pale Oak Fence Gate",
+    "value": "pale_oak_fence_gate"
+  },
+  {
+    "label": "Pale Oak Stairs",
+    "value": "pale_oak_stairs"
+  },
+  {
+    "label": "Pale Oak Slab",
+    "value": "pale_oak_slab"
+  },
+  {
+    "label": "Pale Oak Button",
+    "value": "pale_oak_button"
+  },
+  {
+    "label": "Pale Oak Pressure Plate",
+    "value": "pale_oak_pressure_plate"
+  },
+  {
+    "label": "Pale Oak Sign",
+    "value": "pale_oak_sign"
+  },
+  {
+    "label": "Pale Oak Hanging Sign",
+    "value": "pale_oak_hanging_sign"
+  },
+  {
+    "label": "Pale Oak Boat",
+    "value": "pale_oak_boat"
+  },
+  {
+    "label": "Pale Oak Chest Boat",
+    "value": "pale_oak_chest_boat"
+  },
+  {
+    "label": "Pale Moss Block",
+    "value": "pale_moss_block"
+  },
+  {
+    "label": "Pale Moss Carpet",
+    "value": "pale_moss_carpet"
+  },
+  {
+    "label": "Pale Hanging Moss",
+    "value": "pale_hanging_moss"
+  },
+  {
+    "label": "Eyeblossom",
+    "value": "eyeblossom"
+  },
+  {
+    "label": "Closed Eyeblossom",
+    "value": "closed_eyeblossom"
+  },
+  {
+    "label": "Resin Clump",
+    "value": "resin_clump"
+  },
+  {
+    "label": "Resin Block",
+    "value": "resin_block"
+  },
+  {
+    "label": "Resin Bricks",
+    "value": "resin_bricks"
+  },
+  {
+    "label": "Resin Brick Stairs",
+    "value": "resin_brick_stairs"
+  },
+  {
+    "label": "Resin Brick Slab",
+    "value": "resin_brick_slab"
+  },
+  {
+    "label": "Resin Brick Wall",
+    "value": "resin_brick_wall"
+  },
+  {
+    "label": "Chiseled Resin Bricks",
+    "value": "chiseled_resin_bricks"
+  },
+  {
+    "label": "Creaking Heart",
+    "value": "creaking_heart"
+  },
+  {
+    "label": "Creaking Spawn Egg",
+    "value": "creaking_spawn_egg"
+  },
+  {
+    "label": "Armadillo Spawn Egg",
+    "value": "armadillo_spawn_egg"
+  },
+  {
+    "label": "Armadillo Scute",
+    "value": "armadillo_scute"
+  },
+  {
+    "label": "Camel Spawn Egg",
+    "value": "camel_spawn_egg"
+  },
+  {
+    "label": "Sniffer Spawn Egg",
+    "value": "sniffer_spawn_egg"
+  },
+  {
+    "label": "Sniffer Egg",
+    "value": "sniffer_egg"
+  },
+  {
+    "label": "Crafter",
+    "value": "crafter"
+  },
+  {
+    "label": "Trial Spawner",
+    "value": "trial_spawner"
+  },
+  {
+    "label": "Vault",
+    "value": "vault"
+  },
+  {
+    "label": "Trial Key",
+    "value": "trial_key"
+  },
+  {
+    "label": "Ominous Trial Key",
+    "value": "ominous_trial_key"
+  },
+  {
+    "label": "Ominous Bottle",
+    "value": "ominous_bottle"
+  },
+  {
+    "label": "Chipped Anvil",
+    "value": "chipped_anvil"
+  },
+  {
+    "label": "Damaged Anvil",
+    "value": "damaged_anvil"
+  },
+  {
+    "label": "Polished Blackstone Pressure Plate",
+    "value": "polished_blackstone_pressure_plate"
+  },
+  {
+    "label": "Red Sandstone",
+    "value": "red_sandstone"
+  },
+  {
+    "label": "Cut Red Sandstone",
+    "value": "cut_red_sandstone"
+  },
+  {
+    "label": "Chiseled Red Sandstone",
+    "value": "chiseled_red_sandstone"
+  },
+  {
+    "label": "Smooth Red Sandstone",
+    "value": "smooth_red_sandstone"
+  },
+  {
+    "label": "Red Sandstone Stairs",
+    "value": "red_sandstone_stairs"
+  },
+  {
+    "label": "Red Sandstone Slab",
+    "value": "red_sandstone_slab"
+  },
+  {
+    "label": "Red Sandstone Wall",
+    "value": "red_sandstone_wall"
+  },
+  {
+    "label": "Cut Sandstone",
+    "value": "cut_sandstone"
+  },
+  {
+    "label": "Chiseled Sandstone",
+    "value": "chiseled_sandstone"
+  },
+  {
+    "label": "Chiseled Quartz Block",
+    "value": "chiseled_quartz_block"
+  },
+  {
+    "label": "Quartz Pillar",
+    "value": "quartz_pillar"
+  },
+  {
+    "label": "Quartz Bricks",
+    "value": "quartz_bricks"
+  },
+  {
+    "label": "Prismarine Stairs",
+    "value": "prismarine_stairs"
+  },
+  {
+    "label": "Prismarine Brick Stairs",
+    "value": "prismarine_brick_stairs"
+  },
+  {
+    "label": "Dark Prismarine Stairs",
+    "value": "dark_prismarine_stairs"
+  },
+  {
+    "label": "Prismarine Slab",
+    "value": "prismarine_slab"
+  },
+  {
+    "label": "Prismarine Brick Slab",
+    "value": "prismarine_brick_slab"
+  },
+  {
+    "label": "Dark Prismarine Slab",
+    "value": "dark_prismarine_slab"
+  },
+  {
+    "label": "Prismarine Wall",
+    "value": "prismarine_wall"
+  },
+  {
+    "label": "Red Nether Bricks",
+    "value": "red_nether_bricks"
+  },
+  {
+    "label": "Red Nether Brick Stairs",
+    "value": "red_nether_brick_stairs"
+  },
+  {
+    "label": "Red Nether Brick Slab",
+    "value": "red_nether_brick_slab"
+  },
+  {
+    "label": "Red Nether Brick Wall",
+    "value": "red_nether_brick_wall"
+  },
+  {
+    "label": "Chiseled Nether Bricks",
+    "value": "chiseled_nether_bricks"
+  },
+  {
+    "label": "Cracked Nether Bricks",
+    "value": "cracked_nether_bricks"
+  },
+  {
+    "label": "Nether Brick Slab",
+    "value": "nether_brick_slab"
+  },
+  {
+    "label": "End Stone Brick Stairs",
+    "value": "end_stone_brick_stairs"
+  },
+  {
+    "label": "End Stone Brick Slab",
+    "value": "end_stone_brick_slab"
+  },
+  {
+    "label": "End Stone Brick Wall",
+    "value": "end_stone_brick_wall"
+  },
+  {
+    "label": "Brick Stairs",
+    "value": "brick_stairs"
+  },
+  {
+    "label": "Brick Slab",
+    "value": "brick_slab"
+  },
+  {
+    "label": "Brick Wall",
+    "value": "brick_wall"
+  },
+  {
+    "label": "Mossy Stone Brick Stairs",
+    "value": "mossy_stone_brick_stairs"
+  },
+  {
+    "label": "Mossy Stone Brick Slab",
+    "value": "mossy_stone_brick_slab"
+  },
+  {
+    "label": "Mossy Stone Brick Wall",
+    "value": "mossy_stone_brick_wall"
+  },
+  {
+    "label": "Smooth Stone Slab",
+    "value": "smooth_stone_slab"
+  },
+  {
+    "label": "Smooth Sandstone Stairs",
+    "value": "smooth_sandstone_stairs"
+  },
+  {
+    "label": "Smooth Sandstone Slab",
+    "value": "smooth_sandstone_slab"
+  },
+  {
+    "label": "Smooth Red Sandstone Stairs",
+    "value": "smooth_red_sandstone_stairs"
+  },
+  {
+    "label": "Smooth Red Sandstone Slab",
+    "value": "smooth_red_sandstone_slab"
+  },
+  {
+    "label": "Smooth Quartz Stairs",
+    "value": "smooth_quartz_stairs"
+  },
+  {
+    "label": "Smooth Quartz Slab",
+    "value": "smooth_quartz_slab"
+  },
+  {
+    "label": "Cobbled Deepslate Stairs",
+    "value": "cobbled_deepslate_stairs"
+  },
+  {
+    "label": "Cobbled Deepslate Slab",
+    "value": "cobbled_deepslate_slab"
+  },
+  {
+    "label": "Cobbled Deepslate Wall",
+    "value": "cobbled_deepslate_wall"
+  },
+  {
+    "label": "Polished Deepslate Stairs",
+    "value": "polished_deepslate_stairs"
+  },
+  {
+    "label": "Polished Deepslate Slab",
+    "value": "polished_deepslate_slab"
+  },
+  {
+    "label": "Polished Deepslate Wall",
+    "value": "polished_deepslate_wall"
+  },
+  {
+    "label": "Deepslate Tile Stairs",
+    "value": "deepslate_tile_stairs"
+  },
+  {
+    "label": "Deepslate Tile Slab",
+    "value": "deepslate_tile_slab"
+  },
+  {
+    "label": "Deepslate Tile Wall",
+    "value": "deepslate_tile_wall"
+  },
+  {
+    "label": "Cut Copper Stairs",
+    "value": "cut_copper_stairs"
+  },
+  {
+    "label": "Cut Copper Slab",
+    "value": "cut_copper_slab"
+  },
+  {
+    "label": "Exposed Cut Copper Stairs",
+    "value": "exposed_cut_copper_stairs"
+  },
+  {
+    "label": "Exposed Cut Copper Slab",
+    "value": "exposed_cut_copper_slab"
+  },
+  {
+    "label": "Weathered Cut Copper Stairs",
+    "value": "weathered_cut_copper_stairs"
+  },
+  {
+    "label": "Weathered Cut Copper Slab",
+    "value": "weathered_cut_copper_slab"
+  },
+  {
+    "label": "Oxidized Cut Copper Stairs",
+    "value": "oxidized_cut_copper_stairs"
+  },
+  {
+    "label": "Oxidized Cut Copper Slab",
+    "value": "oxidized_cut_copper_slab"
+  },
+  {
+    "label": "Waxed Cut Copper",
+    "value": "waxed_cut_copper"
+  },
+  {
+    "label": "Waxed Cut Copper Stairs",
+    "value": "waxed_cut_copper_stairs"
+  },
+  {
+    "label": "Waxed Cut Copper Slab",
+    "value": "waxed_cut_copper_slab"
+  },
+  {
+    "label": "Waxed Exposed Cut Copper Stairs",
+    "value": "waxed_exposed_cut_copper_stairs"
+  },
+  {
+    "label": "Waxed Exposed Cut Copper Slab",
+    "value": "waxed_exposed_cut_copper_slab"
+  },
+  {
+    "label": "Waxed Weathered Cut Copper Stairs",
+    "value": "waxed_weathered_cut_copper_stairs"
+  },
+  {
+    "label": "Waxed Weathered Cut Copper Slab",
+    "value": "waxed_weathered_cut_copper_slab"
+  },
+  {
+    "label": "Waxed Oxidized Cut Copper Stairs",
+    "value": "waxed_oxidized_cut_copper_stairs"
+  },
+  {
+    "label": "Waxed Oxidized Cut Copper Slab",
+    "value": "waxed_oxidized_cut_copper_slab"
+  },
+  {
+    "label": "Chiseled Copper",
+    "value": "chiseled_copper"
+  },
+  {
+    "label": "Exposed Chiseled Copper",
+    "value": "exposed_chiseled_copper"
+  },
+  {
+    "label": "Weathered Chiseled Copper",
+    "value": "weathered_chiseled_copper"
+  },
+  {
+    "label": "Oxidized Chiseled Copper",
+    "value": "oxidized_chiseled_copper"
+  },
+  {
+    "label": "Waxed Chiseled Copper",
+    "value": "waxed_chiseled_copper"
+  },
+  {
+    "label": "Waxed Exposed Chiseled Copper",
+    "value": "waxed_exposed_chiseled_copper"
+  },
+  {
+    "label": "Waxed Weathered Chiseled Copper",
+    "value": "waxed_weathered_chiseled_copper"
+  },
+  {
+    "label": "Waxed Oxidized Chiseled Copper",
+    "value": "waxed_oxidized_chiseled_copper"
+  },
+  {
+    "label": "End Rod",
+    "value": "end_rod"
+  },
+  {
+    "label": "Infested Stone",
+    "value": "infested_stone"
+  },
+  {
+    "label": "Infested Cobblestone",
+    "value": "infested_cobblestone"
+  },
+  {
+    "label": "Infested Stone Bricks",
+    "value": "infested_stone_bricks"
+  },
+  {
+    "label": "Infested Deepslate",
+    "value": "infested_deepslate"
+  },
+  {
+    "label": "Dirt Path",
+    "value": "dirt_path"
+  },
+  {
+    "label": "Farmland",
+    "value": "farmland"
+  },
+  {
+    "label": "Azalea Leaves",
+    "value": "azalea_leaves"
+  },
+  {
+    "label": "Flowering Azalea Leaves",
+    "value": "flowering_azalea_leaves"
+  },
+  {
+    "label": "Spruce Chest Boat",
+    "value": "spruce_chest_boat"
+  },
+  {
+    "label": "Birch Chest Boat",
+    "value": "birch_chest_boat"
+  },
+  {
+    "label": "Jungle Chest Boat",
+    "value": "jungle_chest_boat"
+  },
+  {
+    "label": "Acacia Chest Boat",
+    "value": "acacia_chest_boat"
+  },
+  {
+    "label": "Dark Oak Chest Boat",
+    "value": "dark_oak_chest_boat"
+  },
+  {
+    "label": "Mangrove Chest Boat",
+    "value": "mangrove_chest_boat"
+  },
+  {
+    "label": "Cherry Boat",
+    "value": "cherry_boat"
+  },
+  {
+    "label": "Cherry Chest Boat",
+    "value": "cherry_chest_boat"
+  },
+  {
+    "label": "Bamboo Raft",
+    "value": "bamboo_raft"
+  },
+  {
+    "label": "Bamboo Chest Raft",
+    "value": "bamboo_chest_raft"
+  },
+  {
+    "label": "Cherry Button",
+    "value": "cherry_button"
+  },
+  {
+    "label": "Cherry Pressure Plate",
+    "value": "cherry_pressure_plate"
+  },
+  {
+    "label": "Music Disc (Creator Music Box)",
+    "value": "music_disc_creator_music_box"
+  },
+  {
+    "label": "Music Disc (Tears)",
+    "value": "music_disc_tears"
+  },
+  {
+    "label": "Skull Pottery Sherd",
+    "value": "skull_pottery_sherd"
+  },
+  {
+    "label": "Tide Pottery Sherd",
+    "value": "tide_pottery_sherd"
+  },
+  {
+    "label": "Melon",
+    "value": "melon_slice"
+  },
+  {
+    "label": "Golden Dandelion",
+    "value": "golden_dandelion"
+  },
+  {
+    "label": "Copper Nautilus Armor",
+    "value": "copper_nautilus_armor"
+  },
+  {
+    "label": "Iron Nautilus Armor",
+    "value": "iron_nautilus_armor"
+  },
+  {
+    "label": "Diamond Nautilus Armor",
+    "value": "diamond_nautilus_armor"
+  },
+  {
+    "label": "Golden Nautilus Armor",
+    "value": "golden_nautilus_armor"
+  },
+  {
+    "label": "Netherite Nautilus Armor",
+    "value": "netherite_nautilus_armor"
+  }
 ]

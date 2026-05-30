@@ -10,9 +10,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import Select from 'react-select';
 import { minecraftItems } from '../utils/minecraftItems';
 
-// Fix: Flatten the nested items structure for React-Select and lookup
-const flatItems = Array.isArray(minecraftItems[0]) ? (minecraftItems as any[]).flat() : minecraftItems as any[];
-const typedFlatItems = flatItems as { label: string; value: string }[];
+// Fix: Always flatten the items structure to ensure nested arrays are included
+const typedFlatItems = (minecraftItems as any[]).flat() as { label: string; value: string }[];
 
 const AdminShopItemForm = ({ item, onSubmit, onCancel, isSaving }: { 
   item?: ShopItem; 
