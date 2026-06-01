@@ -168,11 +168,38 @@ export interface ShopCategory {
   updated_at: string;
 }
 
+export interface CommunityMember {
+  id: string
+  username: string
+  nickname: string | null
+  avatar_url: string | null
+  favorite_mob: string | null
+  favorite_block: string | null
+  favorite_color: string | null
+  favorite_biome: string | null
+  favorite_role: string | null
+  social_links: string | null
+  bio: string | null
+  birth_month: string | null
+  age: number | null
+  join_date: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CommunityMemberBadge {
+  member_id: string
+  badge_id: string
+  assigned_at: string
+}
+
 export interface PlayerShop {
   id: string;
-  owner_id: string;
+  owner_id: string | null;
+  owner_name: string | null;
   name: string;
   description: string | null;
+  banner_url: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -187,6 +214,8 @@ export interface ShopItem {
   currency: string;
   quantity: number;
   unit_size: number;
+  unit_display: string | null;
+  custom_image_url: string | null;
   description: string | null;
   availability_status: 'in_stock' | 'out_of_stock' | 'on_order';
   category_id: string | null;

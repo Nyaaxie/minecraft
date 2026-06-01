@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
 import { adminService } from '../services/adminService';
@@ -15,15 +16,16 @@ import {
   Loader2, Trash2, Award, Calendar, Megaphone, ShieldCheck,
   Users, CheckSquare, Bell, BookOpen, Puzzle, Terminal,
   GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw,
-  Info, MessageSquare, Sparkle,
+  Info, MessageSquare, Sparkle, UsersRound, Store, User,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sortBadges } from '../utils/badgeUtils';
+import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 type TabKey =
-  | 'users' | 'approvals' | 'announcements' | 'events'
+  | 'users' | 'approvals' | 'members' | 'shops' | 'announcements' | 'events'
   | 'rules' | 'reminders' | 'versions'
   | 'badges' | 'commands' | 'guides' | 'plugins' | 'serverInfo'
   | 'suggestions' | 'helpRequests';
@@ -36,11 +38,16 @@ type ModalState =
   | { type: 'edit-announcement'; data: any }
   | { type: 'badge' }
   | { type: 'edit-badge'; data: Badge }
-  | { type: 'assign-badges'; data: Profile };
+  | { type: 'assign-badges'; data: Profile }
+  | { type: 'member'; data?: any }
+  | { type: 'assign-member-badges'; data: any }
+  | { type: 'shop'; data?: any };
 
 const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'users', label: 'Users', icon: Users },
   { key: 'approvals', label: 'Approvals', icon: CheckSquare },
+  { key: 'members', label: 'Members', icon: UsersRound },
+  { key: 'shops', label: 'Shops', icon: Store },
   { key: 'announcements', label: 'Announcements', icon: Megaphone },
   { key: 'events', label: 'Events', icon: Calendar },
   { key: 'rules', label: 'Rules', icon: ShieldCheck },
@@ -652,7 +659,352 @@ const GuidesTab = memo(({ guides, onRefresh }: { guides: any[]; onRefresh: () =>
   );
 });
 
-// ─── PLUGINS TAB ───────────────────────────────────────────────────────────
+// ─── MEMBERS TAB ───────────────────────────────────────────────────────────
+
+const MembersTab = memo(({ onRefresh, onAssignBadges }: {
+  onRefresh: () => void; onAssignBadges: (m: any) => void;
+}) => {
+  const [members, setMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [editTarget, setEditTarget] = useState<any | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    username: '', nickname: '', bio: '', avatar_url: '',
+    favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
+    favorite_biome: '', favorite_role: '', social_links: '',
+    birth_month: '', age: '', join_date: ''
+  });
+
+  const fetchMembers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await dbService.getCommunityMembers();
+      setMembers(data);
+    } catch { toast.error('Failed to load members'); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchMembers(); }, [fetchMembers]);
+
+  const filtered = useMemo(
+    () => members.filter(m =>
+      m.username?.toLowerCase().includes(search.toLowerCase()) ||
+      m.nickname?.toLowerCase().includes(search.toLowerCase())
+    ),
+    [members, search]
+  );
+
+  const openAdd = useCallback(() => {
+    setForm({
+      username: '', nickname: '', bio: '', avatar_url: '',
+      favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
+      favorite_biome: '', favorite_role: '',
+      discord_url: '', facebook_url: '', instagram_url: '', tiktok_url: '', twitter_url: '', youtube_url: '', twitch_url: '',
+      birth_month: '', age: '', join_date: new Date().toISOString().split('T')[0]
+    });
+    setEditTarget(null);
+    setIsAdding(true);
+  }, []);
+
+  const openEdit = useCallback((m: any) => {
+    setForm({
+      username: m.username || '',
+      nickname: m.nickname || '',
+      bio: m.bio || '',
+      avatar_url: m.avatar_url || '',
+      favorite_mob: m.favorite_mob || '',
+      favorite_block: m.favorite_block || '',
+      favorite_color: m.favorite_color || '#e35a7f',
+      favorite_biome: m.favorite_biome || '',
+      favorite_role: m.favorite_role || '',
+      discord_url: m.discord_url || '',
+      facebook_url: m.facebook_url || '',
+      instagram_url: m.instagram_url || '',
+      tiktok_url: m.tiktok_url || '',
+      twitter_url: m.twitter_url || '',
+      youtube_url: m.youtube_url || '',
+      twitch_url: m.twitch_url || '',
+      birth_month: m.birth_month || '',
+      age: m.age?.toString() || '',
+      join_date: m.join_date || ''
+    });
+    setEditTarget(m);
+    setIsAdding(false);
+  }, []);
+
+  const handleSave = async () => {
+    if (!form.username) { toast.error('Username is required'); return; }
+    setSaving(true);
+    try {
+      const payload = { ...form, age: form.age ? parseInt(form.age) : null };
+      if (editTarget) {
+        await dbService.updateCommunityMember(editTarget.id, payload);
+        toast.success('Member updated');
+      } else {
+        await dbService.createCommunityMember(payload);
+        toast.success('Member created');
+      }
+      setEditTarget(null);
+      setIsAdding(false);
+      fetchMembers();
+      onRefresh();
+    } catch { toast.error('Failed to save member'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await dbService.deleteCommunityMember(deleteTarget.id);
+      toast.success('Member removed');
+      setDeleteTarget(null);
+      fetchMembers();
+      onRefresh();
+    } catch { toast.error('Failed to delete member'); }
+  };
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-strawberry-600" size={28} /></div>;
+
+  return (
+    <>
+      <SectionHeader icon={UsersRound} title="Community Members" count={filtered.length} onAdd={openAdd} addLabel="Add Member" search={search} onSearch={setSearch} />
+      {filtered.length === 0 ? <EmptyState icon={UsersRound} label="No members found" /> : filtered.map(m => (
+        <div key={m.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0">
+              {m.avatar_url
+                ? <img src={m.avatar_url} alt={m.username} className="w-full h-full object-cover" />
+                : <User size={16} className="text-neutral-400" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-black italic uppercase tracking-tight truncate">{m.username}</p>
+              {m.nickname && <p className="text-[10px] text-strawberry-600 font-bold uppercase tracking-widest truncate">aka {m.nickname}</p>}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => onAssignBadges(m)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 text-neutral-400 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest italic"
+            >
+              <Award size={11} /> Badges
+            </button>
+            <RowActions onEdit={() => openEdit(m)} onDelete={() => setDeleteTarget(m)} />
+          </div>
+        </div>
+      ))}
+
+      <CrudModal open={!!editTarget || isAdding} onClose={() => { setEditTarget(null); setIsAdding(false); }} title={editTarget ? 'Edit Member' : 'Add Member'} icon={UsersRound} onSubmit={handleSave} submitting={saving}>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <label className={labelCls}>Username (Required)</label>
+            <input className={inputCls} value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} placeholder="Minecraft Username" />
+          </div>
+          <div>
+            <label className={labelCls}>Nickname</label>
+            <input className={inputCls} value={form.nickname} onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))} placeholder="Display Nickname" />
+          </div>
+          <div>
+            <label className={labelCls}>Age</label>
+            <input type="number" className={inputCls} value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} placeholder="Years" />
+          </div>
+          <div className="col-span-2">
+            <label className={labelCls}>Avatar URL (Optional)</label>
+            <input className={inputCls} value={form.avatar_url} onChange={e => setForm(f => ({ ...f, avatar_url: e.target.value }))} placeholder="https://..." />
+          </div>
+          <div>
+            <label className={labelCls}>Birth Month</label>
+            <select className={inputCls} value={form.birth_month} onChange={e => setForm(f => ({ ...f, birth_month: e.target.value }))}>
+              <option value="">Select Month</option>
+              {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Join Date</label>
+            <input type="date" className={inputCls} value={form.join_date} onChange={e => setForm(f => ({ ...f, join_date: e.target.value }))} />
+          </div>
+          <div className="col-span-2">
+            <label className={labelCls}>Social Links (JSON)</label>
+            <input className={inputCls} value={form.social_links} onChange={e => setForm(f => ({ ...f, social_links: e.target.value }))} placeholder='{"discord": "...", "instagram": "..."}' />
+          </div>
+          <div>
+            <label className={labelCls}>Fav Biome</label>
+            <input className={inputCls} value={form.favorite_biome} onChange={e => setForm(f => ({ ...f, favorite_biome: e.target.value }))} placeholder="e.g. Cherry Grove" />
+          </div>
+          <div>
+            <label className={labelCls}>Fav Role</label>
+            <input className={inputCls} value={form.favorite_role} onChange={e => setForm(f => ({ ...f, favorite_role: e.target.value }))} placeholder="e.g. Builder" />
+          </div>
+          <div className="col-span-2">
+            <label className={labelCls}>Bio</label>
+            <textarea className={`${inputCls} resize-none`} rows={3} value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} placeholder="Member biography..." />
+          </div>
+          <div>
+            <label className={labelCls}>Fav Mob</label>
+            <div className="flex gap-2">
+              <input className={inputCls} value={form.favorite_mob} onChange={e => setForm(f => ({ ...f, favorite_mob: e.target.value }))} placeholder="e.g. Fox" />
+              {form.favorite_mob && (
+                <div className="w-12 h-12 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 flex items-center justify-center shrink-0">
+                  <img src={getMinecraftItemImageUrl(form.favorite_mob)} alt="" className="w-8 h-8 pixelated" onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }} />
+                </div>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className={labelCls}>Fav Block</label>
+            <div className="flex gap-2">
+              <input className={inputCls} value={form.favorite_block} onChange={e => setForm(f => ({ ...f, favorite_block: e.target.value }))} placeholder="e.g. Moss" />
+              {form.favorite_block && (
+                <div className="w-12 h-12 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 flex items-center justify-center shrink-0">
+                  <img src={getMinecraftItemImageUrl(form.favorite_block)} alt="" className="w-8 h-8 pixelated" onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }} />
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="col-span-2">
+            <label className={labelCls}>Fav Color</label>
+            <div className="flex gap-3">
+              <input type="color" className="w-12 h-12 rounded-xl bg-neutral-100 dark:bg-neutral-800 border-none cursor-pointer" value={form.favorite_color} onChange={e => setForm(f => ({ ...f, favorite_color: e.target.value }))} />
+              <input className={inputCls} value={form.favorite_color} onChange={e => setForm(f => ({ ...f, favorite_color: e.target.value }))} placeholder="#HEX" />
+            </div>
+          </div>
+        </div>
+      </CrudModal>
+
+      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.username || 'member'} />
+    </>
+  );
+});
+
+// ─── SHOPS TAB ─────────────────────────────────────────────────────────────
+
+const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
+  const [shops, setShops] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [editTarget, setEditTarget] = useState<any | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ name: '', owner_name: '', description: '', banner_url: '', is_active: true });
+
+  const fetchShops = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await dbService.getPlayerShops();
+      setShops(data);
+    } catch { toast.error('Failed to load shops'); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchShops(); }, [fetchShops]);
+
+  const filtered = useMemo(
+    () => shops.filter(s =>
+      s.name?.toLowerCase().includes(search.toLowerCase()) ||
+      s.owner_name?.toLowerCase().includes(search.toLowerCase())
+    ),
+    [shops, search]
+  );
+
+  const openAdd = useCallback(() => {
+    setForm({ name: '', owner_name: '', description: '', banner_url: '', is_active: true });
+    setEditTarget(null);
+    setIsAdding(true);
+  }, []);
+
+  const openEdit = useCallback((s: any) => {
+    setForm({
+      name: s.name || '',
+      owner_name: s.owner_name || '',
+      description: s.description || '',
+      banner_url: s.banner_url || '',
+      is_active: s.is_active ?? true
+    });
+    setEditTarget(s);
+    setIsAdding(false);
+  }, []);
+
+  const handleSave = async () => {
+    if (!form.owner_name) { toast.error('Owner Name is required'); return; }
+    setSaving(true);
+    try {
+      const payload = { ...form, name: form.owner_name };
+      if (editTarget) {
+        await dbService.updatePlayerShop(editTarget.id, payload);
+        toast.success('Shop updated');
+      } else {
+        await dbService.createPlayerShop({ ...payload, owner_id: null });
+        toast.success('Shop created');
+      }
+      setEditTarget(null);
+      setIsAdding(false);
+      fetchShops();
+      onRefresh();
+    } catch { toast.error('Failed to save shop'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await dbService.deletePlayerShop(deleteTarget.id);
+      toast.success('Shop removed');
+      setDeleteTarget(null);
+      fetchShops();
+      onRefresh();
+    } catch { toast.error('Failed to delete shop'); }
+  };
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-strawberry-600" size={28} /></div>;
+
+  return (
+    <>
+      <SectionHeader icon={Store} title="Player Shops" count={filtered.length} onAdd={openAdd} addLabel="New Shop" search={search} onSearch={setSearch} />
+      {filtered.length === 0 ? <EmptyState icon={Store} label="No shops found" /> : filtered.map(s => (
+        <div key={s.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+          <Link to={`/shops/${s.id}`} className="flex items-center gap-3 min-w-0 flex-grow group">
+            <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+              {s.banner_url
+                ? <img src={s.banner_url} alt={s.owner_name} className="w-full h-full object-cover" />
+                : <Store size={16} className="text-neutral-400" />}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-black italic uppercase tracking-tight truncate group-hover:text-strawberry-600 transition-colors">{s.owner_name}</p>
+              <p className="text-[10px] text-strawberry-600 font-bold uppercase tracking-widest truncate italic">Market Stall</p>
+            </div>
+          </Link>
+          <RowActions onEdit={() => openEdit(s)} onDelete={() => setDeleteTarget(s)} />
+        </div>
+      ))}
+
+      <CrudModal
+        open={!!editTarget || isAdding}
+        onClose={() => { setEditTarget(null); setIsAdding(false); }}
+        title={editTarget ? 'Edit Shop' : 'New Shop'}
+        icon={Store}
+        onSubmit={handleSave}
+        submitting={saving}
+      >
+        <div className="space-y-4">
+          <div><label className={labelCls}>Owner Username</label><input className={inputCls} value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} placeholder="Player Username" /></div>
+          <div><label className={labelCls}>Banner URL</label><input className={inputCls} value={form.banner_url} onChange={e => setForm(f => ({ ...f, banner_url: e.target.value }))} placeholder="https://..." /></div>
+          <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Shop tagline..." /></div>
+          <div className="flex items-center gap-2 pt-2">
+            <input type="checkbox" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} className="w-4 h-4 accent-strawberry-600" />
+            <label className="text-xs font-bold uppercase tracking-widest italic">Shop is Active</label>
+          </div>
+        </div>
+      </CrudModal>
+
+      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'shop'} />
+    </>
+  );
+});
 
 const PluginsTab = memo(({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => void }) => {
   const { profile } = useAuthStore();
@@ -917,7 +1269,6 @@ const AdminPanel = () => {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   // Stable modal openers
-  const openAssignBadges = useCallback((p: Profile) => setModal({ type: 'assign-badges', data: p }), []);
   const openEditBadge = useCallback((b: Badge) => setModal({ type: 'edit-badge', data: b }), []);
   const openEditVersion = useCallback((v: any) => setModal({ type: 'edit-version', data: v }), []);
   const openVersion = useCallback(() => setModal({ type: 'version' }), []);
@@ -953,11 +1304,12 @@ const AdminPanel = () => {
         editingBadge={modal.type === 'edit-badge' ? modal.data : undefined}
       />
       <AssignBadgesModal
-        isOpen={modal.type === 'assign-badges'}
+        isOpen={modal.type === 'assign-badges' || modal.type === 'assign-member-badges'}
         onClose={closeModal}
-        userProfile={modal.type === 'assign-badges' ? modal.data : null}
+        userProfile={(modal.type === 'assign-badges' || modal.type === 'assign-member-badges') ? modal.data : null}
         assignedBy={currentAdminProfile?.id || null}
         onBadgesUpdated={fetchData}
+        isCommunityMember={modal.type === 'assign-member-badges'}
       />
 
       {/* Header */}
@@ -988,8 +1340,8 @@ const AdminPanel = () => {
                 key={key}
                 onClick={() => setActiveTab(key)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest italic whitespace-nowrap shrink-0 transition-all duration-200 ${active
-                    ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30'
-                    : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 text-neutral-500 dark:text-neutral-400 hover:text-strawberry-600 hover:border-strawberry-500/30'
+                  ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30'
+                  : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 text-neutral-500 dark:text-neutral-400 hover:text-strawberry-600 hover:border-strawberry-500/30'
                   }`}
               >
                 <Icon size={12} />
@@ -1016,8 +1368,10 @@ const AdminPanel = () => {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
           >
-            {activeTab === 'users' && <UsersTab profiles={profiles} onRefresh={fetchData} onAssignBadges={openAssignBadges} />}
+            {activeTab === 'users' && <UsersTab profiles={profiles} onRefresh={fetchData} onAssignBadges={(p) => setModal({ type: 'assign-badges', data: p })} />}
             {activeTab === 'approvals' && <AdminApprovalPanel />}
+            {activeTab === 'members' && <MembersTab onRefresh={fetchData} onAssignBadges={(m) => setModal({ type: 'assign-member-badges', data: m })} />}
+            {activeTab === 'shops' && <ShopsTab onRefresh={fetchData} />}
             {activeTab === 'announcements' && (
               <>
                 <SectionHeader icon={Megaphone} title="Announcements" onAdd={openAnnouncement} addLabel="New Announcement" />

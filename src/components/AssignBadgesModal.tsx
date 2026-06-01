@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { dbService } from '../services/dbService';
 import toast from 'react-hot-toast';
-import type { Profile, Badge } from '../types/database.types';
+import type { Profile, Badge, CommunityMember } from '../types/database.types';
 import { Loader2, Check } from 'lucide-react';
 
 import { sortBadges } from '../utils/badgeUtils';
@@ -10,12 +10,20 @@ import { sortBadges } from '../utils/badgeUtils';
 interface AssignBadgesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userProfile: Profile | null;
-  assignedBy: string | null; // New prop for the admin's ID
-  onBadgesUpdated: () => void; // Callback to refresh profile list or just badges
+  userProfile: Profile | CommunityMember | null;
+  assignedBy?: string | null;
+  onBadgesUpdated: () => void;
+  isCommunityMember?: boolean;
 }
 
-const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({ isOpen, onClose, userProfile, assignedBy, onBadgesUpdated }) => {
+const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  userProfile, 
+  assignedBy, 
+  onBadgesUpdated,
+  isCommunityMember = false
+}) => {
   const [allBadges, setAllBadges] = useState<Badge[]>([]);
   const [assignedBadgeIds, setAssignedBadgeIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -23,20 +31,25 @@ const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({ isOpen, onClose, 
 
   useEffect(() => {
     if (!isOpen || !userProfile?.id) {
-      setLoading(false); // Ensure loading is false if modal is closed or no user
+      setLoading(false);
       return;
     }
 
     const fetchBadgesData = async () => {
       setLoading(true);
       try {
-        const [fetchedAllBadges, fetchedUserBadges] = await Promise.all([
+        const [fetchedAllBadges, fetchedAssignedBadges] = await Promise.all([
           dbService.getBadges(),
-          dbService.getUserBadges(userProfile.id),
+          isCommunityMember 
+            ? dbService.getCommunityMembers().then(members => {
+                const member = members.find(m => m.id === userProfile.id);
+                return (member as any)?.community_member_badges?.map((b: any) => ({ badge_id: b.badge_id })) || [];
+              })
+            : dbService.getUserBadges(userProfile.id),
         ]);
 
         setAllBadges(fetchedAllBadges);
-        setAssignedBadgeIds(new Set(fetchedUserBadges.map(ub => ub.badge_id)));
+        setAssignedBadgeIds(new Set(fetchedAssignedBadges.map((ub: any) => ub.badge_id)));
       } catch (error) {
         console.error('Failed to fetch badges data:', error);
         toast.error('Failed to load badges data.');
@@ -47,13 +60,10 @@ const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({ isOpen, onClose, 
     };
 
     fetchBadgesData();
-  }, [isOpen, userProfile?.id, onClose]);
+  }, [isOpen, userProfile?.id, onClose, isCommunityMember]);
 
   const handleToggleBadge = async (badgeId: string) => {
-    if (!userProfile?.id || !assignedBy) { // Check if assignedBy is available
-      toast.error('Admin user not identified. Cannot assign/unassign badges.');
-      return;
-    }
+    if (!userProfile?.id) return;
 
     setSaving(true);
     const wasAssigned = assignedBadgeIds.has(badgeId);
@@ -61,16 +71,29 @@ const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({ isOpen, onClose, 
 
     try {
       if (wasAssigned) {
-        await dbService.removeBadgeFromUser(userProfile.id, badgeId);
+        if (isCommunityMember) {
+          await dbService.removeBadgeFromCommunityMember(userProfile.id, badgeId);
+        } else {
+          await dbService.removeBadgeFromUser(userProfile.id, badgeId);
+        }
         updatedAssignedBadges.delete(badgeId);
         toast.success('Badge unassigned.');
       } else {
-        await dbService.assignBadgeToUser(userProfile.id, badgeId, assignedBy); // Use assignedBy prop
+        if (isCommunityMember) {
+          await dbService.assignBadgeToCommunityMember(userProfile.id, badgeId);
+        } else {
+          if (!assignedBy) {
+            toast.error('Admin user not identified.');
+            setSaving(false);
+            return;
+          }
+          await dbService.assignBadgeToUser(userProfile.id, badgeId, assignedBy);
+        }
         updatedAssignedBadges.add(badgeId);
         toast.success('Badge assigned.');
       }
       setAssignedBadgeIds(updatedAssignedBadges);
-      onBadgesUpdated(); // Notify parent to refresh if needed
+      onBadgesUpdated();
     } catch (error) {
       console.error('Failed to update badge assignment:', error);
       toast.error('Failed to update badge assignment.');
@@ -80,7 +103,7 @@ const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({ isOpen, onClose, 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Assign Badges to ${userProfile?.username || 'User'}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Assign Badges to ${userProfile?.username || 'Member'}`}>
       {loading ? (
         <div className="flex justify-center items-center py-8">
           <Loader2 className="animate-spin text-strawberry-600" size={24} />

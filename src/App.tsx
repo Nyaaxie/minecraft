@@ -147,15 +147,15 @@ function App() {
               
               <Route path="/dynamap" element={<ProtectedRoute><DashboardLayout><DynaMapPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/plugins" element={<ProtectedRoute><DashboardLayout><PluginsPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/members" element={<ProtectedRoute><DashboardLayout><MembersPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/members" element={<DashboardLayout><MembersPage /></DashboardLayout>} />
               <Route path="/admin/plugins/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/admin/plugins/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/shops" element={<ProtectedRoute><DashboardLayout><ShopsPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/shops/:id" element={<ProtectedRoute><DashboardLayout><ShopDetailPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/shops/new" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/shops/edit/:id" element={<ProtectedRoute><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/shops/:shopId/items/new" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/shops/:shopId/items/edit/:itemId" element={<ProtectedRoute><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops" element={<DashboardLayout><ShopsPage /></DashboardLayout>} />
+              <Route path="/shops/:id" element={<DashboardLayout><ShopDetailPage /></DashboardLayout>} />
+              <Route path="/shops/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops/edit/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminShopPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops/:shopId/items/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/shops/:shopId/items/edit/:itemId" element={<ProtectedRoute adminOnly><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/transactions" element={<ProtectedRoute><DashboardLayout><TransactionsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/events" element={<ProtectedRoute><DashboardLayout><EventsPage /></DashboardLayout></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><DashboardLayout><MessagesPage /></DashboardLayout></ProtectedRoute>} />

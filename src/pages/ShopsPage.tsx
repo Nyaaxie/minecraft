@@ -1,125 +1,85 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { dbService } from '../services/dbService';
 import type { PlayerShop } from '../types/database.types';
-import { Search, Store, RefreshCw, Edit, User } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Search, Store, RefreshCw, Edit, User, AlertCircle, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-import toast from 'react-hot-toast';
-import { useDebounce } from '../hooks/useDebounce';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const ShopCard = React.memo(({ shop, currentUserId, isAdmin }: {
-  shop: PlayerShop & { profiles: { username: string; avatar_url: string } | null },
-  currentUserId?: string,
-  isAdmin: boolean,
-  onDelete: (id: string) => void
-}) => {
-  const ownerUsername = shop.profiles?.username || 'Unknown Player';
-  const ownerAvatar = shop.profiles?.avatar_url || '';
-  const isOwner = currentUserId === shop.owner_id;
-  const canManage = isOwner || isAdmin;
-
+const ShopCard: React.FC<{
+  shop: PlayerShop;
+  isAdmin: boolean;
+  onDelete: (id: string) => void;
+}> = ({ shop, isAdmin, onDelete }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2rem] p-6 shadow-xl shadow-neutral-900/5 flex flex-col h-full hover:border-strawberry-500/30 transition-all group overflow-hidden relative"
-    >
-      <div className="absolute top-0 right-0 w-24 h-24 bg-strawberry-500/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
-
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Header Row: Owner (Left) and Edit (Right) */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded-full overflow-hidden border border-white dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800">
-              {ownerAvatar ? (
-                <img src={ownerAvatar} alt={ownerUsername} className="h-full w-full object-cover" loading="lazy" />
-              ) : (
-                <User size={12} className="m-auto text-neutral-400" />
-              )}
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">{ownerUsername}</span>
+    <Link to={`/shops/${shop.id}`}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        whileHover={{ y: -5 }}
+        className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-3xl p-6 transition-all hover:border-strawberry-500/30 shadow-sm dark:shadow-none"
+      >
+        <div className="flex items-start justify-between mb-4">
+          <div className="h-16 w-16 rounded-2xl bg-strawberry-600/10 flex items-center justify-center text-strawberry-600 group-hover:bg-strawberry-600 group-hover:text-white transition-all">
+            <Store size={32} />
           </div>
-
-          {canManage && (
-            <Link
-              to={`/shops/edit/${shop.id}`}
-              className="p-2 bg-neutral-100 dark:bg-white/5 hover:bg-strawberry-500/10 hover:text-strawberry-600 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-              title="Edit Shop"
-            >
-              <Edit size={14} />
-            </Link>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  onDelete(shop.id);
+                }}
+                className="p-2 text-neutral-400 hover:text-red-500 transition-colors"
+              >
+                <RefreshCw size={18} />
+              </button>
+            </div>
           )}
         </div>
 
-        {/* Main Shop Row: Icon and Title */}
-        <Link to={`/shops/${shop.id}`} className="flex items-center gap-4 mb-5 group/link">
-          <div className="w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0 border border-neutral-200 dark:border-white/5 group-hover:scale-105 transition-transform duration-500">
-            <Store size={24} className="text-strawberry-600" />
-          </div>
-          <div className="min-w-0 flex-grow">
-            <h3 className="text-lg font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white group-hover/link:text-strawberry-600 transition-colors break-words">
-              {shop.name}
-            </h3>
-          </div>
-        </Link>
+        <h3 className="text-xl font-bold mb-2 group-hover:text-strawberry-600 transition-colors uppercase tracking-tight italic">
+          {shop.owner_name}
+        </h3>
 
-        {/* Description Section */}
-        <Link to={`/shops/${shop.id}`} className="flex-grow">
-          <p className="text-center text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed italic px-2 break-words">
-            "{shop.description || 'Welcome to my storefront.'}"
-          </p>
-        </Link>
-      </div>
-    </motion.div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-6 w-6 rounded-full overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+            <User size={14} className="m-auto text-neutral-400" />
+          </div>
+          <span className="text-xs font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 italic">
+            Market Stall
+          </span>
+        </div>
+
+        <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2 italic mb-4">
+          "{shop.description || 'No description provided.'}"
+        </p>
+
+        <div className="mt-6 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-neutral-400 pt-4 border-t border-neutral-100 dark:border-white/5">
+          <span>Catalog</span>
+          <Edit size={14} />
+        </div>
+      </motion.div>
+    </Link>
   );
-});
+};
 
-const ShopCardSkeleton = () => (
-  <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-lg flex flex-col h-full animate-pulse">
-    <div className="flex items-center gap-4 mb-6">
-      <div className="w-16 h-16 rounded-[1.5rem] bg-neutral-100 dark:bg-neutral-800" />
-      <div className="space-y-2">
-        <div className="h-6 w-32 bg-neutral-100 dark:bg-neutral-800 rounded-lg" />
-        <div className="h-3 w-24 bg-neutral-100 dark:bg-neutral-800 rounded-lg" />
-      </div>
-    </div>
-    <div className="space-y-2 mb-8">
-      <div className="h-4 w-full bg-neutral-100 dark:bg-neutral-800 rounded-lg" />
-      <div className="h-4 w-2/3 bg-neutral-100 dark:bg-neutral-800 rounded-lg" />
-    </div>
-    <div className="mt-auto pt-6 border-t border-neutral-100 dark:border-white/5 flex justify-between">
-      <div className="h-6 w-16 bg-neutral-100 dark:bg-neutral-800 rounded-lg" />
-      <div className="h-4 w-20 bg-neutral-100 dark:bg-neutral-800 rounded-lg" />
-    </div>
-  </div>
-);
-
-const ShopsPage = () => {
-  const [shops, setShops] = useState<(PlayerShop & { profiles: { username: string; avatar_url: string } | null })[]>([]);
-  const [items, setItems] = useState<any[]>([]);
+const ShopsPage: React.FC = () => {
+  const [shops, setShops] = useState<PlayerShop[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
-
-  const { user, profile } = useAuthStore();
-  const isAdmin = profile?.role === 'admin';
-  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const { isAdmin } = useAuthStore();
 
   const fetchShops = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const [fetchedShops, fetchedItems] = await Promise.all([
-        dbService.getPlayerShops(),
-        dbService.getShopItems()
-      ]);
-      setShops(fetchedShops);
-      setItems(fetchedItems);
+      const data = await dbService.getPlayerShops();
+      setShops(data);
     } catch (err) {
-      console.error('Error fetching shops:', err);
+      console.error('Failed to fetch shops:', err);
       setError('Failed to load shops. Please try again later.');
     } finally {
       setLoading(false);
@@ -128,130 +88,103 @@ const ShopsPage = () => {
 
   useEffect(() => {
     fetchShops();
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        fetchShops();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [fetchShops]);
 
   const handleDeleteShop = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this shop? All items will be removed permanently.')) return;
+    if (!window.confirm('Are you sure you want to delete this shop?')) return;
     try {
       await dbService.deletePlayerShop(id);
-      toast.success('Shop closed successfully.');
-      fetchShops();
+      setShops(prev => prev.filter(s => s.id !== id));
     } catch (err) {
-      console.error('Error deleting shop:', err);
-      toast.error('Failed to delete shop.');
+      console.error('Failed to delete shop:', err);
+      alert('Failed to delete shop');
     }
   };
 
-  const filteredShops = shops.filter(shop => {
-    const ownerUsername = shop.profiles?.username || '';
-    const shopItems = items.filter(item => item.shop_id === shop.id);
-
-    return shop.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      shop.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      ownerUsername.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      shopItems.some(item => item.item_name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
-  });
-
-  const [userShops, setUserShops] = useState<PlayerShop[]>([]);
-  useEffect(() => {
-    if (user) {
-      dbService.getPlayerShopsByOwner(user.id).then(setUserShops);
-    }
-  }, [user]);
-
-  const handleOpenShop = () => {
-    if (userShops.length > 0) {
-      navigate(`/shops/${userShops[0].id}`);
-    } else {
-      navigate('/shops/new');
-    }
-  };
+  const filteredShops = shops.filter(shop =>
+    shop.owner_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6 space-y-12">
+    <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6 space-y-12 text-neutral-900 dark:text-neutral-100 mt-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2 mb-12">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600">
+          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600 shadow-xl shadow-strawberry-600/10">
             <Store size={32} />
           </div>
           <div className="space-y-1">
             <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
-              Shops
+              Community<span className="text-strawberry-600">Shops</span>
             </h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
-              Discover unique player-owned shops.
+              Browse the official directory of community-run markets.
             </p>
           </div>
         </div>
-        <button
-          onClick={handleOpenShop}
-          className="px-8 py-4 bg-strawberry-600 text-white rounded-[1.5rem] font-black italic uppercase tracking-widest text-sm shadow-xl shadow-strawberry-600/30 hover:bg-strawberry-700 transition-all active:scale-95 text-center"
-        >
-          {userShops.length > 0 && !isAdmin ? 'Go to Your Shop' : 'Open Your Shop'}
-        </button>
+
+        {isAdmin && (
+          <Link
+            to="/admin?tab=shops"
+            className="flex items-center gap-3 px-8 py-4 bg-strawberry-600 hover:bg-strawberry-700 text-white rounded-[1.5rem] font-black italic uppercase tracking-widest text-xs shadow-xl shadow-strawberry-600/20 active:scale-95 transition-all"
+          >
+            <Edit size={16} />
+            Manage Shops
+          </Link>
+        )}
       </div>
 
-      <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-6 lg:p-8 shadow-xl shadow-neutral-900/5 backdrop-blur-sm flex flex-col md:flex-row gap-4">
-        <div className="relative flex-grow group">
-          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-strawberry-500 transition-colors" />
+      {/* Search Controls */}
+      <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-xl shadow-neutral-900/5 backdrop-blur-sm">
+        <div className="relative">
+          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
-            placeholder="Search shops, owners, or products..."
-            className="w-full bg-neutral-100 dark:bg-neutral-800/50 border border-transparent focus:border-strawberry-500/20 rounded-2xl py-4 pl-12 pr-6 text-neutral-900 dark:text-white outline-none transition-all text-sm font-medium"
+            placeholder="Search by owner name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-6 py-4 bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 transition-all font-bold"
           />
         </div>
-        <button
-          onClick={fetchShops}
-          className="px-6 py-4 bg-neutral-100 dark:bg-white/5 border border-transparent hover:border-strawberry-500/30 rounded-2xl text-neutral-600 dark:text-neutral-400 hover:text-strawberry-600 transition-all flex items-center justify-center gap-3 font-bold text-xs uppercase tracking-widest"
-        >
-          <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          <span>Sync</span>
-        </button>
       </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[...Array(6)].map((_, i) => (
-            <ShopCardSkeleton key={i} />
-          ))}
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <Loader2 className="animate-spin text-strawberry-600" size={64} />
+          <p className="text-neutral-500 font-black uppercase tracking-widest animate-pulse">Visiting Markets...</p>
         </div>
-      ) : error ? (
-        <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-12 rounded-[2.5rem] text-center max-w-2xl mx-auto space-y-4">
-          <RefreshCw className="mx-auto" size={48} />
-          <p className="text-xl font-black italic uppercase tracking-tighter">{error}</p>
-          <button onClick={fetchShops} className="px-6 py-2 bg-red-500 text-white rounded-xl font-bold uppercase text-xs tracking-widest">Retry Connection</button>
+      )}
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-8 rounded-3xl text-center max-w-md mx-auto">
+          <AlertCircle size={48} className="mx-auto mb-4" />
+          <p className="font-bold text-lg">{error}</p>
         </div>
-      ) : filteredShops.length === 0 ? (
+      )}
+
+      {!loading && !error && filteredShops.length === 0 && (
         <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 p-20 rounded-[3rem] text-center space-y-6 backdrop-blur-sm">
           <div className="w-24 h-24 bg-neutral-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto">
-            <Store className="text-neutral-300" size={48} />
+            <Store className="text-neutral-400" size={48} />
           </div>
           <div className="space-y-2">
             <p className="text-3xl font-black uppercase italic tracking-tighter">No shops found</p>
-            <p className="text-neutral-500 max-w-xs mx-auto uppercase tracking-tight text-xs font-bold leading-relaxed">Adjust your search or be the first to establish a storefront!</p>
+            <p className="text-neutral-500">The market seems quiet today.</p>
           </div>
         </div>
-      ) : (
+      )}
+
+      {!loading && !error && filteredShops.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredShops.map(shop => (
-            <ShopCard
-              key={shop.id}
-              shop={shop}
-              currentUserId={user?.id}
-              isAdmin={isAdmin}
-              onDelete={handleDeleteShop}
-            />
-          ))}
+          <AnimatePresence mode="popLayout">
+            {filteredShops.map(shop => (
+              <ShopCard
+                key={shop.id}
+                shop={shop}
+                isAdmin={isAdmin}
+                onDelete={handleDeleteShop}
+              />
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </div>

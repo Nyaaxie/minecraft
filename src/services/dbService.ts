@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem, PluginCategory, ShopTransaction, Reminder, Badge } from '../types/database.types';
+import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem, PluginCategory, ShopTransaction, Reminder, Badge, CommunityMember } from '../types/database.types';
 
 export const dbService = {
   // --- Profiles & Admin ---
@@ -41,6 +41,69 @@ export const dbService = {
   async uploadAvatar(userId: string, file: File) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    return data.publicUrl;
+  },
+
+  // --- Community Members ---
+  async getCommunityMembers() {
+    const { data, error } = await supabase
+      .from('community_members')
+      .select(`
+        *,
+        community_member_badges (
+          badge_id,
+          badges (
+            id, name, description, color, icon_url, is_visible, priority
+          )
+        )
+      `)
+      .order('username', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  async createCommunityMember(member: Omit<CommunityMember, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('community_members').insert(member).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateCommunityMember(id: string, updates: Partial<CommunityMember>) {
+    const { data, error } = await supabase.from('community_members').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteCommunityMember(id: string) {
+    const { error } = await supabase.from('community_members').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  async assignBadgeToCommunityMember(memberId: string, badgeId: string) {
+    const { data, error } = await supabase.from('community_member_badges').insert({ member_id: memberId, badge_id: badgeId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async removeBadgeFromCommunityMember(memberId: string, badgeId: string) {
+    const { error } = await supabase.from('community_member_badges').delete().eq('member_id', memberId).eq('badge_id', badgeId);
+    if (error) throw error;
+    return true;
+  },
+
+  async uploadMemberAvatar(file: File) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `members/${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
@@ -436,24 +499,18 @@ export const dbService = {
 
   // --- Player Shops ---
   async getPlayerShops() {
-    const { data, error } = await supabase.from('player_shops').select('*, profiles!owner_id(username, avatar_url)').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('player_shops').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   },
   async getPlayerShopById(id: string) {
-    const { data, error } = await supabase.from('player_shops').select('*, profiles!owner_id(username, avatar_url)').eq('id', id).single();
-    if (error) throw error;
-    return data;
-  },
-  async getPlayerShopsByOwner(owner_id: string) {
-    const { data, error } = await supabase.from('player_shops').select('*, profiles!owner_id(username, avatar_url)').eq('owner_id', owner_id).order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('player_shops').select('*').eq('id', id).single();
     if (error) throw error;
     return data;
   },
   async createPlayerShop(shop: Omit<PlayerShop, 'id' | 'created_at' | 'updated_at'>) {
     const { data, error } = await supabase.from('player_shops').insert(shop).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Shop Opened', `A new shop has been opened: ${shop.name}`, 'system', `/shops/${data.id}`, shop.owner_id);
     return data;
   },
 
@@ -466,6 +523,21 @@ export const dbService = {
     const { error } = await supabase.from('player_shops').delete().eq('id', id);
     if (error) throw error;
     return true;
+  },
+
+  async uploadShopBanner(file: File) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `shops/${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    return data.publicUrl;
   },
 
   // --- Shop Items ---
@@ -484,10 +556,9 @@ export const dbService = {
     if (error) throw error;
     return data;
   },
-  async createShopItem(item: Omit<ShopItem, 'id' | 'created_at' | 'updated_at'>, creatorId?: string) {
+  async createShopItem(item: Omit<ShopItem, 'id' | 'created_at' | 'updated_at'>) {
     const { data, error } = await supabase.from('shop_items').insert(item).select().single();
     if (error) throw error;
-    await this.notifyAllUsers('New Shop Item', `A new item has been added: ${item.item_name}`, 'system', `/shops/${item.shop_id}`, creatorId);
     return data;
   },
   async updateShopItem(id: string, updates: Partial<ShopItem>) {
