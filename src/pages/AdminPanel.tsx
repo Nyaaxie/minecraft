@@ -650,7 +650,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
     username: '', nickname: '', bio: '', avatar_url: '',
     favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
     favorite_biome: '', favorite_role: '', social_links: '',
-    birth_month: '', age: '', join_date: ''
+    birth_month: '', birthday: '', join_date: ''
   });
 
   const fetchMembers = useCallback(async () => {
@@ -677,7 +677,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
       username: '', nickname: '', bio: '', avatar_url: '',
       favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
       favorite_biome: '', favorite_role: '', social_links: '',
-      birth_month: '', age: '', join_date: new Date().toISOString().split('T')[0]
+      birth_month: '', birthday: '', join_date: new Date().toISOString().split('T')[0]
     });
     setEditTarget(null);
     setIsAdding(true);
@@ -696,7 +696,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
       favorite_role: m.favorite_role || '',
       social_links: m.social_links || '',
       birth_month: m.birth_month || '',
-      age: m.age?.toString() || '',
+      birthday: m.birthday || '',
       join_date: m.join_date || ''
     });
     setEditTarget(m);
@@ -707,6 +707,18 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
     if (!form.username) { toast.error('Username is required'); return; }
     setSaving(true);
     try {
+      // Calculate age from birthday if provided
+      let calculatedAge = null;
+      if (form.birthday) {
+        const birthDate = new Date(form.birthday);
+        const today = new Date();
+        calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          calculatedAge--;
+        }
+      }
+
       // Create a clean payload based on database schema
       const payload = {
         username: form.username,
@@ -720,7 +732,8 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
         favorite_role: form.favorite_role,
         social_links: form.social_links,
         birth_month: form.birth_month,
-        age: form.age ? parseInt(form.age) : null,
+        age: calculatedAge,
+        birthday: form.birthday,
         join_date: form.join_date
       };
 
@@ -791,8 +804,8 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
             <input className={inputCls} value={form.nickname} onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))} placeholder="Display Nickname" />
           </div>
           <div>
-            <label className={labelCls}>Age</label>
-            <input type="number" className={inputCls} value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} placeholder="Years" />
+            <label className={labelCls}>Birthday</label>
+            <input type="date" className={inputCls} value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))} />
           </div>
           <div className="col-span-2">
             <label className={labelCls}>Avatar URL (Optional)</label>
@@ -800,12 +813,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
           </div>
           <div>
             <label className={labelCls}>Birth Month</label>
-            <select className={inputCls} value={form.birth_month} onChange={e => setForm(f => ({ ...f, birth_month: e.target.value }))}>
-              <option value="">Select Month</option>
-              {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
+            <input className={inputCls} value={form.birth_month} onChange={e => setForm(f => ({ ...f, birth_month: e.target.value }))} placeholder="e.g. July" />
           </div>
           <div>
             <label className={labelCls}>Join Date</label>

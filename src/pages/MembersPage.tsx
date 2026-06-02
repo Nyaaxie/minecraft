@@ -27,6 +27,20 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
     catch { return {}; }
   }, [member.social_links]);
 
+  const calculatedAge = React.useMemo(() => {
+    if (member.birthday) {
+      const birthDate = new Date(member.birthday);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+    return member.age;
+  }, [member.birthday, member.age]);
+
   return (
     <motion.div
       id={`member-${member.id}`}
@@ -93,7 +107,7 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
         <div className="flex flex-col items-center gap-1 text-[10px] font-bold text-neutral-600 dark:text-neutral-400">
           <div className="flex items-center gap-1">
             <Timer size={14} className="text-strawberry-400" />
-            <span className="font-black text-neutral-900 dark:text-white text-xs">{member.age || '---'}</span>
+            <span className="font-black text-neutral-900 dark:text-white text-xs">{calculatedAge || '---'}</span>
           </div>
           <span className="text-[8px] uppercase tracking-widest text-neutral-400">Age</span>
         </div>
@@ -164,19 +178,14 @@ const MembersPage: React.FC = () => {
             <button
               key={member.id}
               onClick={() => scrollToMember(member.id)}
-              className="flex flex-col items-center gap-2 min-w-[4.5rem] group"
+              className="flex flex-col items-center gap-2 min-w-[5.5rem] group"
             >
-              <div className="w-16 h-16 rounded-2xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 border-2 border-transparent group-hover:border-strawberry-500 shadow-md transition-all">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 border-2 border-transparent group-hover:border-strawberry-500 shadow-md transition-all">
                 <img src={getAvatarUrl(member.username, member.avatar_url)} alt={member.username} className="w-full h-full object-cover" />
               </div>
-              <p className="text-[10px] font-black truncate w-full group-hover:text-strawberry-600 transition-colors">
-                {member.nickname || member.username}
+              <p className="text-xs font-black truncate w-full group-hover:text-strawberry-600 transition-colors">
+                {member.username}
               </p>
-              {member.nickname && (
-                <p className="text-[8px] font-bold text-neutral-400 truncate w-full group-hover:text-strawberry-600/70 transition-colors">
-                  {member.username}
-                </p>
-              )}
             </button>
           ))}
         </div>

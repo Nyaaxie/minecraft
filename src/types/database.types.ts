@@ -181,6 +181,7 @@ export interface CommunityMember {
   social_links: string | null
   bio: string | null
   birth_month: string | null
+  birthday: string | null
   age: number | null
   join_date: string | null
   created_at: string
