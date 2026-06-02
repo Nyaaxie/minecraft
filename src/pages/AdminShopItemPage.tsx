@@ -153,7 +153,7 @@ const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel
 
           <div className="space-y-2">
             <label htmlFor="subCategoryId" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
-              <Hash size={12} className="text-strawberry-600" /> Sub-Category
+              <Hash size={12} className="text-strawberry-600" /> Sub-Category (Optional)
             </label>
             <select
               id="subCategoryId"
@@ -162,7 +162,7 @@ const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel
               className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all"
               disabled={!categoryId}
             >
-              <option value="">{categoryId ? (filteredSubCategories.length > 0 ? 'Select a sub-category' : 'No sub-categories found') : 'Select category first'}</option>
+              <option value="">{categoryId ? (filteredSubCategories.length > 0 ? 'None' : 'No sub-categories found') : 'Select category first'}</option>
               {filteredSubCategories.map(sub => (
                 <option key={sub.id} value={sub.id}>{sub.name}</option>
               ))}

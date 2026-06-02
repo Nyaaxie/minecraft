@@ -55,7 +55,7 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
       const catId = item.category_id || 'uncategorized';
       const catName = item.categories?.name || 'General';
       const subId = item.sub_category_id || 'none';
-      const subName = item.sub_categories?.name || '';
+      const subName = item.sub_categories?.name || 'No sub cate';
 
       if (!map.has(catId)) map.set(catId, { name: catName, subCats: new Map() });
       const cat = map.get(catId)!;
@@ -83,13 +83,16 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
           <div className="space-y-3 pl-1">
             {Array.from(cat.subCats.values()).map((sub) => {
               const prices = [...new Set(sub.items.map((i) => i.price))].sort((a, b) => a - b);
+              const unitLabels = [...new Set(sub.items.map((i) => i.unit_display || ''))];
+              
+              const isUniform = prices.length === 1 && unitLabels.length === 1;
               const priceLabel = prices.length === 1 ? `${prices[0]}` : `${prices[0]}–${prices[prices.length - 1]}`;
-              const unitLabel = sub.items[0]?.unit_display || '';
+              const unitLabel = unitLabels.length === 1 ? unitLabels[0] : '';
 
               return (
                 <div key={sub.name || 'default'} className="space-y-1">
                   {/* Sub-Category Name */}
-                  {sub.name && (
+                  {sub.name && sub.name !== 'No sub cate' && (
                     <div className="flex items-center gap-1.5 opacity-80">
                       <Hash size={12} className="text-neutral-400" />
                       <span className="text-xs font-black italic uppercase tracking-wider text-neutral-500">
@@ -98,34 +101,54 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
                     </div>
                   )}
 
-                  {/* Row: Dynamic Grid | Price Badge */}
-                  <div className="flex items-start justify-between gap-4 p-4 bg-neutral-50/50 dark:bg-neutral-800/30 rounded-2xl border border-neutral-100/50 dark:border-white/5 group hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors">
+                  {sub.name !== 'No sub cate' || isUniform ? (
+                    /* Row: Dynamic Grid | Price Badge */
+                    <div className="flex items-start justify-between gap-4 p-4 bg-neutral-50/50 dark:bg-neutral-800/30 rounded-2xl border border-neutral-100/50 dark:border-white/5 group hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors">
 
-                    {/* Responsive Grid for Items */}
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1.5 flex-1 min-w-0">
+                      {/* Responsive Grid for Items */}
+                      <div className="grid grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1.5 flex-1 min-w-0">
+                        {sub.items.map((item) => (
+                          <ItemIconSm key={item.id} item={item} />
+                        ))}
+                      </div>
+
+                      {/* Vertical Divider */}
+                      <div className="w-px self-stretch bg-neutral-200 dark:bg-white/10 mx-2" />
+
+                      {/* Price Badge */}
+                      <div className="flex flex-col items-end shrink-0 pl-2">
+                        <div className="flex items-center gap-1">
+                          <span className="text-lg font-black text-strawberry-600 tabular-nums leading-none tracking-tight">
+                            {priceLabel}
+                          </span>
+                          <Gem size={14} className="text-strawberry-500 fill-strawberry-500/10 shrink-0" />
+                        </div>
+                        {unitLabel && (
+                          <span className="text-[9px] font-black uppercase tracking-[0.1em] text-neutral-400 dark:text-neutral-500 mt-1.5 leading-none">
+                            {unitLabel}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    /* Simple List for items with different prices or units in 'No sub cate' */
+                    <div className="space-y-1.5">
                       {sub.items.map((item) => (
-                        <ItemIconSm key={item.id} item={item} />
+                        <div key={item.id} className="flex items-center justify-between p-3 bg-neutral-50/50 dark:bg-neutral-800/30 rounded-xl border border-neutral-100/50 dark:border-white/5 group hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <ItemIconSm item={item} />
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <div className='flex flex-col items-end'>
+                                <span className="text-sm font-black text-strawberry-600 tabular-nums">{item.price}</span>
+                                {item.unit_display && <span className="text-[9px] font-black uppercase tracking-[0.1em] text-neutral-400 dark:text-neutral-500 leading-none">{item.unit_display}</span>}
+                             </div>
+                            <Gem size={10} className="text-strawberry-500 fill-strawberry-500/10" />
+                          </div>
+                        </div>
                       ))}
                     </div>
-
-                    {/* Vertical Divider */}
-                    <div className="w-px self-stretch bg-neutral-200 dark:bg-white/10 mx-2" />
-
-                    {/* Price Badge */}
-                    <div className="flex flex-col items-end shrink-0 pl-2">
-                      <div className="flex items-center gap-1">
-                        <span className="text-lg font-black text-strawberry-600 tabular-nums leading-none tracking-tight">
-                          {priceLabel}
-                        </span>
-                        <Gem size={14} className="text-strawberry-500 fill-strawberry-500/10 shrink-0" />
-                      </div>
-                      {unitLabel && (
-                        <span className="text-[9px] font-black uppercase tracking-[0.1em] text-neutral-400 dark:text-neutral-500 mt-1.5 leading-none">
-                          {unitLabel}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
               );
             })}
