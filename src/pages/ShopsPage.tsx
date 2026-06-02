@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, memo, useMemo } from 'react';
 import { dbService } from '../services/dbService';
 import type { PlayerShop } from '../types/database.types';
-import { Search, Store, Edit, AlertCircle, Loader2, Tag, Hash, Gem } from 'lucide-react';
+import { Search, Store, Edit, AlertCircle, Loader2, Tag, Hash, Gem, SortAsc, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -80,19 +80,19 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
             </h4>
           </div>
 
-          <div className="space-y-5 pl-1">
+          <div className="space-y-3 pl-1">
             {Array.from(cat.subCats.values()).map((sub) => {
               const prices = [...new Set(sub.items.map((i) => i.price))].sort((a, b) => a - b);
               const priceLabel = prices.length === 1 ? `${prices[0]}` : `${prices[0]}–${prices[prices.length - 1]}`;
               const unitLabel = sub.items[0]?.unit_display || '';
 
               return (
-                <div key={sub.name || 'default'} className="space-y-2.5">
+                <div key={sub.name || 'default'} className="space-y-1">
                   {/* Sub-Category Name */}
                   {sub.name && (
-                    <div className="flex items-center gap-1.5 opacity-60">
-                      <Hash size={10} className="text-neutral-400" />
-                      <span className="text-[10px] font-black italic uppercase tracking-wider text-neutral-500">
+                    <div className="flex items-center gap-1.5 opacity-80">
+                      <Hash size={12} className="text-neutral-400" />
+                      <span className="text-xs font-black italic uppercase tracking-wider text-neutral-500">
                         {sub.name}
                       </span>
                     </div>
@@ -206,9 +206,11 @@ const ShopsPage: React.FC = () => {
     fetchShops();
   }, [fetchShops]);
 
-  const filteredShops = shops.filter(shop =>
-    shop.owner_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredShops = useMemo(() => {
+    return shops
+      .filter(shop => shop.owner_name?.toLowerCase().includes(searchTerm.toLowerCase()))
+      .sort((a, b) => (a.owner_name || '').localeCompare(b.owner_name || ''));
+  }, [shops, searchTerm]);
 
   return (
     <div className="max-w-7xl mx-auto pb-20 px-4 sm:px-6 space-y-12 text-neutral-900 dark:text-neutral-100 mt-8">
@@ -238,9 +240,9 @@ const ShopsPage: React.FC = () => {
         )}
       </div>
 
-      {/* Search */}
-      <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-xl shadow-neutral-900/5 backdrop-blur-sm">
-        <div className="relative">
+      {/* Search & Sort */}
+      <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-xl shadow-neutral-900/5 backdrop-blur-sm flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
           <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
@@ -249,6 +251,10 @@ const ShopsPage: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-6 py-4 bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 transition-all font-bold"
           />
+        </div>
+        <div className="flex items-center gap-2 px-6 py-4 bg-neutral-100 dark:bg-neutral-800/50 rounded-2xl text-neutral-400">
+          <SortAsc size={14} />
+          <span className="font-black italic uppercase tracking-widest text-[10px]">A-Z</span>
         </div>
       </div>
 
