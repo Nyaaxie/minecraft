@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem, PluginCategory, ShopTransaction, Reminder, Badge, CommunityMember } from '../types/database.types';
+import type { Event, EventRSVP, Profile, Announcement, Plugin, ShopCategory, PlayerShop, ShopItem, PluginCategory, ShopTransaction, Reminder, Badge, CommunityMember, Category, SubCategory } from '../types/database.types';
 
 export const dbService = {
   // --- Profiles & Admin ---
@@ -475,6 +475,52 @@ export const dbService = {
     return true;
   },
 
+  // --- Categories ---
+  async getCategories() {
+    const { data, error } = await supabase.from('categories').select('*').order('display_order', { ascending: true }).order('name', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+  async createCategory(category: Omit<Category, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('categories').insert(category).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updateCategory(id: string, updates: Partial<Category>) {
+    const { data, error } = await supabase.from('categories').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deleteCategory(id: string) {
+    const { error } = await supabase.from('categories').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // --- Sub-Categories ---
+  async getSubCategories(categoryId?: string) {
+    let query = supabase.from('sub_categories').select('*, categories(*)').order('display_order', { ascending: true }).order('name', { ascending: true });
+    if (categoryId) query = query.eq('category_id', categoryId);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  },
+  async createSubCategory(subCategory: Omit<SubCategory, 'id' | 'created_at' | 'updated_at'>) {
+    const { data, error } = await supabase.from('sub_categories').insert(subCategory).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async updateSubCategory(id: string, updates: Partial<SubCategory>) {
+    const { data, error } = await supabase.from('sub_categories').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async deleteSubCategory(id: string) {
+    const { error } = await supabase.from('sub_categories').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
   // --- Shop Categories ---
   async getShopCategories() {
     const { data, error } = await supabase.from('shop_categories').select('*').order('name', { ascending: true });
@@ -499,7 +545,10 @@ export const dbService = {
 
   // --- Player Shops ---
   async getPlayerShops() {
-    const { data, error } = await supabase.from('player_shops').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('player_shops')
+      .select('id, owner_id, owner_name, name, description, banner_url, is_active, created_at, updated_at, shop_items(*, categories(name), sub_categories(name))')
+      .order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   },
@@ -542,17 +591,17 @@ export const dbService = {
 
   // --- Shop Items ---
   async getShopItems() {
-    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), shop_categories(name)').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), categories(name), sub_categories(name)').order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   },
   async getShopItemById(id: string) {
-    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), shop_categories(name)').eq('id', id).single();
+    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), categories(name), sub_categories(name)').eq('id', id).single();
     if (error) throw error;
     return data;
   },
   async getShopItemsByShop(shopId: string) {
-    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), shop_categories(name)').eq('shop_id', shopId).order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('shop_items').select('*, player_shops(name), categories(name), sub_categories(name)').eq('shop_id', shopId).order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   },

@@ -205,6 +205,26 @@ export interface PlayerShop {
   updated_at: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  description: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubCategory {
+  id: string;
+  category_id: string;
+  name: string;
+  description: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+  categories?: Category | null;
+}
+
 export interface ShopItem {
   id: string;
   shop_id: string;
@@ -219,10 +239,13 @@ export interface ShopItem {
   description: string | null;
   availability_status: 'in_stock' | 'out_of_stock' | 'on_order';
   category_id: string | null;
+  sub_category_id: string | null;
   is_visible: boolean;
   created_at: string;
   updated_at: string;
   shop_categories?: { name: string } | null;
+  categories?: Category | null;
+  sub_categories?: SubCategory | null;
 }
 
 export interface PluginCategory {

@@ -1,22 +1,21 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
 import { adminService } from '../services/adminService';
 import AdminApprovalPanel from '../components/AdminApprovalPanel';
-import { AddVersionModal } from '../components/AddVersionModal';
 import { AnnouncementModal } from '../components/AnnouncementModal';
 import AddEditBadgeModal from '../components/AddEditBadgeModal';
 import AssignBadgesModal from '../components/AssignBadgesModal';
-import { useMinecraftVersions } from '../hooks/useMinecraftVersions';
 import { useAuthStore } from '../store/useAuthStore';
 import type { Profile, Event, Rule, Reminder, Badge, UserRole } from '../types/database.types';
 import BadgeChip from '../components/BadgeChip';
 import {
   Loader2, Trash2, Award, Calendar, Megaphone, ShieldCheck,
   Users, CheckSquare, Bell, BookOpen, Puzzle, Terminal,
-  GitBranch, Shield, Plus, Edit2, X, Save, Search, RefreshCw,
+  Shield, Plus, Edit2, X, Save, Search, RefreshCw,
   Info, MessageSquare, Sparkle, UsersRound, Store, User,
+  Tag, Hash
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sortBadges } from '../utils/badgeUtils';
@@ -25,15 +24,13 @@ import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 type TabKey =
-  | 'users' | 'approvals' | 'members' | 'shops' | 'announcements' | 'events'
-  | 'rules' | 'reminders' | 'versions'
+  | 'users' | 'approvals' | 'members' | 'shops' | 'categories' | 'subCategories' | 'announcements' | 'events'
+  | 'rules' | 'reminders'
   | 'badges' | 'commands' | 'guides' | 'plugins' | 'serverInfo'
   | 'suggestions' | 'helpRequests';
 
 type ModalState =
   | { type: 'none' }
-  | { type: 'version' }
-  | { type: 'edit-version'; data: any }
   | { type: 'announcement' }
   | { type: 'edit-announcement'; data: any }
   | { type: 'badge' }
@@ -41,18 +38,21 @@ type ModalState =
   | { type: 'assign-badges'; data: Profile }
   | { type: 'member'; data?: any }
   | { type: 'assign-member-badges'; data: any }
-  | { type: 'shop'; data?: any };
+  | { type: 'shop'; data?: any }
+  | { type: 'category'; data?: any }
+  | { type: 'subCategory'; data?: any };
 
 const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'users', label: 'Users', icon: Users },
   { key: 'approvals', label: 'Approvals', icon: CheckSquare },
   { key: 'members', label: 'Members', icon: UsersRound },
   { key: 'shops', label: 'Shops', icon: Store },
+  { key: 'categories', label: 'Categories', icon: Tag },
+  { key: 'subCategories', label: 'Sub-Categories', icon: Hash },
   { key: 'announcements', label: 'Announcements', icon: Megaphone },
   { key: 'events', label: 'Events', icon: Calendar },
   { key: 'rules', label: 'Rules', icon: ShieldCheck },
   { key: 'reminders', label: 'Reminders', icon: Bell },
-  { key: 'versions', label: 'Versions', icon: GitBranch },
   { key: 'badges', label: 'Badges', icon: Award },
   { key: 'commands', label: 'Commands', icon: Terminal },
   { key: 'guides', label: 'Guides', icon: BookOpen },
@@ -62,8 +62,6 @@ const TAB_CONFIG: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'helpRequests', label: 'Help Requests', icon: MessageSquare },
 ];
 
-// ─── Shared constants ───────────────────────────────────────────────────────
-
 const cardCls =
   'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm p-4';
 
@@ -71,8 +69,6 @@ const inputCls =
   'w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all';
 
 const labelCls = 'text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block';
-
-// ─── Shared UI ─────────────────────────────────────────────────────────────
 
 const CrudModal = memo(({
   open, onClose, title, icon: Icon, onSubmit, submitting, children,
@@ -211,13 +207,8 @@ const EmptyState = memo(({ icon: Icon, label }: { icon: React.ElementType; label
   </div>
 ));
 
-// ─── SERVER INFO TAB ────────────────────────────────────────────────────────
-// Fix: sync local state when prop changes
-
-const ServerInfoTab = ({ serverInfo, onSave }: { serverInfo: any[]; onSave: (data: any[]) => void }) => {
+const ServerInfoTab = memo(({ serverInfo, onSave }: { serverInfo: any[]; onSave: (data: any[]) => void }) => {
   const [data, setData] = useState(serverInfo);
-
-  // Sync when parent data changes (e.g. after refresh)
   useEffect(() => { setData(serverInfo); }, [serverInfo]);
 
   const updateItem = useCallback((index: number, key: string, value: string) => {
@@ -244,11 +235,7 @@ const ServerInfoTab = ({ serverInfo, onSave }: { serverInfo: any[]; onSave: (dat
       </button>
     </>
   );
-};
-
-// ─── USERS TAB ─────────────────────────────────────────────────────────────
-
-const ROLES: UserRole[] = ['player', 'admin'];
+});
 
 const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
   profiles: Profile[]; onRefresh: () => void; onAssignBadges: (p: Profile) => void;
@@ -344,7 +331,7 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
         <div>
           <label className={labelCls}>Role</label>
           <div className="flex gap-2 flex-wrap">
-            {ROLES.map(r => (
+            {['player', 'admin'].map(r => (
               <button key={r} onClick={() => setForm(f => ({ ...f, role: r }))}
                 className={`px-4 py-2 rounded-xl text-[10px] font-black italic uppercase tracking-widest transition-all ${form.role === r ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/20' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500'}`}>
                 {r}
@@ -357,8 +344,6 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
     </>
   );
 });
-
-// ─── EVENTS TAB ────────────────────────────────────────────────────────────
 
 const EventsTab = memo(({ events, onRefresh }: { events: Event[]; onRefresh: () => void }) => {
   const { profile } = useAuthStore();
@@ -429,25 +414,23 @@ const EventsTab = memo(({ events, onRefresh }: { events: Event[]; onRefresh: () 
   );
 });
 
-// ─── RULES TAB ─────────────────────────────────────────────────────────────
-
 const RulesTab = memo(({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => void }) => {
   const { profile } = useAuthStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Rule | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Rule | null>(null);
-  const [form, setForm] = useState({ title: '', content: '', order: 0 });
+  const [form, setForm] = useState({ title: '', content: '', priority: 0 });
   const [saving, setSaving] = useState(false);
 
-  const openAdd = useCallback(() => { setForm({ title: '', content: '', order: rules.length + 1 }); setEditTarget(null); setModalOpen(true); }, [rules.length]);
-  const openEdit = useCallback((r: Rule) => { setForm({ title: r.title || '', content: (r as any).content || '', order: (r as any).order || 0 }); setEditTarget(r); setModalOpen(true); }, []);
+  const openAdd = useCallback(() => { setForm({ title: '', content: '', priority: rules.length + 1 }); setEditTarget(null); setModalOpen(true); }, [rules.length]);
+  const openEdit = useCallback((r: Rule) => { setForm({ title: r.title || '', content: (r as any).content || '', priority: (r as any).priority || 0 }); setEditTarget(r); setModalOpen(true); }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       if (editTarget) { await adminService.updateRule(editTarget.id, form); toast.success('Rule updated'); }
       else {
-        await adminService.createRule({ title: form.title, content: form.content, priority: form.order, created_by: profile?.id ?? null, is_pinned: false, is_visible: true, category: null });
+        await adminService.createRule({ title: form.title, content: form.content, priority: form.priority, created_by: profile?.id ?? null, is_pinned: false, is_visible: true, category: null });
         toast.success('Rule created');
       }
       setModalOpen(false); onRefresh();
@@ -478,15 +461,13 @@ const RulesTab = memo(({ rules, onRefresh }: { rules: Rule[]; onRefresh: () => v
       ))}
       <CrudModal open={modalOpen} onClose={() => setModalOpen(false)} title={editTarget ? 'Edit Rule' : 'New Rule'} icon={ShieldCheck} onSubmit={handleSave} submitting={saving}>
         <div><label className={labelCls}>Title</label><input className={inputCls} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Rule title" /></div>
-        <div><label className={labelCls}>Order</label><input type="number" className={inputCls} value={form.order} onChange={e => setForm(f => ({ ...f, order: +e.target.value }))} /></div>
+        <div><label className={labelCls}>Order</label><input type="number" className={inputCls} value={form.priority} onChange={e => setForm(f => ({ ...f, priority: +e.target.value }))} /></div>
         <div><label className={labelCls}>Content</label><textarea className={`${inputCls} resize-none`} rows={4} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Full rule text..." /></div>
       </CrudModal>
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.title || 'rule'} />
     </>
   );
 });
-
-// ─── REMINDERS TAB ─────────────────────────────────────────────────────────
 
 const RemindersTab = memo(({ reminders, onRefresh }: { reminders: Reminder[]; onRefresh: () => void }) => {
   const { profile } = useAuthStore();
@@ -542,8 +523,6 @@ const RemindersTab = memo(({ reminders, onRefresh }: { reminders: Reminder[]; on
     </>
   );
 });
-
-// ─── COMMANDS TAB ──────────────────────────────────────────────────────────
 
 const CommandsTab = memo(({ commands, onRefresh }: { commands: any[]; onRefresh: () => void }) => {
   const [search, setSearch] = useState('');
@@ -603,8 +582,6 @@ const CommandsTab = memo(({ commands, onRefresh }: { commands: any[]; onRefresh:
   );
 });
 
-// ─── GUIDES TAB ────────────────────────────────────────────────────────────
-
 const GuidesTab = memo(({ guides, onRefresh }: { guides: any[]; onRefresh: () => void }) => {
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -659,8 +636,6 @@ const GuidesTab = memo(({ guides, onRefresh }: { guides: any[]; onRefresh: () =>
   );
 });
 
-// ─── MEMBERS TAB ───────────────────────────────────────────────────────────
-
 const MembersTab = memo(({ onRefresh, onAssignBadges }: {
   onRefresh: () => void; onAssignBadges: (m: any) => void;
 }) => {
@@ -701,8 +676,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
     setForm({
       username: '', nickname: '', bio: '', avatar_url: '',
       favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
-      favorite_biome: '', favorite_role: '',
-      discord_url: '', facebook_url: '', instagram_url: '', tiktok_url: '', twitter_url: '', youtube_url: '', twitch_url: '',
+      favorite_biome: '', favorite_role: '', social_links: '',
       birth_month: '', age: '', join_date: new Date().toISOString().split('T')[0]
     });
     setEditTarget(null);
@@ -720,13 +694,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
       favorite_color: m.favorite_color || '#e35a7f',
       favorite_biome: m.favorite_biome || '',
       favorite_role: m.favorite_role || '',
-      discord_url: m.discord_url || '',
-      facebook_url: m.facebook_url || '',
-      instagram_url: m.instagram_url || '',
-      tiktok_url: m.tiktok_url || '',
-      twitter_url: m.twitter_url || '',
-      youtube_url: m.youtube_url || '',
-      twitch_url: m.twitch_url || '',
+      social_links: m.social_links || '',
       birth_month: m.birth_month || '',
       age: m.age?.toString() || '',
       join_date: m.join_date || ''
@@ -739,7 +707,23 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
     if (!form.username) { toast.error('Username is required'); return; }
     setSaving(true);
     try {
-      const payload = { ...form, age: form.age ? parseInt(form.age) : null };
+      // Create a clean payload based on database schema
+      const payload = {
+        username: form.username,
+        nickname: form.nickname,
+        avatar_url: form.avatar_url,
+        bio: form.bio,
+        favorite_mob: form.favorite_mob,
+        favorite_block: form.favorite_block,
+        favorite_color: form.favorite_color,
+        favorite_biome: form.favorite_biome,
+        favorite_role: form.favorite_role,
+        social_links: form.social_links,
+        birth_month: form.birth_month,
+        age: form.age ? parseInt(form.age) : null,
+        join_date: form.join_date
+      };
+
       if (editTarget) {
         await dbService.updateCommunityMember(editTarget.id, payload);
         toast.success('Member updated');
@@ -828,8 +812,8 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
             <input type="date" className={inputCls} value={form.join_date} onChange={e => setForm(f => ({ ...f, join_date: e.target.value }))} />
           </div>
           <div className="col-span-2">
-            <label className={labelCls}>Social Links (JSON)</label>
-            <input className={inputCls} value={form.social_links} onChange={e => setForm(f => ({ ...f, social_links: e.target.value }))} placeholder='{"discord": "...", "instagram": "..."}' />
+            <label className={labelCls}>Social Link</label>
+            <input className={inputCls} value={form.social_links} onChange={e => setForm(f => ({ ...f, social_links: e.target.value }))} placeholder="Paste social link here..." />
           </div>
           <div>
             <label className={labelCls}>Fav Biome</label>
@@ -845,25 +829,11 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
           </div>
           <div>
             <label className={labelCls}>Fav Mob</label>
-            <div className="flex gap-2">
-              <input className={inputCls} value={form.favorite_mob} onChange={e => setForm(f => ({ ...f, favorite_mob: e.target.value }))} placeholder="e.g. Fox" />
-              {form.favorite_mob && (
-                <div className="w-12 h-12 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 flex items-center justify-center shrink-0">
-                  <img src={getMinecraftItemImageUrl(form.favorite_mob)} alt="" className="w-8 h-8 pixelated" onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }} />
-                </div>
-              )}
-            </div>
+            <input className={inputCls} value={form.favorite_mob} onChange={e => setForm(f => ({ ...f, favorite_mob: e.target.value }))} placeholder="e.g. Fox" />
           </div>
           <div>
             <label className={labelCls}>Fav Block</label>
-            <div className="flex gap-2">
-              <input className={inputCls} value={form.favorite_block} onChange={e => setForm(f => ({ ...f, favorite_block: e.target.value }))} placeholder="e.g. Moss" />
-              {form.favorite_block && (
-                <div className="w-12 h-12 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 flex items-center justify-center shrink-0">
-                  <img src={getMinecraftItemImageUrl(form.favorite_block)} alt="" className="w-8 h-8 pixelated" onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }} />
-                </div>
-              )}
-            </div>
+            <input className={inputCls} value={form.favorite_block} onChange={e => setForm(f => ({ ...f, favorite_block: e.target.value }))} placeholder="e.g. Moss" />
           </div>
           <div className="col-span-2">
             <label className={labelCls}>Fav Color</label>
@@ -880,8 +850,6 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
   );
 });
 
-// ─── SHOPS TAB ─────────────────────────────────────────────────────────────
-
 const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
   const [shops, setShops] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -890,7 +858,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', owner_name: '', description: '', banner_url: '', is_active: true });
+  const [form, setForm] = useState({ name: '', owner_name: '', description: '', avatar_url: '', is_active: true });
 
   const fetchShops = useCallback(async () => {
     setLoading(true);
@@ -912,7 +880,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
   );
 
   const openAdd = useCallback(() => {
-    setForm({ name: '', owner_name: '', description: '', banner_url: '', is_active: true });
+    setForm({ name: '', owner_name: '', description: '', avatar_url: '', is_active: true });
     setEditTarget(null);
     setIsAdding(true);
   }, []);
@@ -922,7 +890,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
       name: s.name || '',
       owner_name: s.owner_name || '',
       description: s.description || '',
-      banner_url: s.banner_url || '',
+      avatar_url: s.banner_url || '',
       is_active: s.is_active ?? true
     });
     setEditTarget(s);
@@ -933,12 +901,19 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
     if (!form.owner_name) { toast.error('Owner Name is required'); return; }
     setSaving(true);
     try {
-      const payload = { ...form, name: form.owner_name };
+      const payload = {
+        name: form.owner_name,
+        owner_name: form.owner_name, // Store username for display
+        banner_url: form.avatar_url,
+        description: form.description,
+        is_active: form.is_active,
+        owner_id: null // Explicitly force null for admin-managed shops
+      };
       if (editTarget) {
         await dbService.updatePlayerShop(editTarget.id, payload);
         toast.success('Shop updated');
       } else {
-        await dbService.createPlayerShop({ ...payload, owner_id: null });
+        await dbService.createPlayerShop(payload);
         toast.success('Shop created');
       }
       setEditTarget(null);
@@ -967,7 +942,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
       <SectionHeader icon={Store} title="Player Shops" count={filtered.length} onAdd={openAdd} addLabel="New Shop" search={search} onSearch={setSearch} />
       {filtered.length === 0 ? <EmptyState icon={Store} label="No shops found" /> : filtered.map(s => (
         <div key={s.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
-          <Link to={`/shops/${s.id}`} className="flex items-center gap-3 min-w-0 flex-grow group">
+          <div className="flex items-center gap-3 min-w-0 flex-grow group">
             <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
               {s.banner_url
                 ? <img src={s.banner_url} alt={s.owner_name} className="w-full h-full object-cover" />
@@ -977,7 +952,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
               <p className="text-sm font-black italic uppercase tracking-tight truncate group-hover:text-strawberry-600 transition-colors">{s.owner_name}</p>
               <p className="text-[10px] text-strawberry-600 font-bold uppercase tracking-widest truncate italic">Market Stall</p>
             </div>
-          </Link>
+          </div>
           <RowActions onEdit={() => openEdit(s)} onDelete={() => setDeleteTarget(s)} />
         </div>
       ))}
@@ -992,12 +967,74 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
       >
         <div className="space-y-4">
           <div><label className={labelCls}>Owner Username</label><input className={inputCls} value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} placeholder="Player Username" /></div>
-          <div><label className={labelCls}>Banner URL</label><input className={inputCls} value={form.banner_url} onChange={e => setForm(f => ({ ...f, banner_url: e.target.value }))} placeholder="https://..." /></div>
+          <div><label className={labelCls}>Avatar URL</label><input className={inputCls} value={form.avatar_url} onChange={e => setForm(f => ({ ...f, avatar_url: e.target.value }))} placeholder="https://..." /></div>
           <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Shop tagline..." /></div>
-          <div className="flex items-center gap-2 pt-2">
-            <input type="checkbox" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} className="w-4 h-4 accent-strawberry-600" />
-            <label className="text-xs font-bold uppercase tracking-widest italic">Shop is Active</label>
+
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} className="w-4 h-4 accent-strawberry-600" />
+              <label className="text-xs font-bold uppercase tracking-widest italic">Shop is Active</label>
+            </div>
+            {editTarget && (
+              <Link to={`/shops/${editTarget.id}/items/new`} className="text-xs font-black uppercase tracking-widest text-strawberry-600 hover:text-strawberry-700">
+                Manage Items
+              </Link>
+            )}
           </div>
+          {editTarget && editTarget.shop_items && editTarget.shop_items.length > 0 && (
+            <div className="mt-6 border-t border-neutral-100 dark:border-white/5 pt-4">
+              <label className={labelCls}>Current Shop Items</label>
+              <div className="space-y-2 mt-2">
+                {editTarget.shop_items.map((item: any) => (
+                  <div key={item.id} className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-800 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-neutral-700 flex items-center justify-center shrink-0 overflow-hidden">
+                        <img
+                          src={item.custom_image_url || getMinecraftItemImageUrl(item.minecraft_item_id, { size: 64 })}
+                          alt={item.item_name}
+                          className="w-6 h-6 object-contain pixelated"
+                          onError={(e) => { e.currentTarget.src = 'https://minecraft.wiki/images/Invicon_Barrier.png'; }}
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold">{item.item_name}</span>
+                        <div className="flex items-center gap-1 text-[9px] text-neutral-500 font-bold uppercase tracking-wider">
+                          <span>{item.categories?.name || 'No Category'}</span>
+                          {item.sub_categories?.name && (
+                            <>
+                              <span className="text-neutral-300">/</span>
+                              <span className="text-strawberry-600/70">{item.sub_categories.name}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-black text-strawberry-600">{item.price} DIAMONDS</span>
+                      <div className="flex items-center gap-1.5">
+                        <Link 
+                          to={`/shops/${editTarget.id}/items/${item.id}/edit`}
+                          className="p-1.5 text-neutral-400 hover:text-strawberry-600 rounded-lg hover:bg-strawberry-500/10"
+                        >
+                          <Edit2 size={14} />
+                        </Link>
+                        <button onClick={async () => {
+                          if (window.confirm('Remove this item?')) {
+                            await dbService.deleteShopItem(item.id);
+                            toast.success('Item removed');
+                            fetchShops();
+                            onRefresh();
+                          }
+                        }} className="p-1.5 text-neutral-400 hover:text-red-500 rounded-lg hover:bg-red-500/10">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </CrudModal>
 
@@ -1006,72 +1043,116 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
   );
 });
 
-const PluginsTab = memo(({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => void }) => {
-  const { profile } = useAuthStore();
-  const [search, setSearch] = useState('');
+const CategoriesTab = memo(({ categories, onRefresh }: { categories: any[]; onRefresh: () => void }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<any>(null);
-  const [deleteTarget, setDeleteTarget] = useState<any>(null);
-  const [form, setForm] = useState({ name: '', description: '', version: '', url: '' });
+  const [editTarget, setEditTarget] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [form, setForm] = useState({ name: '', description: '', display_order: 0 });
   const [saving, setSaving] = useState(false);
 
-  const filtered = useMemo(
-    () => plugins.filter(p => p.name?.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase())),
-    [plugins, search]
-  );
-
-  const openAdd = useCallback(() => { setForm({ name: '', description: '', version: '', url: '' }); setEditTarget(null); setModalOpen(true); }, []);
-  const openEdit = useCallback((p: any) => { setForm({ name: p.name || '', description: p.description || '', version: p.version || '', url: p.url || '' }); setEditTarget(p); setModalOpen(true); }, []);
+  const openAdd = useCallback(() => { setForm({ name: '', description: '', display_order: categories.length }); setEditTarget(null); setModalOpen(true); }, [categories.length]);
+  const openEdit = useCallback((c: any) => { setForm({ name: c.name || '', description: c.description || '', display_order: c.display_order || 0 }); setEditTarget(c); setModalOpen(true); }, []);
 
   const handleSave = async () => {
+    if (!form.name) { toast.error('Name is required'); return; }
     setSaving(true);
     try {
-      if (editTarget) { await dbService.updatePlugin(editTarget.id, form); toast.success('Plugin updated'); }
-      else {
-        await dbService.createPlugin({ name: form.name, description: form.description || null, version: form.version || null, icon_url: null, category: null, is_visible: true, created_by: profile?.id ?? null });
-        toast.success('Plugin created');
-      }
+      if (editTarget) { await dbService.updateCategory(editTarget.id, form); toast.success('Category updated'); }
+      else { await dbService.createCategory(form); toast.success('Category created'); }
       setModalOpen(false); onRefresh();
-    } catch { toast.error('Failed to save plugin'); }
+    } catch { toast.error('Failed to save category'); }
     finally { setSaving(false); }
   };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    try { await dbService.deletePlugin(deleteTarget.id); toast.success('Plugin deleted'); setDeleteTarget(null); onRefresh(); }
-    catch { toast.error('Failed to delete plugin'); }
+    try { await dbService.deleteCategory(deleteTarget.id); toast.success('Category deleted'); setDeleteTarget(null); onRefresh(); }
+    catch { toast.error('Failed to delete category'); }
   };
 
   return (
     <>
-      <SectionHeader icon={Puzzle} title="Plugins" count={filtered.length} onAdd={openAdd} addLabel="New Plugin" search={search} onSearch={setSearch} />
-      {filtered.length === 0 ? <EmptyState icon={Puzzle} label="No plugins installed" /> : filtered.map(p => (
-        <div key={p.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+      <SectionHeader icon={Tag} title="Categories" count={categories.length} onAdd={openAdd} addLabel="New Category" />
+      {categories.length === 0 ? <EmptyState icon={Tag} label="No categories defined" /> : categories.map(c => (
+        <div key={c.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0"><Puzzle size={13} className="text-strawberry-600" /></div>
+            <div className="w-8 h-8 rounded-xl bg-strawberry-500/10 flex items-center justify-center shrink-0"><Tag size={13} className="text-strawberry-600" /></div>
             <div className="min-w-0">
-              <p className="text-sm font-black italic uppercase tracking-tight truncate">{p.name}</p>
-              <div className="flex items-center gap-2">
-                <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest truncate">{p.description}</p>
-                {p.version && <span className="text-[9px] font-black bg-neutral-100 dark:bg-white/5 text-neutral-400 px-1.5 py-0.5 rounded-md shrink-0">v{p.version}</span>}
-              </div>
+              <p className="text-sm font-black italic uppercase tracking-tight truncate">{c.name}</p>
+              {c.description && <p className="text-[10px] text-neutral-400 font-bold truncate">{c.description}</p>}
             </div>
           </div>
-          <RowActions onEdit={() => openEdit(p)} onDelete={() => setDeleteTarget(p)} />
+          <RowActions onEdit={() => openEdit(c)} onDelete={() => setDeleteTarget(c)} />
         </div>
       ))}
-      <CrudModal open={modalOpen} onClose={() => setModalOpen(false)} title={editTarget ? 'Edit Plugin' : 'New Plugin'} icon={Puzzle} onSubmit={handleSave} submitting={saving}>
-        <div><label className={labelCls}>Plugin Name</label><input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Plugin name" /></div>
-        <div><label className={labelCls}>Version</label><input className={inputCls} value={form.version} onChange={e => setForm(f => ({ ...f, version: e.target.value }))} placeholder="1.0.0" /></div>
-        <div><label className={labelCls}>URL / Source</label><input className={inputCls} value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} placeholder="https://..." /></div>
-        <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="What this plugin does..." /></div>
+      <CrudModal open={modalOpen} onClose={() => setModalOpen(false)} title={editTarget ? 'Edit Category' : 'New Category'} icon={Tag} onSubmit={handleSave} submitting={saving}>
+        <div><label className={labelCls}>Name</label><input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Category name" /></div>
+        <div><label className={labelCls}>Order</label><input type="number" className={inputCls} value={form.display_order} onChange={e => setForm(f => ({ ...f, display_order: +e.target.value }))} /></div>
+        <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Category description..." /></div>
       </CrudModal>
-      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'plugin'} />
+      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'category'} />
     </>
   );
 });
 
-// ─── BADGES TAB ────────────────────────────────────────────────────────────
+const SubCategoriesTab = memo(({ subCategories, categories, onRefresh }: { subCategories: any[]; categories: any[]; onRefresh: () => void }) => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [form, setForm] = useState({ name: '', description: '', display_order: 0, category_id: '' });
+  const [saving, setSaving] = useState(false);
+
+  const openAdd = useCallback(() => { setForm({ name: '', description: '', display_order: subCategories.length, category_id: categories[0]?.id || '' }); setEditTarget(null); setModalOpen(true); }, [subCategories.length, categories]);
+  const openEdit = useCallback((s: any) => { setForm({ name: s.name || '', description: s.description || '', display_order: s.display_order || 0, category_id: s.category_id || '' }); setEditTarget(s); setModalOpen(true); }, []);
+
+  const handleSave = async () => {
+    if (!form.name || !form.category_id) { toast.error('Name and Category are required'); return; }
+    setSaving(true);
+    try {
+      if (editTarget) { await dbService.updateSubCategory(editTarget.id, form); toast.success('Sub-Category updated'); }
+      else { await dbService.createSubCategory(form); toast.success('Sub-Category created'); }
+      setModalOpen(false); onRefresh();
+    } catch { toast.error('Failed to save sub-category'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try { await dbService.deleteSubCategory(deleteTarget.id); toast.success('Sub-Category deleted'); setDeleteTarget(null); onRefresh(); }
+    catch { toast.error('Failed to delete sub-category'); }
+  };
+
+  return (
+    <>
+      <SectionHeader icon={Hash} title="Sub-Categories" count={subCategories.length} onAdd={openAdd} addLabel="New Sub-Category" />
+      {subCategories.length === 0 ? <EmptyState icon={Hash} label="No sub-categories defined" /> : subCategories.map(s => (
+        <div key={s.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-strawberry-500/10 flex items-center justify-center shrink-0"><Hash size={13} className="text-strawberry-600" /></div>
+            <div className="min-w-0">
+              <p className="text-sm font-black italic uppercase tracking-tight truncate">{s.name}</p>
+              <p className="text-[10px] text-strawberry-600 font-bold uppercase tracking-widest">{s.categories?.name || 'Unknown Category'}</p>
+            </div>
+          </div>
+          <RowActions onEdit={() => openEdit(s)} onDelete={() => setDeleteTarget(s)} />
+        </div>
+      ))}
+      <CrudModal open={modalOpen} onClose={() => setModalOpen(false)} title={editTarget ? 'Edit Sub-Category' : 'New Sub-Category'} icon={Hash} onSubmit={handleSave} submitting={saving}>
+        <div><label className={labelCls}>Name</label><input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Sub-category name" /></div>
+        <div>
+          <label className={labelCls}>Parent Category</label>
+          <select className={inputCls} value={form.category_id} onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))}>
+            <option value="">Select Category</option>
+            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div><label className={labelCls}>Order</label><input type="number" className={inputCls} value={form.display_order} onChange={e => setForm(f => ({ ...f, display_order: +e.target.value }))} /></div>
+        <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Sub-category description..." /></div>
+      </CrudModal>
+      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'sub-category'} />
+    </>
+  );
+});
 
 const BadgesTab = memo(({ badges, onRefresh, onAdd, onEdit }: {
   badges: Badge[]; onRefresh: () => void; onAdd: () => void; onEdit: (b: Badge) => void;
@@ -1103,55 +1184,53 @@ const BadgesTab = memo(({ badges, onRefresh, onAdd, onEdit }: {
   );
 });
 
-// ─── VERSIONS TAB ──────────────────────────────────────────────────────────
-
-const VersionsTab = memo(({ onAdd, onEdit }: { onAdd: () => void; onEdit: (v: any) => void }) => {
-  const { versions, loading, refetch } = useMinecraftVersions();
-  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+const PluginsTab = memo(({ plugins, onRefresh }: { plugins: any[]; onRefresh: () => void }) => {
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      const { error } = await (await import('../services/supabase')).supabase
-        .from('minecraft_versions').delete().eq('id', deleteTarget.id);
-      if (error) throw error;
-      toast.success('Version deleted');
+      await dbService.deletePlugin(deleteTarget.id);
+      toast.success('Plugin deleted');
       setDeleteTarget(null);
-      refetch();
-    } catch { toast.error('Failed to delete version'); }
+      onRefresh();
+    } catch {
+      toast.error('Failed to delete plugin');
+    }
   };
-
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-strawberry-600" size={28} /></div>;
 
   return (
     <>
-      <SectionHeader icon={GitBranch} title="Versions" count={versions?.length} onAdd={onAdd} addLabel="Add Version" />
-      {!versions?.length ? <EmptyState icon={GitBranch} label="No versions added" /> : versions.map((v: any) => (
-        <div key={v.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-strawberry-500/10 flex items-center justify-center shrink-0">
-              <GitBranch size={13} className="text-strawberry-600" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-black italic uppercase tracking-tight truncate">{v.version_string}</p>
-              <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
-                {v.is_recommended && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-green-500/10 text-green-500">Recommended</span>}
-                {v.is_supported && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-500">Supported</span>}
-                {v.maintenance_mode && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-600">Maintenance</span>}
-                {v.supports_java && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-white/5 text-neutral-400">Java</span>}
-                {v.supports_bedrock && <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-white/5 text-neutral-400">Bedrock</span>}
+      <SectionHeader
+        icon={Puzzle}
+        title="Plugins"
+        count={plugins.length}
+        onAdd={() => window.location.href = '/admin/plugins/new'}
+        addLabel="New Plugin"
+      />
+      {plugins.length === 0 ? <EmptyState icon={Puzzle} label="No plugins listed yet" /> : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {plugins.map(p => (
+            <div key={p.id} className={`${cardCls} flex items-center justify-between gap-3`}>
+              <div className="flex items-center gap-3 min-w-0">
+                <img src={p.icon_url || 'https://via.placeholder.com/40'} alt={p.name} className="w-10 h-10 rounded-xl object-cover" />
+                <div className="min-w-0">
+                  <h4 className="font-bold text-sm truncate">{p.name}</h4>
+                  <p className="text-[10px] text-neutral-500 truncate">{p.category} • v{p.version}</p>
+                </div>
               </div>
+              <RowActions
+                onEdit={() => window.location.href = `/admin/plugins/${p.id}`}
+                onDelete={() => setDeleteTarget(p)}
+              />
             </div>
-          </div>
-          <RowActions onEdit={() => onEdit(v)} onDelete={() => setDeleteTarget(v)} />
+          ))}
         </div>
-      ))}
-      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.version_string || 'version'} />
+      )}
+      <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'plugin'} />
     </>
   );
 });
-
-// ─── SUGGESTIONS & HELP REQUESTS ───────────────────────────────────────────
 
 const SuggestionsTab = memo(({ suggestions, onRefresh }: { suggestions: any[]; onRefresh: () => void }) => {
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
@@ -1229,19 +1308,30 @@ const AdminPanel = () => {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [helpRequests, setHelpRequests] = useState<any[]>([]);
 
-  const { refetch: refetchVersions } = useMinecraftVersions();
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabKey>('users');
+
+  // Sync activeTab with URL 'tab' param on load
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as TabKey;
+    if (tabParam && TAB_CONFIG.some(t => t.key === tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Typed modal state — avoids unnecessary re-renders from a single object
   const [modal, setModal] = useState<ModalState>({ type: 'none' });
   const closeModal = useCallback(() => setModal({ type: 'none' }), []);
 
+  const [categories, setCategories] = useState<any[]>([]);
+  const [subCategories, setSubCategories] = useState<any[]>([]);
+
   // Stable fetchData with useCallback so it can safely be in useEffect deps
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [p, e, r, rem, b, c, g, pl, s, h, info] = await Promise.all([
+      const [p, e, r, rem, b, c, g, pl, s, h, info, cats, subCats] = await Promise.all([
         dbService.getAllProfiles(true) as any,
         dbService.getEvents(),
         adminService.getRules(),
@@ -1253,11 +1343,14 @@ const AdminPanel = () => {
         dbService.getSuggestions(),
         dbService.getHelpRequests(),
         adminService.getServerInfo(),
+        dbService.getCategories(),
+        dbService.getSubCategories(),
       ]);
       setProfiles(p); setEvents(e); setRules(r);
       setReminders(rem); setBadges(b); setCommands(c);
       setGuides(g); setPlugins(pl); setSuggestions(s);
       setHelpRequests(h); setServerInfo(info);
+      setCategories(cats); setSubCategories(subCats);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load admin data');
@@ -1270,8 +1363,6 @@ const AdminPanel = () => {
 
   // Stable modal openers
   const openEditBadge = useCallback((b: Badge) => setModal({ type: 'edit-badge', data: b }), []);
-  const openEditVersion = useCallback((v: any) => setModal({ type: 'edit-version', data: v }), []);
-  const openVersion = useCallback(() => setModal({ type: 'version' }), []);
   const openBadge = useCallback(() => setModal({ type: 'badge' }), []);
   const openAnnouncement = useCallback(() => setModal({ type: 'announcement' }), []);
 
@@ -1285,12 +1376,6 @@ const AdminPanel = () => {
     <div className="max-w-7xl mx-auto space-y-6 pb-20 px-3 sm:px-6">
 
       {/* Modals */}
-      <AddVersionModal
-        isOpen={modal.type === 'version' || modal.type === 'edit-version'}
-        onClose={closeModal}
-        onVersionAdded={refetchVersions}
-        version={modal.type === 'edit-version' ? modal.data : undefined}
-      />
       <AnnouncementModal
         isOpen={modal.type === 'announcement' || modal.type === 'edit-announcement'}
         onClose={closeModal}
@@ -1300,7 +1385,16 @@ const AdminPanel = () => {
       <AddEditBadgeModal
         isOpen={modal.type === 'badge' || modal.type === 'edit-badge'}
         onClose={closeModal}
-        onSave={fetchData}
+        onSave={async (badge) => {
+          if ('id' in badge) {
+            await dbService.updateBadge(badge.id, badge);
+            toast.success('Badge updated');
+          } else {
+            await dbService.createBadge(badge);
+            toast.success('Badge created');
+          }
+          fetchData();
+        }}
         editingBadge={modal.type === 'edit-badge' ? modal.data : undefined}
       />
       <AssignBadgesModal
@@ -1372,6 +1466,8 @@ const AdminPanel = () => {
             {activeTab === 'approvals' && <AdminApprovalPanel />}
             {activeTab === 'members' && <MembersTab onRefresh={fetchData} onAssignBadges={(m) => setModal({ type: 'assign-member-badges', data: m })} />}
             {activeTab === 'shops' && <ShopsTab onRefresh={fetchData} />}
+            {activeTab === 'categories' && <CategoriesTab categories={categories} onRefresh={fetchData} />}
+            {activeTab === 'subCategories' && <SubCategoriesTab subCategories={subCategories} categories={categories} onRefresh={fetchData} />}
             {activeTab === 'announcements' && (
               <>
                 <SectionHeader icon={Megaphone} title="Announcements" onAdd={openAnnouncement} addLabel="New Announcement" />
@@ -1386,7 +1482,6 @@ const AdminPanel = () => {
             {activeTab === 'events' && <EventsTab events={events} onRefresh={fetchData} />}
             {activeTab === 'rules' && <RulesTab rules={rules} onRefresh={fetchData} />}
             {activeTab === 'reminders' && <RemindersTab reminders={reminders} onRefresh={fetchData} />}
-            {activeTab === 'versions' && <VersionsTab onAdd={openVersion} onEdit={openEditVersion} />}
             {activeTab === 'badges' && <BadgesTab badges={badges} onRefresh={fetchData} onAdd={openBadge} onEdit={openEditBadge} />}
             {activeTab === 'commands' && <CommandsTab commands={commands} onRefresh={fetchData} />}
             {activeTab === 'guides' && <GuidesTab guides={guides} onRefresh={fetchData} />}
@@ -1401,4 +1496,4 @@ const AdminPanel = () => {
   );
 };
 
-export default AdminPanel;
+export default AdminPanel;  

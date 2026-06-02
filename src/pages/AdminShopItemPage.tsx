@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { dbService } from '../services/dbService';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { ShopItem } from '../types/database.types';
+import type { ShopItem, Category, SubCategory } from '../types/database.types';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
 import { Loader2, ShoppingBag, Tag, Hash, Eye, Save, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -9,12 +9,15 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
 import Select from 'react-select';
 import { minecraftItems } from '../utils/minecraftItems';
+import { useMemo } from 'react';
 
 // Fix: Always flatten the items structure to ensure nested arrays are included
 const typedFlatItems = (minecraftItems as any[]).flat() as { label: string; value: string }[];
 
-const AdminShopItemForm = ({ item, onSubmit, onCancel, isSaving }: { 
+const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel, isSaving }: { 
   item?: ShopItem; 
+  categories: Category[];
+  subCategories: SubCategory[];
   onSubmit: (item: Omit<ShopItem, 'id' | 'created_at' | 'updated_at' | 'shop_id'>) => void;
   onCancel: () => void;
   isSaving: boolean;
@@ -26,6 +29,13 @@ const AdminShopItemForm = ({ item, onSubmit, onCancel, isSaving }: {
   const [unitDisplay, setUnitDisplay] = useState(item?.unit_display || '');
   const [customImageUrl, setCustomImageUrl] = useState(item?.custom_image_url || '');
   const [isVisible, setIsVisible] = useState(item?.is_visible ?? true);
+  const [categoryId, setCategoryId] = useState(item?.category_id || '');
+  const [subCategoryId, setSubCategoryId] = useState(item?.sub_category_id || '');
+
+  const filteredSubCategories = useMemo(() => {
+    if (!categoryId) return [];
+    return subCategories.filter(s => s.category_id === categoryId);
+  }, [subCategories, categoryId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +54,8 @@ const AdminShopItemForm = ({ item, onSubmit, onCancel, isSaving }: {
       custom_image_url: customImageUrl || null,
       description: '',
       availability_status: 'in_stock',
-      category_id: null,
+      category_id: categoryId || null,
+      sub_category_id: subCategoryId || null,
       is_visible: isVisible,
     });
   };
@@ -106,7 +117,7 @@ const AdminShopItemForm = ({ item, onSubmit, onCancel, isSaving }: {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
+          <div className="space-y-2 col-span-2">
             <label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
               <Hash size={12} className="text-strawberry-600" /> Price (Diamonds)
             </label>
@@ -124,19 +135,54 @@ const AdminShopItemForm = ({ item, onSubmit, onCancel, isSaving }: {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="unitDisplay" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
-              <Tag size={12} className="text-strawberry-600" /> Unit Display
+            <label htmlFor="categoryId" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
+              <Tag size={12} className="text-strawberry-600" /> Category
             </label>
-            <input 
-              type="text" 
-              id="unitDisplay" 
-              value={unitDisplay} 
-              onChange={(e) => setUnitDisplay(e.target.value)} 
-              className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all" 
-              placeholder="e.g. 1 Stack, 32 Units"
-              required
-            />
+            <select
+              id="categoryId"
+              value={categoryId}
+              onChange={(e) => { setCategoryId(e.target.value); setSubCategoryId(''); }}
+              className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all"
+            >
+              <option value="">Select a category</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
           </div>
+
+          <div className="space-y-2">
+            <label htmlFor="subCategoryId" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
+              <Hash size={12} className="text-strawberry-600" /> Sub-Category
+            </label>
+            <select
+              id="subCategoryId"
+              value={subCategoryId}
+              onChange={(e) => setSubCategoryId(e.target.value)}
+              className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all"
+              disabled={!categoryId}
+            >
+              <option value="">{categoryId ? (filteredSubCategories.length > 0 ? 'Select a sub-category' : 'No sub-categories found') : 'Select category first'}</option>
+              {filteredSubCategories.map(sub => (
+                <option key={sub.id} value={sub.id}>{sub.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="unitDisplay" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
+            <Tag size={12} className="text-strawberry-600" /> Unit Display
+          </label>
+          <input 
+            type="text" 
+            id="unitDisplay" 
+            value={unitDisplay} 
+            onChange={(e) => setUnitDisplay(e.target.value)} 
+            className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all" 
+            placeholder="e.g. 1 Stack, 32 Units"
+            required
+          />
         </div>
 
         <div className="space-y-2">
@@ -193,6 +239,8 @@ const AdminShopItemPage = () => {
   const { shopId, itemId } = useParams<{ shopId: string; itemId?: string }>();
   const navigate = useNavigate();
   const [item, setItem] = useState<ShopItem | undefined>(undefined);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [, setError] = useState<string | null>(null);
@@ -204,6 +252,13 @@ const AdminShopItemPage = () => {
       setError(null);
       if (!shopId) { navigate('/shops'); return; }
       
+      const [cats, subCats] = await Promise.all([
+        dbService.getCategories(),
+        dbService.getSubCategories()
+      ]);
+      setCategories(cats);
+      setSubCategories(subCats);
+
       if (itemId) {
         const fetchedItem = await dbService.getShopItemById(itemId);
         if (fetchedItem && fetchedItem.shop_id === shopId) {
@@ -240,7 +295,7 @@ const AdminShopItemPage = () => {
         await dbService.createShopItem({ ...formData, shop_id: shopId });
         toast.success('Item added successfully!');
       }
-      navigate(`/shops/${shopId}`);
+      navigate(`/admin?tab=shops`);
     } catch (err) {
       console.error('Error saving item:', err);
       toast.error('Failed to save item');
@@ -275,9 +330,11 @@ const AdminShopItemPage = () => {
       </div>
 
       <AdminShopItemForm 
-        item={item} 
+        item={item}
+        categories={categories}
+        subCategories={subCategories}
         onSubmit={handleSubmit} 
-        onCancel={() => navigate(`/shops/${shopId}`)} 
+        onCancel={() => navigate(`/admin?tab=shops`)} 
         isSaving={isSaving} 
       />
     </div>
