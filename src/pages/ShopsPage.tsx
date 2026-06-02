@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, memo, useMemo } from 'react';
 import { dbService } from '../services/dbService';
 import type { PlayerShop } from '../types/database.types';
-import { Search, Store, Edit, AlertCircle, Loader2, Tag, Hash, Gem, SortAsc, Clock } from 'lucide-react';
+import { Search, Store, Edit, AlertCircle, Loader2, Tag, Hash, Gem, SortAsc } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
