@@ -85,56 +85,56 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
   if (!items.length) return null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {hierarchy.map((cat) => (
-        <div key={cat.name} className="space-y-4">
+        <div key={cat.name} className="space-y-2">
           {/* Category Label */}
-          <div className="flex items-center gap-2 border-b border-neutral-100 dark:border-white/5 pb-2">
-            <Tag size={12} className="text-strawberry-600" />
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-strawberry-600">
+          <div className="flex items-center gap-1.5 border-b border-neutral-100 dark:border-white/5 pb-1">
+            <Tag size={10} className="text-strawberry-600" />
+            <h4 className="text-[10px] font-black uppercase tracking-[0.1em] text-strawberry-600">
               {cat.name}
             </h4>
           </div>
 
-          <div className="space-y-6 pl-1">
+          <div className="space-y-3 pl-1">
             {Array.from(cat.subCats.values()).map((sub) => (
-              <div key={sub.name} className="space-y-3">
+              <div key={sub.name} className="space-y-1">
                 {/* Sub-Category Name */}
                 {sub.name !== 'No sub category' && (
-                  <div className="flex items-center gap-1.5 opacity-80">
-                    <Hash size={12} className="text-neutral-400" />
-                    <span className="text-xs font-black italic uppercase tracking-wider text-neutral-500">
+                  <div className="flex items-center gap-1 opacity-80">
+                    <Hash size={10} className="text-neutral-400" />
+                    <span className="text-[10px] font-black italic uppercase tracking-wider text-neutral-500">
                       {sub.name}
                     </span>
                   </div>
                 )}
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {sub.priceGroups.map((group, gIdx) => (
                     <div 
                       key={`${group.price}-${group.unit}-${gIdx}`}
-                      className="flex items-start justify-between gap-4 p-4 bg-neutral-50/50 dark:bg-neutral-800/30 rounded-2xl border border-neutral-100/50 dark:border-white/5 group/row hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors"
+                      className="flex items-center justify-between gap-2 p-2 bg-neutral-50/50 dark:bg-neutral-800/30 rounded-xl border border-neutral-100/50 dark:border-white/5 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors"
                     >
                       {/* Grid for Items with SAME price/unit */}
-                      <div className="grid grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-2 flex-1 min-w-0">
+                      <div className="grid grid-cols-[repeat(auto-fill,minmax(24px,1fr))] gap-0.5 flex-1 min-w-0">
                         {group.items.map((item) => (
                           <ItemIconSm key={item.id} item={item} />
                         ))}
                       </div>
 
                       {/* Vertical Divider */}
-                      <div className="w-px self-stretch bg-neutral-200 dark:bg-white/10 mx-2" />
+                      <div className="w-px self-stretch bg-neutral-200 dark:bg-white/10 mx-1" />
 
                       {/* Price Badge */}
-                      <div className="flex flex-col items-end shrink-0 pl-2">
-                        <div className="flex items-center gap-1">
-                          <span className="text-lg font-black text-strawberry-600 tabular-nums leading-none tracking-tight">
+                      <div className="flex flex-col items-end shrink-0 pl-1">
+                        <div className="flex items-center gap-0.5">
+                          <span className="text-sm font-black text-strawberry-600 tabular-nums leading-none tracking-tight">
                             {group.price}
                           </span>
-                          <Gem size={14} className="text-strawberry-500 fill-strawberry-500/10 shrink-0" />
+                          <Gem size={10} className="text-strawberry-500 fill-strawberry-500/10 shrink-0" />
                         </div>
                         {group.unit && (
-                          <span className="text-[9px] font-black uppercase tracking-[0.1em] text-neutral-400 dark:text-neutral-500 mt-1.5 leading-none text-right">
+                          <span className="text-[8px] font-black uppercase tracking-[0.1em] text-neutral-400 dark:text-neutral-500 mt-0.5 leading-none text-right">
                             {group.unit}
                           </span>
                         )}
@@ -172,11 +172,15 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
         </div>
         <div className="flex flex-col overflow-hidden">
           <h3 className="text-lg font-bold truncate transition-colors uppercase tracking-tight italic">
-            {shop.name}
-          </h3>
-          <span className="text-xs font-bold text-neutral-500 truncate italic">
             {shop.owner_name}
-          </span>
+          </h3>
+          <div className="flex flex-col">
+            {shop.nickname && (
+              <span className="text-[10px] font-black text-strawberry-600 truncate italic">
+                {shop.nickname}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

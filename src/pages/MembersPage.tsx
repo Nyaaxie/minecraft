@@ -105,7 +105,9 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
         <div className="flex flex-col items-center gap-1 text-[10px] font-bold text-neutral-600 dark:text-neutral-400">
           <div className="flex items-center gap-1">
             <Calendar size={14} className="text-strawberry-400" />
-            <span className="font-black text-neutral-900 dark:text-white text-xs">{member.join_date ? new Date(member.join_date).getFullYear() : '---'}</span>
+            <span className="font-bold text-white text-[10px] uppercase tracking-widest whitespace-nowrap">
+              {member.join_date ? new Date(member.join_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '---'}
+            </span>
           </div>
           <span className="text-[8px] uppercase tracking-widest text-neutral-400">Joined</span>
         </div>

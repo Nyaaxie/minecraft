@@ -1,0 +1,1 @@
+ALTER TABLE player_shops ADD COLUMN IF NOT EXISTS nickname TEXT;

@@ -1052,6 +1052,10 @@
     "value": "diamond_horse_armor"
   },
   {
+    "label": "Copper Horse Armor",
+    "value": "copper_horse_armor"
+  },
+  {
     "label": "Lead",
     "value": "lead"
   },

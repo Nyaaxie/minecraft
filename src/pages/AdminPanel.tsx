@@ -883,7 +883,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', owner_name: '', description: '', avatar_url: '', is_active: true });
+  const [form, setForm] = useState({ name: '', nickname: '', owner_name: '', description: '', avatar_url: '', is_active: true });
 
   const fetchShops = useCallback(async () => {
     setLoading(true);
@@ -899,13 +899,14 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
   const filtered = useMemo(
     () => shops.filter(s =>
       s.name?.toLowerCase().includes(search.toLowerCase()) ||
-      s.owner_name?.toLowerCase().includes(search.toLowerCase())
+      s.owner_name?.toLowerCase().includes(search.toLowerCase()) ||
+      s.nickname?.toLowerCase().includes(search.toLowerCase())
     ),
     [shops, search]
   );
 
   const openAdd = useCallback(() => {
-    setForm({ name: '', owner_name: '', description: '', avatar_url: '', is_active: true });
+    setForm({ name: '', nickname: '', owner_name: '', description: '', avatar_url: '', is_active: true });
     setEditTarget(null);
     setIsAdding(true);
   }, []);
@@ -913,6 +914,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
   const openEdit = useCallback((s: any) => {
     setForm({
       name: s.name || '',
+      nickname: s.nickname || '',
       owner_name: s.owner_name || '',
       description: s.description || '',
       avatar_url: s.banner_url || '',
@@ -929,6 +931,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
       const payload = {
         name: form.owner_name,
         owner_name: form.owner_name, // Store username for display
+        nickname: form.nickname,
         banner_url: form.avatar_url,
         description: form.description,
         is_active: form.is_active,
@@ -975,7 +978,9 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-black italic uppercase tracking-tight truncate group-hover:text-strawberry-600 transition-colors">{s.owner_name}</p>
-              <p className="text-[10px] text-strawberry-600 font-bold uppercase tracking-widest truncate italic">Market Stall</p>
+              <p className="text-[10px] text-strawberry-600 font-bold uppercase tracking-widest truncate italic">
+                {s.nickname ? `aka ${s.nickname} • Market Stall` : 'Market Stall'}
+              </p>
             </div>
           </div>
           <RowActions onEdit={() => openEdit(s)} onDelete={() => setDeleteTarget(s)} />
@@ -992,6 +997,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
       >
         <div className="space-y-4">
           <div><label className={labelCls}>Owner Username</label><input className={inputCls} value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} placeholder="Player Username" /></div>
+          <div><label className={labelCls}>Shop Nickname</label><input className={inputCls} value={form.nickname} onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))} placeholder="Nickname (optional)" /></div>
           <div><label className={labelCls}>Avatar URL</label><input className={inputCls} value={form.avatar_url} onChange={e => setForm(f => ({ ...f, avatar_url: e.target.value }))} placeholder="https://..." /></div>
           <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Shop tagline..." /></div>
 

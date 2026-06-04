@@ -199,6 +199,7 @@ export interface PlayerShop {
   id: string;
   owner_id: string | null;
   owner_name: string | null;
+  nickname: string | null;
   name: string;
   description: string | null;
   banner_url: string | null;

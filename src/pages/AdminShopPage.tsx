@@ -14,6 +14,7 @@ const AdminShopForm = ({ shop, onSubmit, onCancel, isSaving }: {
   isSaving: boolean;
 }) => {
   const [ownerName, setOwnerName] = useState(shop?.owner_name || '');
+  const [nickname, setNickname] = useState(shop?.nickname || '');
   const [description, setDescription] = useState(shop?.description || '');
   const [bannerUrl, setBannerUrl] = useState(shop?.banner_url || '');
   const [isActive, setIsActive] = useState(shop?.is_active ?? true);
@@ -24,7 +25,7 @@ const AdminShopForm = ({ shop, onSubmit, onCancel, isSaving }: {
       toast.error('Owner Username is required');
       return;
     }
-    onSubmit({ name: ownerName, owner_name: ownerName, description, banner_url: bannerUrl, is_active: isActive });
+    onSubmit({ name: ownerName, owner_name: ownerName, nickname, description, banner_url: bannerUrl, is_active: isActive });
   };
 
   return (
@@ -35,7 +36,7 @@ const AdminShopForm = ({ shop, onSubmit, onCancel, isSaving }: {
       onSubmit={handleSubmit}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="col-span-1 md:col-span-2 space-y-2">
+        <div className="col-span-1 space-y-2">
           <label htmlFor="owner_name" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
             <User size={12} className="text-strawberry-600" /> Owner Username
           </label>
@@ -47,6 +48,19 @@ const AdminShopForm = ({ shop, onSubmit, onCancel, isSaving }: {
             className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all"
             placeholder="Minecraft Username"
             required
+          />
+        </div>
+        <div className="col-span-1 space-y-2">
+          <label htmlFor="nickname" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
+            <User size={12} className="text-strawberry-600" /> Shop Nickname
+          </label>
+          <input
+            type="text"
+            id="nickname"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all"
+            placeholder="e.g. My Awesome Shop"
           />
         </div>
 

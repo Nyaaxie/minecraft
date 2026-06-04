@@ -547,7 +547,7 @@ export const dbService = {
   async getPlayerShops() {
     const { data, error } = await supabase
       .from('player_shops')
-      .select('id, owner_id, owner_name, name, description, banner_url, is_active, created_at, updated_at, shop_items(*, categories(name), sub_categories(name))')
+      .select('id, owner_id, owner_name, nickname, name, description, banner_url, is_active, created_at, updated_at, shop_items(*, categories(name), sub_categories(name))')
       .order('created_at', { ascending: false });
     if (error) throw error;
     return data;

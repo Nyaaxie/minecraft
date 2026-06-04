@@ -14,7 +14,6 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const VerificationPage = lazy(() => import('./pages/VerificationPage'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
-const ServerInfoPage = lazy(() => import('./pages/ServerInfoPage'));
 const EventsPage = lazy(() => import('./pages/EventsPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -28,7 +27,6 @@ const AdminShopItemPage = lazy(() => import('./pages/AdminShopItemPage'));
 const AdminCategoriesPage = lazy(() => import('./pages/AdminCategoriesPage'));
 const MembersPage = lazy(() => import('./pages/MembersPage'));
 const TransactionsPage = lazy(() => import('./pages/TransactionsPage'));
-const RulesPage = lazy(() => import('./pages/RulesPage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
 const SuggestionsPage = lazy(() => import('./pages/SuggestionsPage'));
 
@@ -110,7 +108,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   }
 
   // 5. Admin check
-  if (adminOnly && profile.role !== 'admin') return <Navigate to="/server-info" replace />;
+  if (adminOnly && profile.role !== 'admin') return <Navigate to="/help" replace />;
 
   return <>{children}</>;
 };
@@ -130,17 +128,7 @@ function App() {
                 <Route path="/verify" element={<VerificationPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />              <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-                <Route path="/dashboard" element={<Navigate to="/server-info" replace />} />
-                <Route
-                  path="/server-info"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <ServerInfoPage />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
+                <Route path="/dashboard" element={<Navigate to="/help" replace />} />
 
                 <Route path="/dynamap" element={<ProtectedRoute><DashboardLayout><DynaMapPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/members" element={<DashboardLayout><MembersPage /></DashboardLayout>} />
@@ -158,7 +146,6 @@ function App() {
 
                 <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfilePage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/profile/:id" element={<ProtectedRoute><DashboardLayout><PublicProfilePage /></DashboardLayout></ProtectedRoute>} />
-                <Route path="/rules" element={<ProtectedRoute><DashboardLayout><RulesPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/help" element={<ProtectedRoute><DashboardLayout><HelpPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/suggestions" element={<ProtectedRoute><DashboardLayout><SuggestionsPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />

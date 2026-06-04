@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, Terminal, Puzzle, BookOpen, Loader2, Send, ChevronDown } from 'lucide-react';
+import { HelpCircle, Terminal, Puzzle, BookOpen, Loader2, Send, ChevronDown, ShieldCheck, Server } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { dbService } from '../services/dbService';
+import { adminService } from '../services/adminService';
 import { useAuthStore } from '../store/useAuthStore';
+import type { Rule } from '../types/database.types';
 
 // ─── Section Card ───────────────────────────────────────────────────────────
 
@@ -90,10 +92,12 @@ const SectionCard = ({
 // ─── HelpPage ───────────────────────────────────────────────────────────────
 
 const HelpPage = () => {
-  const [data, setData] = useState<{ commands: any[]; plugins: any[]; guides: any[] }>({
+  const [data, setData] = useState<{ commands: any[]; plugins: any[]; guides: any[]; rules: Rule[]; serverInfo: any[] }>({
     commands: [],
     plugins: [],
     guides: [],
+    rules: [],
+    serverInfo: [],
   });
   const [loading, setLoading] = useState(true);
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -127,12 +131,20 @@ const HelpPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [commands, plugins, guides] = await Promise.all([
+        const [commands, plugins, guides, rules, serverInfo] = await Promise.all([
           dbService.getCommands(),
           dbService.getPlugins(),
           dbService.getGuides(),
+          dbService.getRules(),
+          adminService.getServerInfo(),
         ]);
-        setData({ commands, plugins, guides });
+        setData({ 
+            commands, 
+            plugins, 
+            guides, 
+            rules: rules.sort((a, b) => (b.priority || 0) - (a.priority || 0)), 
+            serverInfo: serverInfo || [] 
+        });
       } catch (err) {
         console.error('Error fetching help data:', err);
       } finally {
@@ -151,6 +163,67 @@ const HelpPage = () => {
   }
 
   const SECTIONS = [
+    {
+      id: 'rules',
+      icon: ShieldCheck,
+      title: 'Rules',
+      color: '#f59e0b',
+      count: data.rules.length,
+      content: (
+        <div className="space-y-4 mt-4">
+            {data.rules.length === 0 ? (
+                <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest py-8 text-center italic">
+                  No rules defined yet.
+                </p>
+            ) : data.rules.map((rule, index) => (
+                <div
+                    key={rule.id}
+                    className="flex gap-4 bg-neutral-50 dark:bg-neutral-800/60 p-5 rounded-2xl border border-neutral-100 dark:border-white/5"
+                >
+                  <div className="text-xl font-black italic text-orange-500/50 pt-1">
+                    {String(index + 1).padStart(2, '0')}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-neutral-900 dark:text-white mb-1 italic tracking-tight">{rule.title}</h3>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">{rule.content}</p>
+                  </div>
+                </div>
+            ))}
+        </div>
+      ),
+    },
+    {
+      id: 'server-info',
+      icon: Server,
+      title: 'Server Info',
+      color: '#3b82f6',
+      count: data.serverInfo.length,
+      content: (
+        <div className="bg-white dark:bg-neutral-800/60 rounded-2xl border border-neutral-100 dark:border-white/5 overflow-hidden mt-4">
+          {data.serverInfo.length === 0 ? (
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest py-8 text-center italic">
+              No server info available.
+            </p>
+          ) : (
+            <div className="divide-y divide-neutral-100 dark:divide-white/5">
+                {data.serverInfo.map((item, i) => (
+                    <div
+                        key={i}
+                        className="flex items-center justify-between gap-6 px-5 py-4"
+                    >
+                        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                        {item.label}
+                        </span>
+                        <span className="text-sm font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-right">
+                        {item.value}
+                        </span>
+                    </div>
+                ))}
+            </div>
+          )}
+        </div>
+      ),
+    },
     {
       id: 'commands',
       icon: Terminal,
@@ -320,12 +393,12 @@ const HelpPage = () => {
               Help
             </h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
-              Commands, plugins & guides
+              Rules, server info, commands, plugins & guides
             </p>
           </div>
         </div>
 
-        {/* The 3 accordion section cards */}
+        {/* The 5 accordion section cards */}
         <div className="space-y-3">
           {SECTIONS.map((section, i) => (
             <motion.div
