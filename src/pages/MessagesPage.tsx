@@ -96,7 +96,39 @@ const MessagesPage = () => {
       if (msg.sender_id !== currentUser.id && msg.conversation_id !== activeId) {
         incrementUnreadCount(msg.conversation_id);
         const convName = conversations.find(c => c.id === msg.conversation_id)?.name || 'Chat';
-        toast(`💬 New message in ${convName}`, { duration: 3000 });
+        
+        toast.custom((t) => (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            onClick={() => {
+              setActiveConversationId(msg.conversation_id);
+              toast.dismiss(t.id);
+            }}
+            className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white dark:bg-neutral-900 shadow-2xl rounded-[1.5rem] pointer-events-auto flex items-center gap-4 p-4 border border-neutral-200 dark:border-neutral-800 cursor-pointer hover:scale-[1.02] transition-transform`}
+          >
+            <div className="w-12 h-12 rounded-2xl bg-strawberry-500/10 flex items-center justify-center shrink-0">
+              <MessageSquare className="text-strawberry-600" size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 mb-0.5">New Message</p>
+              <p className="text-sm font-black italic uppercase tracking-tight text-neutral-900 dark:text-white truncate">
+                {convName}
+              </p>
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate font-bold">
+                {msg.content}
+              </p>
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); toast.dismiss(t.id); }}
+              className="p-2 text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </motion.div>
+        ), { duration: 4000, position: 'bottom-right' });
+
         if (document.visibilityState === 'hidden' && Notification.permission === 'granted') {
           new Notification(`New message in ${convName}`, { body: msg.content });
         }

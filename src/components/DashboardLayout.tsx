@@ -101,6 +101,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans selection:bg-strawberry-500/30">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-72 flex-col border-r border-neutral-200 dark:border-white/5 bg-white/80 dark:bg-neutral-900/50 backdrop-blur-xl p-6 fixed h-screen z-50 transition-all duration-300">
+        {/* ✅ FIX: Added ml-auto to NotificationCenter wrapper to push it to the far right */}
         <div className="flex items-center gap-3 px-2 py-4 mb-8">
           <motion.div
             whileHover={{ rotate: 15 }}
@@ -111,7 +112,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <span style={{ fontFamily: "'Genty', serif" }} className="text-xl font-black italic tracking-tighter text-neutral-900 dark:text-white flex-1 min-w-0">
             Strawberry<span className="text-strawberry-600">SMP</span>
           </span>
-          <div className="hidden lg:flex items-center shrink-0 -mr-1">
+          {/* ✅ Changed: removed `hidden lg:flex` (redundant inside lg:flex aside) and replaced -mr-1 with ml-auto */}
+          <div className="flex items-center shrink-0 ml-auto">
             <NotificationCenter />
           </div>
         </div>
@@ -215,27 +217,38 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
                 <span style={{ fontFamily: "'Genty', serif" }} className="text-xl font-black italic tracking-tighter text-neutral-900 dark:text-white flex-1 min-w-0">
                   Strawberry<span className="text-strawberry-600">SMP</span>
-                </span>              </div>
+                </span>
+              </div>
 
               <nav className="flex-1 space-y-6 overflow-y-auto hide-scrollbar">
                 {menuGroups.map((group) => (
                   <div key={group.title}>
                     <h4 className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-2">{group.title}</h4>
                     <div className="space-y-1">
-                      {group.items.map((item) => (
-                        <Link
-                          key={item.to}
-                          to={item.to}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${location.pathname === item.to
-                            ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30'
-                            : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5'
-                            }`}
-                        >
-                          <item.icon size={22} />
-                          <span className="text-sm font-bold tracking-tight uppercase italic">{item.label}</span>
-                        </Link>
-                      ))}
+                      {group.items.map((item) => {
+                        const count = item.to === '/messages' ? totalUnread : 0;
+                        return (
+                          <Link
+                            key={item.to}
+                            to={item.to}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${location.pathname === item.to
+                              ? 'bg-strawberry-600 text-white shadow-lg shadow-strawberry-600/30'
+                              : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5'
+                              }`}
+                          >
+                            <div className="relative">
+                              <item.icon size={22} />
+                              {count > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-neutral-900">
+                                  {count > 9 ? '9+' : count}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-sm font-bold tracking-tight uppercase italic">{item.label}</span>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

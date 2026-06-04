@@ -181,7 +181,7 @@ const MembersPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 space-y-16">
       <div className="text-center space-y-4">
-        <h1 className="text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Community<span className='text-strawberry-600'>Members</span></h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Community<span className='text-strawberry-600'>Members</span></h1>
         <p className="text-neutral-500 font-bold uppercase tracking-widest text-xs">Meet the berries of StrawberrySMP</p>
       </div>
 
