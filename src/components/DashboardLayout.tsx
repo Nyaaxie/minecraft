@@ -17,8 +17,6 @@ import {
   Sparkle,
   UsersRound,
   ShoppingBag,
-  ShieldCheck,
-  Server,
   Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
