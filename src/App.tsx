@@ -1,36 +1,12 @@
 import React, { Suspense, lazy } from 'react';
-import { AuthProvider } from './components/AuthProvider';
+import { AuthProvider } from './features/auth/components/AuthProvider';
 import { ThemeProvider } from './components/ThemeProvider';
+import DashboardLayout from './components/DashboardLayout';
 import { useAuthStore } from './store/useAuthStore';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
-
-// Lazy load pages for performance
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const SignupPage = lazy(() => import('./pages/SignupPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
-const VerificationPage = lazy(() => import('./pages/VerificationPage'));
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const EventsPage = lazy(() => import('./pages/EventsPage'));
-const MessagesPage = lazy(() => import('./pages/MessagesPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
-const PublicProfilePage = lazy(() => import('./pages/PublicProfilePage'));
-const AdminPanel = lazy(() => import('./pages/AdminPanel'));
-const DynaMapPage = lazy(() => import('./pages/DynaMapPage'));
-const AdminPluginsPage = lazy(() => import('./pages/AdminPluginsPage'));
-const ShopsPage = lazy(() => import('./pages/ShopsPage'));
-const AdminShopPage = lazy(() => import('./pages/AdminShopPage'));
-const AdminShopItemPage = lazy(() => import('./pages/AdminShopItemPage'));
-const AdminCategoriesPage = lazy(() => import('./pages/AdminCategoriesPage'));
-const MembersPage = lazy(() => import('./pages/MembersPage'));
-const TransactionsPage = lazy(() => import('./pages/TransactionsPage'));
-const HelpPage = lazy(() => import('./pages/HelpPage'));
-const SuggestionsPage = lazy(() => import('./pages/SuggestionsPage'));
-
-import DashboardLayout from './components/DashboardLayout';
 
 const LoadingScreen = () => {
   const [showReset, setShowReset] = React.useState(false);
@@ -67,7 +43,29 @@ const LoadingScreen = () => {
   );
 };
 
-const StatusPage = lazy(() => import('./pages/StatusPage'));
+// Lazy load pages for performance
+const LoginPage = lazy(() => import('./features/auth/pages/LoginPage'));
+const SignupPage = lazy(() => import('./features/auth/pages/SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./features/auth/pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./features/auth/pages/ResetPasswordPage'));
+const VerificationPage = lazy(() => import('./features/auth/pages/VerificationPage'));
+const LandingPage = lazy(() => import('./features/landing/pages/LandingPage'));
+const EventsPage = lazy(() => import('./features/events/pages/EventsPage'));
+const MessagesPage = lazy(() => import('./features/messages/pages/MessagesPage'));
+const ProfilePage = lazy(() => import('./features/profile/pages/ProfilePage'));
+const PublicProfilePage = lazy(() => import('./features/profile/pages/PublicProfilePage'));
+const AdminPanel = lazy(() => import('./features/admin/pages/AdminPanel'));
+const DynaMapPage = lazy(() => import('./features/dynamap/pages/DynaMapPage'));
+const AdminPluginsPage = lazy(() => import('./features/admin/pages/AdminPluginsPage'));
+const ShopsPage = lazy(() => import('./features/shops/pages/ShopsPage'));
+const AdminShopPage = lazy(() => import('./features/admin/pages/AdminShopPage'));
+const AdminShopItemPage = lazy(() => import('./features/admin/pages/AdminShopItemPage'));
+const AdminCategoriesPage = lazy(() => import('./features/admin/pages/AdminCategoriesPage'));
+const MembersPage = lazy(() => import('./features/members/pages/MembersPage'));
+const TransactionsPage = lazy(() => import('./features/transactions/pages/TransactionsPage'));
+const HelpPage = lazy(() => import('./features/help/pages/HelpPage'));
+const SuggestionsPage = lazy(() => import('./features/suggestions/pages/SuggestionsPage'));
+const StatusPage = lazy(() => import('./features/status/pages/StatusPage'));
 
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
   const user = useAuthStore(state => state.user);
