@@ -58,7 +58,7 @@ const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel
     onSubmit({
       item_name: selectedItem.label,
       minecraft_item_id: selectedItem.value,
-      price: parseFloat(price),
+      price: price as any,
       currency: 'diamond',
       quantity: 1,
       unit_size: 1,
@@ -162,15 +162,13 @@ const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel
               <Hash size={12} className="text-strawberry-600" /> Price (Diamonds)
             </label>
             <input 
-              type="number" 
+              type="text" 
               id="price" 
               value={price} 
               onChange={(e) => setPrice(e.target.value)} 
               className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all" 
-              placeholder="0"
+              placeholder="e.g. 2 or 2-8"
               required 
-              min="0" 
-              step="1" 
             />
           </div>
 

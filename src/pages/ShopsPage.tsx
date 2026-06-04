@@ -111,12 +111,12 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
 
                 <div className="space-y-1">
                   {sub.priceGroups.map((group, gIdx) => (
-                    <div 
+                    <div
                       key={`${group.price}-${group.unit}-${gIdx}`}
                       className="flex items-center justify-between gap-2 p-2 bg-neutral-50/50 dark:bg-neutral-800/30 rounded-xl border border-neutral-100/50 dark:border-white/5 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors"
                     >
                       {/* Grid for Items with SAME price/unit */}
-                      <div className="grid grid-cols-[repeat(auto-fill,minmax(24px,1fr))] gap-0.5 flex-1 min-w-0">
+                      <div className="grid grid-cols-[repeat(auto-fill,minmax(24px,1fr))] gap-3 flex-1 min-w-0">
                         {group.items.map((item) => (
                           <ItemIconSm key={item.id} item={item} />
                         ))}
@@ -149,11 +149,11 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
       ))}
     </div>
   );
-  });
+});
 
-  // ─── Shop card ────────────────────────────────────────────────────────────────
+// ─── Shop card ────────────────────────────────────────────────────────────────
 
-  const ShopCard: React.FC<{ shop: any }> = ({ shop }) => {
+const ShopCard: React.FC<{ shop: any }> = ({ shop }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -196,11 +196,11 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
       )}
     </motion.div>
   );
-  };
+};
 
-  // ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
-  const ShopsPage: React.FC = () => {
+const ShopsPage: React.FC = () => {
   const [shops, setShops] = useState<PlayerShop[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -314,6 +314,6 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
       )}
     </div>
   );
-  };
+};
 
 export default ShopsPage;
