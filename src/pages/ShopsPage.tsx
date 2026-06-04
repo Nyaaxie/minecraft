@@ -85,23 +85,23 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
   if (!items.length) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       {hierarchy.map((cat) => (
-        <div key={cat.name} className="space-y-2">
+        <div key={cat.name} className="space-y-2.5">
           {/* Category Label */}
-          <div className="flex items-center gap-1.5 border-b border-neutral-100 dark:border-white/5 pb-1">
+          <div className="flex items-center gap-2.5 border-b border-neutral-100 dark:border-white/5 pb-1">
             <Tag size={10} className="text-strawberry-600" />
             <h4 className="text-[10px] font-black uppercase tracking-[0.1em] text-strawberry-600">
               {cat.name}
             </h4>
           </div>
 
-          <div className="space-y-3 pl-1">
+          <div className="space-y-2.5 pl-1">
             {Array.from(cat.subCats.values()).map((sub) => (
-              <div key={sub.name} className="space-y-1">
+              <div key={sub.name} className="space-y-1.5">
                 {/* Sub-Category Name */}
                 {sub.name !== 'No sub category' && (
-                  <div className="flex items-center gap-1 opacity-80">
+                  <div className="flex items-center gap-2.5 opacity-80">
                     <Hash size={10} className="text-neutral-400" />
                     <span className="text-[10px] font-black italic uppercase tracking-wider text-neutral-500">
                       {sub.name}
@@ -109,21 +109,21 @@ const GroupedShopItems = memo(({ items }: { items: ShopItem[] }) => {
                   </div>
                 )}
 
-                <div className="space-y-1">
+                <div className="space-y-2.5">
                   {sub.priceGroups.map((group, gIdx) => (
                     <div
                       key={`${group.price}-${group.unit}-${gIdx}`}
-                      className="flex items-center justify-between gap-2 p-2 bg-neutral-50/50 dark:bg-neutral-800/30 rounded-xl border border-neutral-100/50 dark:border-white/5 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors"
+                      className="flex items-center justify-between gap-2.5 p-2 bg-neutral-50/50 dark:bg-neutral-800/30 rounded-xl border border-neutral-100/50 dark:border-white/5 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors"
                     >
                       {/* Grid for Items with SAME price/unit */}
-                      <div className="grid grid-cols-[repeat(auto-fill,minmax(24px,1fr))] gap-3 flex-1 min-w-0">
+                      <div className="grid grid-cols-[repeat(auto-fill,minmax(24px,1fr))] gap-2.5 flex-1 min-w-0">
                         {group.items.map((item) => (
                           <ItemIconSm key={item.id} item={item} />
                         ))}
                       </div>
 
                       {/* Vertical Divider */}
-                      <div className="w-px self-stretch bg-neutral-200 dark:bg-white/10 mx-1" />
+                      <div className="w-px self-stretch bg-neutral-200 dark:bg-white/10 mx-0" />
 
                       {/* Price Badge */}
                       <div className="flex flex-col items-end shrink-0 pl-1">
@@ -226,8 +226,15 @@ const ShopsPage: React.FC = () => {
   }, [fetchShops]);
 
   const filteredShops = useMemo(() => {
+    const lowerSearch = searchTerm.toLowerCase();
     return shops
-      .filter(shop => shop.owner_name?.toLowerCase().includes(searchTerm.toLowerCase()))
+      .filter(shop => {
+        const matchesOwner = shop.owner_name?.toLowerCase().includes(lowerSearch);
+        const matchesItem = (shop as any).shop_items?.some((item: any) => 
+          item.item_name?.toLowerCase().includes(lowerSearch)
+        );
+        return matchesOwner || matchesItem;
+      })
       .sort((a, b) => (a.owner_name || '').localeCompare(b.owner_name || ''));
   }, [shops, searchTerm]);
 
@@ -265,7 +272,7 @@ const ShopsPage: React.FC = () => {
           <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
-            placeholder="Search by owner name..."
+            placeholder="Search by owner or item name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-6 py-4 bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 transition-all font-bold"
