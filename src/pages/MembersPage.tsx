@@ -57,15 +57,15 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
             <h2 className="text-base font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white truncate block w-full">{member.nickname || member.username}</h2>
             <div className="flex flex-col gap-0.5">
               <p className="text-xs font-bold text-strawberry-600 italic truncate block w-full">{member.username}</p>
-              {member.relationship && (
-                <p className="text-[8px] font-black text-neutral-400 uppercase tracking-widest truncate block w-full">{member.relationship}</p>
-              )}
             </div>
             <div className="flex flex-nowrap justify-start gap-1.5 mt-2  overflow-x-auto w-full" style={{ scrollbarWidth: 'none' }}>
               {member.community_member_badges.map((b) => (
                 <BadgeChip key={b.badge_id} badge={b.badges} />
               ))}
             </div>
+            {member.relationship && (
+              <p className="text-[8px] font-black text-neutral-400 uppercase tracking-widest truncate block w-full mt-1">{member.relationship}</p>
+            )}
           </div>
         </div>
 
