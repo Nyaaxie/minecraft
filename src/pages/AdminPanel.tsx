@@ -293,10 +293,12 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
   const UserRow = useCallback(({ p }: { p: Profile }) => (
     <div className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0">
+        <div className="relative w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center overflow-hidden shrink-0">
           {p.avatar_url
             ? <img src={p.avatar_url} alt={p.username ?? undefined} className="w-full h-full object-cover" />
             : <Users size={16} className="text-neutral-400" />}
+          {/* Online Indicator */}
+          <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-neutral-900 ${p.status === 'online' ? 'bg-green-500' : 'bg-neutral-400'}`} />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-black italic uppercase tracking-tight truncate">{p.username}</p>
