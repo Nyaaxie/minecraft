@@ -20,6 +20,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { sortBadges } from '../utils/badgeUtils';
 import { getMinecraftItemImageUrl } from '../utils/minecraftItemApi';
+import Select from 'react-select';
+import { useTheme } from '../components/ThemeProvider';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -243,7 +245,7 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
   const [search, setSearch] = useState('');
   const [editTarget, setEditTarget] = useState<Profile | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
-  const [form, setForm] = useState({ role: '', username: '' });
+  const [form, setForm] = useState({ role: '', username: '', avatar_url: '' });
   const [saving, setSaving] = useState(false);
 
   const filtered = useMemo(
@@ -254,7 +256,11 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
   const players = useMemo(() => filtered.filter(p => p.role !== 'admin'), [filtered]);
 
   const openEdit = useCallback((p: Profile) => {
-    setForm({ role: p.role || 'player', username: p.username || '' });
+    setForm({ 
+      role: p.role || 'player', 
+      username: p.username || '',
+      avatar_url: p.avatar_url || ''
+    });
     setEditTarget(p);
   }, []);
 
@@ -262,7 +268,11 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
     if (!editTarget) return;
     setSaving(true);
     try {
-      await dbService.updateProfile(editTarget.id, { role: form.role as UserRole, username: form.username });
+      await dbService.updateProfile(editTarget.id, { 
+        role: form.role as UserRole, 
+        username: form.username,
+        avatar_url: form.avatar_url
+      });
       toast.success('User updated');
       setEditTarget(null);
       onRefresh();
@@ -328,6 +338,7 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
       )}
       <CrudModal open={!!editTarget} onClose={() => setEditTarget(null)} title="Edit User" icon={Users} onSubmit={handleSave} submitting={saving}>
         <div><label className={labelCls}>Username</label><input className={inputCls} value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} placeholder="Username" /></div>
+        <div><label className={labelCls}>Avatar URL</label><input className={inputCls} value={form.avatar_url} onChange={e => setForm(f => ({ ...f, avatar_url: e.target.value }))} placeholder="https://..." /></div>
         <div>
           <label className={labelCls}>Role</label>
           <div className="flex gap-2 flex-wrap">
@@ -650,7 +661,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
     username: '', nickname: '', bio: '', avatar_url: '',
     favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
     favorite_biome: '', favorite_role: '', social_links: '',
-    birth_month: '', birthday: '', join_date: ''
+    birth_month: '', birthday: '', relationship: '', join_date: ''
   });
 
   const fetchMembers = useCallback(async () => {
@@ -677,7 +688,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
       username: '', nickname: '', bio: '', avatar_url: '',
       favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
       favorite_biome: '', favorite_role: '', social_links: '',
-      birth_month: '', birthday: '', join_date: new Date().toISOString().split('T')[0]
+      birth_month: '', birthday: '', relationship: '', join_date: new Date().toISOString().split('T')[0]
     });
     setEditTarget(null);
     setIsAdding(true);
@@ -697,6 +708,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
       social_links: m.social_links || '',
       birth_month: m.birth_month || '',
       birthday: m.birthday || '',
+      relationship: m.relationship || '',
       join_date: m.join_date || ''
     });
     setEditTarget(m);
@@ -732,6 +744,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
         favorite_role: form.favorite_role,
         social_links: form.social_links,
         birth_month: form.birth_month,
+        relationship: form.relationship,
         age: calculatedAge,
         birthday: form.birthday,
         join_date: form.join_date
@@ -806,6 +819,10 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
           <div>
             <label className={labelCls}>Birthday</label>
             <input type="date" className={inputCls} value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))} />
+          </div>
+          <div className="col-span-2">
+            <label className={labelCls}>Relationship (Optional)</label>
+            <input className={inputCls} value={form.relationship} onChange={e => setForm(f => ({ ...f, relationship: e.target.value }))} placeholder="Relationship" />
           </div>
           <div className="col-span-2">
             <label className={labelCls}>Avatar URL (Optional)</label>
@@ -1020,7 +1037,7 @@ const ShopsTab = memo(({ onRefresh }: { onRefresh: () => void }) => {
                     <div className="flex items-center gap-3">
                       <span className="text-xs font-black text-strawberry-600">{item.price} DIAMONDS</span>
                       <div className="flex items-center gap-1.5">
-                        <Link 
+                        <Link
                           to={`/shops/${editTarget.id}/items/${item.id}/edit`}
                           className="p-1.5 text-neutral-400 hover:text-strawberry-600 rounded-lg hover:bg-strawberry-500/10"
                         >
@@ -1104,6 +1121,66 @@ const CategoriesTab = memo(({ categories, onRefresh }: { categories: any[]; onRe
 });
 
 const SubCategoriesTab = memo(({ subCategories, categories, onRefresh }: { subCategories: any[]; categories: any[]; onRefresh: () => void }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  const selectStyles = useMemo(() => ({
+    control: (base: any) => ({
+      ...base,
+      backgroundColor: 'transparent',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb',
+      borderRadius: '0.75rem',
+      padding: '0.125rem 0.25rem',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: '#f43f5e'
+      },
+      transition: 'all 0.2s ease'
+    }),
+    singleValue: (base: any) => ({
+      ...base,
+      color: isDark ? '#ffffff' : '#171717',
+      fontWeight: 'bold',
+      fontSize: '0.875rem'
+    }),
+    placeholder: (base: any) => ({
+      ...base,
+      color: isDark ? '#737373' : '#a3a3a3',
+      fontSize: '0.875rem'
+    }),
+    input: (base: any) => ({
+      ...base,
+      color: isDark ? '#ffffff' : '#171717',
+      fontSize: '0.875rem'
+    }),
+    menu: (base: any) => ({
+      ...base,
+      backgroundColor: isDark ? '#171717' : '#ffffff',
+      borderRadius: '1rem',
+      overflow: 'hidden',
+      border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : '#e5e7eb'}`,
+      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+      zIndex: 100
+    }),
+    option: (base: any, state: any) => ({
+      ...base,
+      backgroundColor: state.isFocused
+        ? (isDark ? '#f43f5e33' : '#f43f5e1a')
+        : 'transparent',
+      color: isDark ? '#ffffff' : '#171717',
+      fontWeight: 'bold',
+      fontSize: '0.875rem',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#f43f5e33'
+      }
+    })
+  }), [isDark]);
+
+  const categoryOptions = useMemo(() =>
+    categories.map(c => ({ value: c.id, label: c.name })),
+    [categories]);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
@@ -1149,10 +1226,14 @@ const SubCategoriesTab = memo(({ subCategories, categories, onRefresh }: { subCa
         <div><label className={labelCls}>Name</label><input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Sub-category name" /></div>
         <div>
           <label className={labelCls}>Parent Category</label>
-          <select className={inputCls} value={form.category_id} onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))}>
-            <option value="">Select Category</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <Select
+            options={categoryOptions}
+            value={categoryOptions.find(opt => opt.value === form.category_id) || null}
+            onChange={(opt) => setForm(f => ({ ...f, category_id: opt?.value || '' }))}
+            styles={selectStyles}
+            placeholder="Select Category"
+            isClearable
+          />
         </div>
         <div><label className={labelCls}>Order</label><input type="number" className={inputCls} value={form.display_order} onChange={e => setForm(f => ({ ...f, display_order: +e.target.value }))} /></div>
         <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Sub-category description..." /></div>

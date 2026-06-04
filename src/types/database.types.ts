@@ -182,6 +182,7 @@ export interface CommunityMember {
   bio: string | null
   birth_month: string | null
   birthday: string | null
+  relationship: string | null
   age: number | null
   join_date: string | null
   created_at: string

@@ -6,6 +6,9 @@ import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore'; // Import useAuthStore
+import Select from 'react-select';
+import { useTheme } from '../components/ThemeProvider';
+import { useMemo } from 'react';
 
 const AdminPluginForm = ({ plugin, categories, onSubmit, onCancel, isSaving }: { 
   plugin?: Plugin; 
@@ -14,6 +17,9 @@ const AdminPluginForm = ({ plugin, categories, onSubmit, onCancel, isSaving }: {
   onCancel: () => void;
   isSaving: boolean;
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const [name, setName] = useState(plugin?.name || '');
   const [description, setDescription] = useState(plugin?.description || '');
   const [iconUrl, setIconUrl] = useState(plugin?.icon_url || '');
@@ -21,11 +27,64 @@ const AdminPluginForm = ({ plugin, categories, onSubmit, onCancel, isSaving }: {
   const [version, setVersion] = useState(plugin?.version || '');
   const [isVisible, setIsVisible] = useState(plugin?.is_visible ?? true);
 
+  const categoryOptions = useMemo(() => [
+    ...categories.map(cat => ({ value: cat.name, label: cat.name })),
+    { value: 'Other', label: 'Other' }
+  ], [categories]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ name, description, icon_url: iconUrl, category, version, is_visible: isVisible });
   };
 
+  const selectStyles = {
+    control: (base: any) => ({
+      ...base,
+      backgroundColor: isDark ? '#1f2937' : '#f3f4f6', // Match bg-neutral-100/800
+      borderColor: isDark ? '#374151' : '#e5e7eb', // Match border-neutral-200/700
+      borderRadius: '0.75rem',
+      padding: '0.125rem 0.25rem',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: '#f43f5e'
+      },
+      transition: 'all 0.2s ease'
+    }),
+    singleValue: (base: any) => ({ 
+      ...base, 
+      color: isDark ? '#ffffff' : '#111827', 
+      fontWeight: 'bold' 
+    }),
+    placeholder: (base: any) => ({
+      ...base,
+      color: isDark ? '#9ca3af' : '#4b5563'
+    }),
+    input: (base: any) => ({
+      ...base,
+      color: isDark ? '#ffffff' : '#111827'
+    }),
+    menu: (base: any) => ({ 
+      ...base, 
+      backgroundColor: isDark ? '#1f2937' : '#ffffff', 
+      borderRadius: '1rem', 
+      overflow: 'hidden', 
+      border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+      zIndex: 50
+    }),
+    option: (base: any, state: any) => ({
+      ...base,
+      backgroundColor: state.isFocused 
+        ? (isDark ? '#f43f5e33' : '#f43f5e1a') 
+        : 'transparent',
+      color: isDark ? '#ffffff' : '#111827',
+      fontWeight: 'bold',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#f43f5e33'
+      }
+    })
+  };
 
   return (
     <motion.form 
@@ -67,18 +126,15 @@ const AdminPluginForm = ({ plugin, categories, onSubmit, onCancel, isSaving }: {
       </div>
       <div>
         <label htmlFor="category" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Category</label>
-        <select
+        <Select
           id="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white focus:ring-2 focus:ring-strawberry-600 focus:border-transparent"
-        >
-          <option value="">Select Category</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.name}>{cat.name}</option>
-          ))}
-          <option value="Other">Other</option>
-        </select>
+          options={categoryOptions}
+          value={categoryOptions.find(opt => opt.value === category) || null}
+          onChange={(opt) => setCategory(opt?.value || '')}
+          styles={selectStyles}
+          placeholder="Select Category"
+          isClearable
+        />
       </div>
       <div>
         <label htmlFor="version" className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">Version</label>

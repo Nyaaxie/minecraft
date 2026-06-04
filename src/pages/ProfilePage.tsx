@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/useAuthStore';
 import { dbService } from '../services/dbService';
-import { User, Lock, Save, Loader2, Shield } from 'lucide-react';
+import { User, Lock, Save, Loader2, Shield, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const ProfilePage: React.FC = () => {
@@ -11,12 +11,41 @@ const ProfilePage: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setUsername(profile.username || '');
     }
   }, [profile]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be less than 2MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const publicUrl = await dbService.uploadAvatar(user.id, file);
+      await dbService.updateProfile(user.id, { avatar_url: publicUrl });
+      await refetchProfile();
+      toast.success('Profile picture updated!');
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +98,35 @@ const ProfilePage: React.FC = () => {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-2xl">
+        <div className="p-8 md:p-12 border-b border-neutral-100 dark:border-white/5 bg-neutral-50/50 dark:bg-white/[0.02]">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-white dark:border-neutral-800 shadow-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={48} className="text-neutral-300 dark:text-neutral-600" />
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                    <Loader2 className="animate-spin text-white" size={24} />
+                  </div>
+                )}
+              </div>
+              <label className="absolute -bottom-2 -right-2 p-3 bg-strawberry-600 hover:bg-strawberry-700 text-white rounded-2xl shadow-lg cursor-pointer transition-all active:scale-90 group-hover:scale-110">
+                <Camera size={20} />
+                <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} />
+              </label>
+            </div>
+            <div className="text-center md:text-left space-y-2">
+              <h3 className="text-2xl font-black italic uppercase tracking-tighter">Profile Picture</h3>
+              <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest leading-relaxed max-w-xs">
+                Upload a custom photo to personalize your presence in the community.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <form onSubmit={handleUpdateProfile} className="p-8 md:p-12 space-y-10">
           {/* Username Section */}
           <section className="space-y-6">

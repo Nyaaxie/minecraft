@@ -676,8 +676,8 @@
     "value": "powder_snow_bucket"
   },
   {
-    "label": "Honey Bucket",
-    "value": "honey_bucket"
+    "label": "Honey Bottle",
+    "value": "honey_bottle"
   },
   {
     "label": "Honey Block",
@@ -1034,6 +1034,22 @@
   {
     "label": "Saddle",
     "value": "saddle"
+  },
+  {
+    "label": "Leather Horse Armor",
+    "value": "leather_horse_armor"
+  },
+  {
+    "label": "Iron Horse Armor",
+    "value": "iron_horse_armor"
+  },
+  {
+    "label": "Golden Horse Armor",
+    "value": "golden_horse_armor"
+  },
+  {
+    "label": "Diamond Horse Armor",
+    "value": "diamond_horse_armor"
   },
   {
     "label": "Lead",
@@ -1564,8 +1580,16 @@
     "value": "frogspawn"
   },
   {
-    "label": "Froglight",
-    "value": "froglight"
+    "label": "Ochre Froglight",
+    "value": "ochre_froglight"
+  },
+  {
+    "label": "Pearlescent Froglight",
+    "value": "pearlescent_froglight"
+  },
+  {
+    "label": "Verdant Froglight",
+    "value": "verdant_froglight"
   },
   {
     "label": "Echo Shard",

@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
 import Select from 'react-select';
+import { useTheme } from '../components/ThemeProvider';
 import { minecraftItems } from '../utils/minecraftItems';
 import { useMemo } from 'react';
 
@@ -22,6 +23,9 @@ const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel
   onCancel: () => void;
   isSaving: boolean;
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const [selectedItem, setSelectedItem] = useState<{ label: string; value: string } | null>(
     item ? typedFlatItems.find(i => i.value === item.minecraft_item_id) || null : null
   );
@@ -36,6 +40,14 @@ const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel
     if (!categoryId) return [];
     return subCategories.filter(s => s.category_id === categoryId);
   }, [subCategories, categoryId]);
+
+  const categoryOptions = useMemo(() => 
+    categories.map(cat => ({ value: cat.id, label: cat.name })),
+  [categories]);
+
+  const subCategoryOptions = useMemo(() => 
+    filteredSubCategories.map(sub => ({ value: sub.id, label: sub.name })),
+  [filteredSubCategories]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,20 +78,48 @@ const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel
     control: (base: any) => ({
       ...base,
       backgroundColor: 'transparent',
-      borderColor: '#e5e7eb',
+      borderColor: isDark ? '#404040' : '#e5e7eb',
       borderRadius: '1rem',
-      padding: '0.5rem',
-      '.dark &': { borderColor: '#404040' }
+      padding: '0.25rem 0.5rem',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: '#f43f5e'
+      },
+      transition: 'all 0.2s ease'
     }),
-    singleValue: (base: any) => ({ ...base, color: 'inherit', fontWeight: 'bold' }),
-    menu: (base: any) => ({ ...base, backgroundColor: '#ffffff', '.dark &': { backgroundColor: '#171717' }, borderRadius: '1rem', overflow: 'hidden', border: '1px solid #404040' }),
+    singleValue: (base: any) => ({ 
+      ...base, 
+      color: isDark ? '#ffffff' : '#171717', 
+      fontWeight: 'bold' 
+    }),
+    placeholder: (base: any) => ({
+      ...base,
+      color: isDark ? '#737373' : '#a3a3a3'
+    }),
+    input: (base: any) => ({
+      ...base,
+      color: isDark ? '#ffffff' : '#171717'
+    }),
+    menu: (base: any) => ({ 
+      ...base, 
+      backgroundColor: isDark ? '#171717' : '#ffffff', 
+      borderRadius: '1rem', 
+      overflow: 'hidden', 
+      border: `1px solid ${isDark ? '#404040' : '#e5e7eb'}`,
+      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+      zIndex: 50
+    }),
     option: (base: any, state: any) => ({
       ...base,
-      backgroundColor: state.isFocused ? '#f43f5e1a' : 'transparent',
-      color: 'inherit',
+      backgroundColor: state.isFocused 
+        ? (isDark ? '#f43f5e33' : '#f43f5e1a') 
+        : 'transparent',
+      color: isDark ? '#ffffff' : '#171717',
       fontWeight: 'bold',
-      '.dark &': { backgroundColor: state.isFocused ? '#f43f5e33' : 'transparent' },
-      cursor: 'pointer'
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#f43f5e33'
+      }
     })
   };
 
@@ -138,35 +178,34 @@ const AdminShopItemForm = ({ item, categories, subCategories, onSubmit, onCancel
             <label htmlFor="categoryId" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
               <Tag size={12} className="text-strawberry-600" /> Category
             </label>
-            <select
+            <Select
               id="categoryId"
-              value={categoryId}
-              onChange={(e) => { setCategoryId(e.target.value); setSubCategoryId(''); }}
-              className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all"
-            >
-              <option value="">Select a category</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
+              options={categoryOptions}
+              value={categoryOptions.find(opt => opt.value === categoryId) || null}
+              onChange={(opt) => { 
+                setCategoryId(opt?.value || ''); 
+                setSubCategoryId(''); 
+              }}
+              styles={selectStyles}
+              placeholder="Select a category"
+              isClearable
+            />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="subCategoryId" className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4 flex items-center gap-2">
               <Hash size={12} className="text-strawberry-600" /> Sub-Category (Optional)
             </label>
-            <select
+            <Select
               id="subCategoryId"
-              value={subCategoryId}
-              onChange={(e) => setSubCategoryId(e.target.value)}
-              className="w-full px-6 py-4 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-strawberry-500/40 font-bold transition-all"
-              disabled={!categoryId}
-            >
-              <option value="">{categoryId ? (filteredSubCategories.length > 0 ? 'None' : 'No sub-categories found') : 'Select category first'}</option>
-              {filteredSubCategories.map(sub => (
-                <option key={sub.id} value={sub.id}>{sub.name}</option>
-              ))}
-            </select>
+              options={subCategoryOptions}
+              value={subCategoryOptions.find(opt => opt.value === subCategoryId) || null}
+              onChange={(opt) => setSubCategoryId(opt?.value || '')}
+              styles={selectStyles}
+              placeholder={categoryId ? (subCategoryOptions.length > 0 ? 'None' : 'No sub-categories') : 'Select category first'}
+              isDisabled={!categoryId}
+              isClearable
+            />
           </div>
         </div>
 
