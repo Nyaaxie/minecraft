@@ -22,6 +22,36 @@
   font-family: "Genty", serif;
 }
 
+@layer base {
+  /* Custom Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-neutral-50 dark:bg-neutral-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 dark:bg-neutral-800 rounded-full border-[3px] border-solid border-neutral-50 dark:border-neutral-900;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-strawberry-500;
+  }
+
+  /* Firefox support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.neutral.300') theme('colors.neutral.50');
+  }
+
+  .dark * {
+    scrollbar-color: theme('colors.neutral.800') theme('colors.neutral.900');
+  }
+}
+
 :root {
   color-scheme: light dark;
 }

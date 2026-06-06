@@ -92,7 +92,7 @@ const ProfilePage: React.FC = () => {
             Account<span className="text-strawberry-600">Settings</span>
           </h1>
           <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
-            Manage your credentials and security.
+            Simply your account settings.
           </p>
         </div>
       </motion.div>
@@ -134,7 +134,7 @@ const ProfilePage: React.FC = () => {
               <User size={20} className="text-strawberry-600" />
               <h2 className="text-xl font-black italic uppercase tracking-tighter">Identity</h2>
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 ml-4">
                 Username

@@ -55,6 +55,8 @@ export const dbService = {
 
   // --- Community Members ---
   async getCommunityMembers() {
+    // We want members with sort_order > 0 to appear first, in order.
+    // Members with sort_order = 0 (unranked) should appear last.
     const { data, error } = await supabase
       .from('community_members')
       .select(`
@@ -66,9 +68,18 @@ export const dbService = {
           )
         )
       `)
+      .order('sort_order', { ascending: true, nullsFirst: false })
       .order('username', { ascending: true });
+    
     if (error) throw error;
-    return data;
+
+    // Further refine sorting in-memory to treat 0 as last
+    return (data as any[]).sort((a, b) => {
+      const valA = a.sort_order === 0 ? 999999 : a.sort_order;
+      const valB = b.sort_order === 0 ? 999999 : b.sort_order;
+      if (valA !== valB) return valA - valB;
+      return a.username.localeCompare(b.username);
+    });
   },
 
   async createCommunityMember(member: Omit<CommunityMember, 'id' | 'created_at' | 'updated_at'>) {

@@ -663,7 +663,9 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
     username: '', nickname: '', bio: '', avatar_url: '',
     favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
     favorite_biome: '', favorite_role: '', social_links: '',
-    birth_month: '', birthday: '', relationship: '', join_date: ''
+    favorite_mob_url: '', favorite_block_url: '', favorite_biome_url: '', favorite_role_url: '',
+    birth_month: '', birthday: '', relationship: '', join_date: '',
+    sort_order: 0
   });
 
   const fetchMembers = useCallback(async () => {
@@ -690,11 +692,12 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
       username: '', nickname: '', bio: '', avatar_url: '',
       favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
       favorite_biome: '', favorite_role: '', social_links: '',
-      birth_month: '', birthday: '', relationship: '', join_date: new Date().toISOString().split('T')[0]
+      birth_month: '', birthday: '', relationship: '', join_date: new Date().toISOString().split('T')[0],
+      sort_order: members.length
     });
     setEditTarget(null);
     setIsAdding(true);
-  }, []);
+  }, [members.length]);
 
   const openEdit = useCallback((m: any) => {
     setForm({
@@ -707,11 +710,16 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
       favorite_color: m.favorite_color || '#e35a7f',
       favorite_biome: m.favorite_biome || '',
       favorite_role: m.favorite_role || '',
+      favorite_mob_url: m.favorite_mob_url || '',
+      favorite_block_url: m.favorite_block_url || '',
+      favorite_biome_url: m.favorite_biome_url || '',
+      favorite_role_url: m.favorite_role_url || '',
       social_links: m.social_links || '',
       birth_month: m.birth_month || '',
       birthday: m.birthday || '',
       relationship: m.relationship || '',
-      join_date: m.join_date || ''
+      join_date: m.join_date || '',
+      sort_order: m.sort_order || 0
     });
     setEditTarget(m);
     setIsAdding(false);
@@ -744,12 +752,17 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
         favorite_color: form.favorite_color,
         favorite_biome: form.favorite_biome,
         favorite_role: form.favorite_role,
+        favorite_mob_url: form.favorite_mob_url,
+        favorite_block_url: form.favorite_block_url,
+        favorite_biome_url: form.favorite_biome_url,
+        favorite_role_url: form.favorite_role_url,
         social_links: form.social_links,
         birth_month: form.birth_month,
         relationship: form.relationship,
         age: calculatedAge,
         birthday: form.birthday,
-        join_date: form.join_date
+        join_date: form.join_date,
+        sort_order: form.sort_order
       };
 
       if (editTarget) {
@@ -819,6 +832,10 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
             <input className={inputCls} value={form.nickname} onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))} placeholder="Display Nickname" />
           </div>
           <div>
+            <label className={labelCls}>Display Order</label>
+            <input type="number" className={inputCls} value={form.sort_order} onChange={e => setForm(f => ({ ...f, sort_order: +e.target.value }))} placeholder="Order (e.g. 1)" />
+          </div>
+          <div>
             <label className={labelCls}>Birthday</label>
             <input type="date" className={inputCls} value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))} />
           </div>
@@ -842,26 +859,36 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
             <label className={labelCls}>Social Link</label>
             <input className={inputCls} value={form.social_links} onChange={e => setForm(f => ({ ...f, social_links: e.target.value }))} placeholder="Paste social link here..." />
           </div>
-          <div>
-            <label className={labelCls}>Fav Biome</label>
-            <input className={inputCls} value={form.favorite_biome} onChange={e => setForm(f => ({ ...f, favorite_biome: e.target.value }))} placeholder="e.g. Cherry Grove" />
+
+          {/* Role */}
+          <div className="col-span-2">
+            <label className={labelCls}>Role Icon URL</label>
+            <input className={inputCls} value={form.favorite_role_url} onChange={e => setForm(f => ({ ...f, favorite_role_url: e.target.value }))} placeholder="https://..." />
           </div>
-          <div>
-            <label className={labelCls}>Fav Role</label>
-            <input className={inputCls} value={form.favorite_role} onChange={e => setForm(f => ({ ...f, favorite_role: e.target.value }))} placeholder="e.g. Builder" />
+
+          {/* Biome */}
+          <div className="col-span-2">
+            <label className={labelCls}>Biome Icon URL</label>
+            <input className={inputCls} value={form.favorite_biome_url} onChange={e => setForm(f => ({ ...f, favorite_biome_url: e.target.value }))} placeholder="https://..." />
           </div>
+
+          {/* Mob */}
+          <div className="col-span-2">
+            <label className={labelCls}>Mobs Icon URL</label>
+            <input className={inputCls} value={form.favorite_mob_url} onChange={e => setForm(f => ({ ...f, favorite_mob_url: e.target.value }))} placeholder="https://..." />
+          </div>
+
+          {/* Block */}
+          <div className="col-span-2">
+            <label className={labelCls}>Block Icon URL</label>
+            <input className={inputCls} value={form.favorite_block_url} onChange={e => setForm(f => ({ ...f, favorite_block_url: e.target.value }))} placeholder="https://..." />
+          </div>
+
           <div className="col-span-2">
             <label className={labelCls}>Bio</label>
             <textarea className={`${inputCls} resize-none`} rows={3} value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} placeholder="Member biography..." />
           </div>
-          <div>
-            <label className={labelCls}>Fav Mob</label>
-            <input className={inputCls} value={form.favorite_mob} onChange={e => setForm(f => ({ ...f, favorite_mob: e.target.value }))} placeholder="e.g. Fox" />
-          </div>
-          <div>
-            <label className={labelCls}>Fav Block</label>
-            <input className={inputCls} value={form.favorite_block} onChange={e => setForm(f => ({ ...f, favorite_block: e.target.value }))} placeholder="e.g. Moss" />
-          </div>
+
           <div className="col-span-2">
             <label className={labelCls}>Fav Color</label>
             <div className="flex gap-3">

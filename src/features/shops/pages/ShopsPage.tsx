@@ -37,7 +37,7 @@ const ShopsPage: React.FC = () => {
     return shops
       .filter(shop => {
         const matchesOwner = shop.owner_name?.toLowerCase().includes(lowerSearch);
-        const matchesItem = (shop as any).shop_items?.some((item: any) => 
+        const matchesItem = (shop as any).shop_items?.some((item: any) =>
           item.item_name?.toLowerCase().includes(lowerSearch)
         );
         return matchesOwner || matchesItem;
@@ -57,7 +57,7 @@ const ShopsPage: React.FC = () => {
               Community<span className="text-strawberry-600">Shops</span>
             </h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
-              Browse the official directory of community-run markets.
+              Wander through our cozy market.
             </p>
           </div>
         </div>

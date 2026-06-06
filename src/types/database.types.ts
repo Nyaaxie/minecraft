@@ -178,6 +178,10 @@ export interface CommunityMember {
   favorite_color: string | null
   favorite_biome: string | null
   favorite_role: string | null
+  favorite_mob_url: string | null
+  favorite_block_url: string | null
+  favorite_biome_url: string | null
+  favorite_role_url: string | null
   social_links: string | null
   bio: string | null
   birth_month: string | null
@@ -185,6 +189,7 @@ export interface CommunityMember {
   relationship: string | null
   age: number | null
   join_date: string | null
+  sort_order: number
   created_at: string
   updated_at: string
 }
@@ -469,6 +474,11 @@ export interface Database {
         Row: UserBadge
         Insert: Omit<UserBadge, 'assigned_at'> & Partial<Pick<UserBadge, 'assigned_at'>>
         Update: Partial<UserBadge>
+      }
+      community_members: {
+        Row: CommunityMember
+        Insert: Omit<CommunityMember, 'id' | 'created_at' | 'updated_at'> & Partial<Pick<CommunityMember, 'id' | 'created_at' | 'updated_at'>>
+        Update: Partial<CommunityMember>
       }
     }
     Enums: {

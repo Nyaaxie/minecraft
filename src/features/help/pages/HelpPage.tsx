@@ -138,12 +138,12 @@ const HelpPage = () => {
           dbService.getRules(),
           adminService.getServerInfo(),
         ]);
-        setData({ 
-            commands, 
-            plugins, 
-            guides, 
-            rules: rules.sort((a, b) => (b.priority || 0) - (a.priority || 0)), 
-            serverInfo: serverInfo || [] 
+        setData({
+          commands,
+          plugins,
+          guides,
+          rules: rules.sort((a, b) => (b.priority || 0) - (a.priority || 0)),
+          serverInfo: serverInfo || []
         });
       } catch (err) {
         console.error('Error fetching help data:', err);
@@ -171,24 +171,24 @@ const HelpPage = () => {
       count: data.rules.length,
       content: (
         <div className="space-y-4 mt-4">
-            {data.rules.length === 0 ? (
-                <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest py-8 text-center italic">
-                  No rules defined yet.
-                </p>
-            ) : data.rules.map((rule, index) => (
-                <div
-                    key={rule.id}
-                    className="flex gap-4 bg-neutral-50 dark:bg-neutral-800/60 p-5 rounded-2xl border border-neutral-100 dark:border-white/5"
-                >
-                  <div className="text-xl font-black italic text-orange-500/50 pt-1">
-                    {String(index + 1).padStart(2, '0')}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-neutral-900 dark:text-white mb-1 italic tracking-tight">{rule.title}</h3>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">{rule.content}</p>
-                  </div>
-                </div>
-            ))}
+          {data.rules.length === 0 ? (
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest py-8 text-center italic">
+              No rules defined yet.
+            </p>
+          ) : data.rules.map((rule, index) => (
+            <div
+              key={rule.id}
+              className="flex gap-4 bg-neutral-50 dark:bg-neutral-800/60 p-5 rounded-2xl border border-neutral-100 dark:border-white/5"
+            >
+              <div className="text-xl font-black italic text-orange-500/50 pt-1">
+                {String(index + 1).padStart(2, '0')}
+              </div>
+              <div>
+                <h3 className="font-bold text-neutral-900 dark:text-white mb-1 italic tracking-tight">{rule.title}</h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">{rule.content}</p>
+              </div>
+            </div>
+          ))}
         </div>
       ),
     },
@@ -206,19 +206,19 @@ const HelpPage = () => {
             </p>
           ) : (
             <div className="divide-y divide-neutral-100 dark:divide-white/5">
-                {data.serverInfo.map((item, i) => (
-                    <div
-                        key={i}
-                        className="flex items-center justify-between gap-6 px-5 py-4"
-                    >
-                        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                        {item.label}
-                        </span>
-                        <span className="text-sm font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-right">
-                        {item.value}
-                        </span>
-                    </div>
-                ))}
+              {data.serverInfo.map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-6 px-5 py-4"
+                >
+                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                    {item.label}
+                  </span>
+                  <span className="text-sm font-black italic uppercase tracking-tight text-neutral-900 dark:text-white text-right">
+                    {item.value}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -393,7 +393,7 @@ const HelpPage = () => {
               Help
             </h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
-              Rules, server info, commands, plugins & guides
+              A harvest of helpful knowledge.
             </p>
           </div>
         </div>

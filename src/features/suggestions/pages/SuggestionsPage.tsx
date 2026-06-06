@@ -40,11 +40,16 @@ const SuggestionsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-12"
       >
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20">
+        <div className="space-y-4 text-left">
+          <div className="w-20 h-20 bg-strawberry-600/10 rounded-[2rem] flex items-center justify-center border border-strawberry-600/20 mb-6">
             <Sparkle className="text-strawberry-600" size={32} />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Suggestions</h1>
+          <h1 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
+            Suggestions
+          </h1>
+          <p className="text-neutral-500 font-bold uppercase tracking-widest text-xs">
+            Plant a seed of suggestion here.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white dark:bg-neutral-900 p-12 rounded-[3rem] border border-neutral-200 dark:border-white/5 shadow-sm space-y-8">

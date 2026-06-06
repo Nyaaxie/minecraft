@@ -64,39 +64,51 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
               ))}
             </div>
             {member.relationship && (
-              <p className="text-[8px] font-black text-neutral-400 uppercase tracking-widest truncate block w-full mt-1">{member.relationship}</p>
+              <p className="text-[8px] font-black text-neutral-400 uppercase tracking-widest truncate block w-full mt-2">{member.relationship}</p>
             )}
           </div>
         </div>
 
-        {/* Right Column: Favorites */}
-        <div className="flex flex-col gap-1.5 min-w-0">
+        {/* Right Column: Large Favorites Icons */}
+        <div className="flex flex-col gap-2 min-w-0">
           {[
-            { label: 'Color', value: member.favorite_color, icon: Palette },
-            { label: 'Block', value: member.favorite_block, icon: Blocks },
-            { label: 'Mob', value: member.favorite_mob, icon: Ghost },
-            { label: 'Biome', value: member.favorite_biome, icon: Trees },
-            { label: 'Role', value: member.favorite_role, icon: Sword },
+            { label: 'Role', url: member.favorite_role_url, icon: Sword },
+            { label: 'Biome', url: member.favorite_biome_url, icon: Trees },
+            { label: 'Mob', url: member.favorite_mob_url, icon: Ghost },
+            { label: 'Block', url: member.favorite_block_url, icon: Blocks },
           ].map((item) => (
-            <div key={item.label} className="bg-neutral-50 dark:bg-neutral-800 p-2 rounded-xl flex items-center gap-2 min-w-0">
-              <div className="bg-white dark:bg-neutral-700 p-1 rounded-lg shrink-0">
-                <item.icon size={12} className="text-strawberry-500" />
+            <div key={item.label} className="bg-neutral-50 dark:bg-neutral-800 p-2.5 rounded-2xl flex items-center gap-3 min-w-0 h-[52px] group/fav relative">
+              <div className="bg-white dark:bg-neutral-700 p-2 rounded-xl shrink-0 shadow-sm">
+                <item.icon size={14} className="text-strawberry-500" />
               </div>
               <div className='flex flex-col min-w-0 flex-1'>
-                <p className="text-[8px] font-black uppercase tracking-widest text-neutral-400">{item.label}</p>
-                {item.label === 'Color' && item.value ? (
-                  <p className="text-[10px] font-bold text-neutral-900 dark:text-white truncate flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full border border-neutral-300 shrink-0" style={{ background: item.value }} />
-                    <span className="truncate">{item.value}</span>
-                  </p>
-                ) : (
-                  <p className="text-[10px] font-bold text-neutral-900 dark:text-white break-words whitespace-normal">
-                    {item.value || '---'}
-                  </p>
-                )}
+                <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 leading-none mb-1">{item.label}</p>
+                <div className="flex items-center">
+                  {item.url ? (
+                    <img src={item.url} alt={item.label} className="h-5 w-5 object-contain pixelated" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-lg bg-neutral-100 dark:bg-neutral-700/50" />
+                  )}
+                </div>
+              </div>
+              {/* Tooltip */}
+              <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-[8px] font-black uppercase tracking-widest rounded-md opacity-0 group-hover/fav:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none shadow-xl">
+                {item.label}
               </div>
             </div>
           ))}
+          {/* Large Color pill */}
+          <div className="bg-neutral-50 dark:bg-neutral-800 p-2.5 rounded-2xl flex items-center gap-3 min-w-0 h-[52px] group/fav relative">
+            <div className="bg-white dark:bg-neutral-700 p-2 rounded-xl shrink-0 shadow-sm">
+              <Palette size={14} className="text-strawberry-500" />
+            </div>
+            <div className='flex flex-col min-w-0 flex-1'>
+              <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 leading-none mb-1">Color</p>
+              <div className="flex items-center">
+                <div className="w-5 h-5 rounded-full border-2 border-white dark:border-neutral-700 shadow-sm" style={{ background: member.favorite_color || '#e35a7f' }} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -165,11 +177,12 @@ const MembersPage: React.FC = () => {
   }, []);
 
   const sortedMembers = [...members].sort((a, b) => {
-    const dateA = a.join_date ? new Date(a.join_date).getTime() : Infinity;
-    const dateB = b.join_date ? new Date(b.join_date).getTime() : Infinity;
+    // Treat 0 or null as 999 (last)
+    const orderA = (a.sort_order === 0 || a.sort_order === null) ? 999 : a.sort_order;
+    const orderB = (b.sort_order === 0 || b.sort_order === null) ? 999 : b.sort_order;
 
-    if (dateA !== dateB) {
-      return dateA - dateB;
+    if (orderA !== orderB) {
+      return orderA - orderB;
     }
 
     return a.username.localeCompare(b.username);
@@ -183,23 +196,23 @@ const MembersPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 space-y-16">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Community<span className='text-strawberry-600'>Members</span></h1>
-        <p className="text-neutral-500 font-bold uppercase tracking-widest text-xs">Meet the berries of StrawberrySMP</p>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Berry<span className='text-strawberry-600'>List</span></h1>
+        <p className="text-neutral-500 font-bold uppercase tracking-widest text-xs">Our little strawberry garden.</p>
       </div>
 
-      {/* Browse Row */}
-      <div className="sticky top-20 z-10 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl border border-neutral-100 dark:border-white/10 rounded-[2.5rem] p-5 shadow-lg shadow-neutral-200/20 dark:shadow-none">
-        <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+      {/* Browse Grid */}
+      <div className="sticky top-20 z-10 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl border border-neutral-100 dark:border-white/10 rounded-[2.5rem] p-6 shadow-lg shadow-neutral-200/20 dark:shadow-none">
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
           {sortedMembers.map(member => (
             <button
               key={member.id}
               onClick={() => scrollToMember(member.id)}
-              className="flex flex-col items-center gap-2 min-w-[5.5rem] group"
+              className="flex flex-col items-center gap-2 group"
             >
-              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 border-2 border-transparent group-hover:border-strawberry-500 shadow-md transition-all">
+              <div className="w-full aspect-square rounded-2xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 border-2 border-transparent group-hover:border-strawberry-500 shadow-md transition-all">
                 <img src={getAvatarUrl(member.username, member.avatar_url)} alt={member.username} className="w-full h-full object-cover" />
               </div>
-              <p className="text-xs font-black truncate w-full group-hover:text-strawberry-600 transition-colors">
+              <p className="text-[10px] font-black truncate w-full group-hover:text-strawberry-600 transition-colors text-center">
                 {member.username}
               </p>
             </button>
