@@ -380,98 +380,100 @@ const HelpPage = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-
-        {/* Page header */}
+    <div className="h-[calc(100vh-6rem)] w-full flex flex-col gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between px-2 mb-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20">
-            <HelpCircle className="text-strawberry-600" size={32} />
+          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600">
+            <HelpCircle size={32} />
           </div>
           <div>
-            <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white leading-none">
+            <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
               Help
             </h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
-              A harvest of helpful knowledge.
+              A harvest of helpful knowledge!
             </p>
           </div>
         </div>
+      </div>
 
-        {/* The 5 accordion section cards */}
-        <div className="space-y-3">
-          {SECTIONS.map((section, i) => (
-            <motion.div
-              key={section.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.07 }}
-            >
-              <SectionCard
-                id={section.id}
-                icon={section.icon}
-                title={section.title}
-                count={section.count}
-                color={section.color}
-                isOpen={openSection === section.id}
-                onToggle={() => toggle(section.id)}
+      <div className="flex-1 overflow-y-auto w-full pr-2">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+          {/* The 5 accordion section cards */}
+          <div className="space-y-3">
+            {SECTIONS.map((section, i) => (
+              <motion.div
+                key={section.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07 }}
               >
-                {section.content}
-              </SectionCard>
-            </motion.div>
-          ))}
-        </div>
+                <SectionCard
+                  id={section.id}
+                  icon={section.icon}
+                  title={section.title}
+                  count={section.count}
+                  color={section.color}
+                  isOpen={openSection === section.id}
+                  onToggle={() => toggle(section.id)}
+                >
+                  {section.content}
+                </SectionCard>
+              </motion.div>
+            ))}
+          </div>
 
-        {/* Help request form */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-neutral-900 p-10 rounded-[2.5rem] border border-neutral-200 dark:border-white/5 shadow-sm space-y-6"
-        >
-          <div>
-            <h2 className="text-2xl font-black italic uppercase tracking-tighter">Need more help?</h2>
-            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">Send us a request and we'll get back to you.</p>
-          </div>
-          <div>
-            <label htmlFor="subject" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
-              Subject
-            </label>
-            <input
-              type="text"
-              id="subject"
-              value={subject}
-              onChange={e => setSubject(e.target.value)}
-              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all"
-              required
-              placeholder="What do you need help with?"
-            />
-          </div>
-          <div>
-            <label htmlFor="message" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
-              Message
-            </label>
-            <textarea
-              id="message"
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              rows={5}
-              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all resize-none"
-              required
-              placeholder="Describe your issue in detail..."
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-4 bg-strawberry-600 text-white rounded-2xl font-black italic uppercase tracking-widest shadow-lg shadow-strawberry-600/20 hover:bg-strawberry-700 active:scale-[0.99] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+          {/* Help request form */}
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white dark:bg-neutral-900 p-10 rounded-[2.5rem] border border-neutral-200 dark:border-white/5 shadow-sm space-y-6"
           >
-            {isSubmitting
-              ? <Loader2 className="animate-spin" size={18} />
-              : <><Send size={16} /> Send Request</>
-            }
-          </button>
-        </form>
-
-      </motion.div>
+            <div>
+              <h2 className="text-2xl font-black italic uppercase tracking-tighter">Need more help?</h2>
+              <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">Send us a request and we'll get back to you.</p>
+            </div>
+            <div>
+              <label htmlFor="subject" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
+                Subject
+              </label>
+              <input
+                type="text"
+                id="subject"
+                value={subject}
+                onChange={e => setSubject(e.target.value)}
+                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all"
+                required
+                placeholder="What do you need help with?"
+              />
+            </div>
+            <div>
+              <label htmlFor="message" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
+                Message
+              </label>
+              <textarea
+                id="message"
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                rows={5}
+                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all resize-none"
+                required
+                placeholder="Describe your issue in detail..."
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-4 bg-strawberry-600 text-white rounded-2xl font-black italic uppercase tracking-widest shadow-lg shadow-strawberry-600/20 hover:bg-strawberry-700 active:scale-[0.99] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              {isSubmitting
+                ? <Loader2 className="animate-spin" size={18} />
+                : <><Send size={16} /> Send Request</>
+              }
+            </button>
+          </form>
+        </motion.div>
+      </div>
     </div>
   );
 };

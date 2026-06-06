@@ -7,7 +7,6 @@ import { ThemeToggle } from './ThemeToggle';
 import {
   LayoutDashboard,
   Calendar,
-  MessageSquare,
   User,
   Settings,
   LogOut,
@@ -75,7 +74,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       items: [
         { icon: UsersRound, label: 'Members', to: '/members' },
         { icon: ShoppingBag, label: 'Shops', to: '/shops' },
-        { icon: MessageSquare, label: 'Messages', to: '/messages', unreadCount: totalUnread },
         { icon: Sparkle, label: 'Suggestions', to: '/suggestions' },
         { icon: User, label: 'Profile', to: '/profile' },
       ]

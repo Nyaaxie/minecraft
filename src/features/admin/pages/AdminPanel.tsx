@@ -863,11 +863,19 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
 
           {/* Role */}
           <div className="col-span-2">
+            <label className={labelCls}>Role</label>
+            <input className={inputCls} value={form.favorite_role} onChange={e => setForm(f => ({ ...f, favorite_role: e.target.value }))} placeholder="e.g. Adventure" />
+          </div>
+          <div className="col-span-2">
             <label className={labelCls}>Role Icon URL</label>
             <input className={inputCls} value={form.favorite_role_url} onChange={e => setForm(f => ({ ...f, favorite_role_url: e.target.value }))} placeholder="https://..." />
           </div>
 
           {/* Biome */}
+          <div className="col-span-2">
+            <label className={labelCls}>Biome</label>
+            <input className={inputCls} value={form.favorite_biome} onChange={e => setForm(f => ({ ...f, favorite_biome: e.target.value }))} placeholder="e.g. Plains" />
+          </div>
           <div className="col-span-2">
             <label className={labelCls}>Biome Icon URL</label>
             <input className={inputCls} value={form.favorite_biome_url} onChange={e => setForm(f => ({ ...f, favorite_biome_url: e.target.value }))} placeholder="https://..." />
@@ -875,11 +883,19 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
 
           {/* Mob */}
           <div className="col-span-2">
+            <label className={labelCls}>Mob</label>
+            <input className={inputCls} value={form.favorite_mob} onChange={e => setForm(f => ({ ...f, favorite_mob: e.target.value }))} placeholder="e.g. Creeper" />
+          </div>
+          <div className="col-span-2">
             <label className={labelCls}>Mobs Icon URL</label>
             <input className={inputCls} value={form.favorite_mob_url} onChange={e => setForm(f => ({ ...f, favorite_mob_url: e.target.value }))} placeholder="https://..." />
           </div>
 
           {/* Block */}
+          <div className="col-span-2">
+            <label className={labelCls}>Block</label>
+            <input className={inputCls} value={form.favorite_block} onChange={e => setForm(f => ({ ...f, favorite_block: e.target.value }))} placeholder="e.g. Dirt" />
+          </div>
           <div className="col-span-2">
             <label className={labelCls}>Block Icon URL</label>
             <input className={inputCls} value={form.favorite_block_url} onChange={e => setForm(f => ({ ...f, favorite_block_url: e.target.value }))} placeholder="https://..." />

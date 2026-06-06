@@ -72,17 +72,17 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
         {/* Right Column: Large Favorites Icons */}
         <div className="flex flex-col gap-2 min-w-0">
           {[
-            { label: 'Role', url: member.favorite_role_url, icon: Sword },
-            { label: 'Biome', url: member.favorite_biome_url, icon: Trees },
-            { label: 'Mob', url: member.favorite_mob_url, icon: Ghost },
-            { label: 'Block', url: member.favorite_block_url, icon: Blocks },
+            { label: 'Role', url: member.favorite_role_url, icon: Sword, text: member.favorite_role },
+            { label: 'Biome', url: member.favorite_biome_url, icon: Trees, text: member.favorite_biome },
+            { label: 'Mob', url: member.favorite_mob_url, icon: Ghost, text: member.favorite_mob },
+            { label: 'Block', url: member.favorite_block_url, icon: Blocks, text: member.favorite_block },
           ].map((item) => (
             <div key={item.label} className="bg-neutral-50 dark:bg-neutral-800 p-2.5 rounded-2xl flex items-center gap-3 min-w-0 h-[52px] group/fav relative">
               <div className="bg-white dark:bg-neutral-700 p-2 rounded-xl shrink-0 shadow-sm">
                 <item.icon size={14} className="text-strawberry-500" />
               </div>
               <div className='flex flex-col min-w-0 flex-1'>
-                <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 leading-none mb-1">{item.label}</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 leading-none mb-1">{item.text || item.label}</p>
                 <div className="flex items-center">
                   {item.url ? (
                     <img src={item.url} alt={item.label} className="h-5 w-5 object-contain pixelated" />
@@ -117,7 +117,7 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
         <div className="flex flex-col items-center gap-1 text-[10px] font-bold text-neutral-600 dark:text-neutral-400">
           <div className="flex items-center gap-1">
             <Calendar size={14} className="text-strawberry-400" />
-            <span className="font-bold text-white text-[10px] uppercase tracking-widest whitespace-nowrap">
+            <span className="font-black text-neutral-900 dark:text-white text-[10px] uppercase tracking-widest whitespace-nowrap">
               {member.join_date ? new Date(member.join_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '---'}
             </span>
           </div>
@@ -196,7 +196,7 @@ const MembersPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 space-y-16">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">Berry<span className='text-strawberry-600'>List</span></h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white"><span className='text-strawberry-600'>Berry</span>List</h1>
         <p className="text-neutral-500 font-bold uppercase tracking-widest text-xs">Our little strawberry garden.</p>
       </div>
 
@@ -213,7 +213,7 @@ const MembersPage: React.FC = () => {
                 <img src={getAvatarUrl(member.username, member.avatar_url)} alt={member.username} className="w-full h-full object-cover" />
               </div>
               <p className="text-[10px] font-black truncate w-full group-hover:text-strawberry-600 transition-colors text-center">
-                {member.username}
+                {member.nickname || member.username}
               </p>
             </button>
           ))}

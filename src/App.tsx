@@ -51,9 +51,7 @@ const ResetPasswordPage = lazy(() => import('./features/auth/pages/ResetPassword
 const VerificationPage = lazy(() => import('./features/auth/pages/VerificationPage'));
 const LandingPage = lazy(() => import('./features/landing/pages/LandingPage'));
 const EventsPage = lazy(() => import('./features/events/pages/EventsPage'));
-const MessagesPage = lazy(() => import('./features/messages/pages/MessagesPage'));
 const ProfilePage = lazy(() => import('./features/profile/pages/ProfilePage'));
-const PublicProfilePage = lazy(() => import('./features/profile/pages/PublicProfilePage'));
 const AdminPanel = lazy(() => import('./features/admin/pages/AdminPanel'));
 const DynaMapPage = lazy(() => import('./features/dynamap/pages/DynaMapPage'));
 const AdminPluginsPage = lazy(() => import('./features/admin/pages/AdminPluginsPage'));
@@ -62,7 +60,6 @@ const AdminShopPage = lazy(() => import('./features/admin/pages/AdminShopPage'))
 const AdminShopItemPage = lazy(() => import('./features/admin/pages/AdminShopItemPage'));
 const AdminCategoriesPage = lazy(() => import('./features/admin/pages/AdminCategoriesPage'));
 const MembersPage = lazy(() => import('./features/members/pages/MembersPage'));
-const TransactionsPage = lazy(() => import('./features/transactions/pages/TransactionsPage'));
 const HelpPage = lazy(() => import('./features/help/pages/HelpPage'));
 const SuggestionsPage = lazy(() => import('./features/suggestions/pages/SuggestionsPage'));
 const StatusPage = lazy(() => import('./features/status/pages/StatusPage'));
@@ -138,12 +135,9 @@ function App() {
                 <Route path="/shops/:shopId/items/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/shops/:shopId/items/edit/:itemId" element={<ProtectedRoute adminOnly><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/shops/:shopId/items/:itemId/edit" element={<ProtectedRoute adminOnly><DashboardLayout><AdminShopItemPage /></DashboardLayout></ProtectedRoute>} />
-                <Route path="/transactions" element={<ProtectedRoute><DashboardLayout><TransactionsPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/events" element={<ProtectedRoute><DashboardLayout><EventsPage /></DashboardLayout></ProtectedRoute>} />
-                <Route path="/messages" element={<ProtectedRoute><DashboardLayout><MessagesPage /></DashboardLayout></ProtectedRoute>} />
 
                 <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfilePage /></DashboardLayout></ProtectedRoute>} />
-                <Route path="/profile/:id" element={<ProtectedRoute><DashboardLayout><PublicProfilePage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/help" element={<ProtectedRoute><DashboardLayout><HelpPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/suggestions" element={<ProtectedRoute><DashboardLayout><SuggestionsPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
