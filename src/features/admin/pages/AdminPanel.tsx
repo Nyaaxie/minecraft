@@ -692,6 +692,7 @@ const MembersTab = memo(({ onRefresh, onAssignBadges }: {
       username: '', nickname: '', bio: '', avatar_url: '',
       favorite_mob: '', favorite_block: '', favorite_color: '#e35a7f',
       favorite_biome: '', favorite_role: '', social_links: '',
+      favorite_mob_url: '', favorite_block_url: '', favorite_biome_url: '', favorite_role_url: '',
       birth_month: '', birthday: '', relationship: '', join_date: new Date().toISOString().split('T')[0],
       sort_order: members.length
     });
