@@ -4,6 +4,7 @@ import type { CommunityMember, Badge } from '../../../types/database.types';
 import { Loader2, Palette, Blocks, Ghost, Trees, Cake, Sword, Calendar, Timer, ExternalLink, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BadgeChip from '../../../components/BadgeChip';
+import { sortBadges, getAutomaticBadge } from '../../../utils/badgeUtils';
 
 interface MemberWithBadges extends CommunityMember {
   community_member_badges: {
@@ -21,7 +22,7 @@ const getSocialIcon = (platform: string) => {
   return <ExternalLink size={14} />;
 };
 
-const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
+const MemberCard: React.FC<{ member: MemberWithBadges; allBadges: Badge[] }> = ({ member, allBadges }) => {
   const socials = React.useMemo(() => {
     try { return member.social_links ? JSON.parse(member.social_links) : {}; }
     catch { return {}; }
@@ -41,6 +42,30 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
     return member.age;
   }, [member.birthday, member.age]);
 
+  const displayBadges = React.useMemo(() => {
+    const autoBadge = getAutomaticBadge(member.join_date, allBadges);
+    const manualBadges = member.community_member_badges.map(b => b.badges);
+    
+    // Identify which manual badges to keep (Owner, Salingkikit, Unbreaking, etc.)
+    const badgesToKeep = manualBadges.filter(b => {
+      const name = b.name.toLowerCase();
+      // Keep if it's owner, unbreaking, or salingkikit
+      if (name.includes('owner') || name.includes('unbreaking') || name.includes('salingk')) return true;
+      // Filter out original 'berry' or 'loyalty' badges that are replaced by automatic ones
+      if (name.includes('berry') || name.includes('loyalty')) return false;
+      // Keep any other manual badges
+      return true;
+    });
+
+    const hasPriorityBadge = badgesToKeep.some(b => {
+      const name = b.name.toLowerCase();
+      return name.includes('owner') || name.includes('salingk');
+    });
+
+    const finalBadges = hasPriorityBadge ? badgesToKeep : [...badgesToKeep, autoBadge];
+    return sortBadges(finalBadges);
+  }, [member.community_member_badges, member.join_date, allBadges]);
+
   return (
     <motion.div
       id={`member-${member.id}`}
@@ -59,8 +84,8 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
               <p className="text-xs font-bold text-strawberry-600 italic truncate block w-full">{member.username}</p>
             </div>
             <div className="flex flex-nowrap justify-start gap-1.5 mt-2  overflow-x-auto w-full" style={{ scrollbarWidth: 'none' }}>
-              {member.community_member_badges.map((b) => (
-                <BadgeChip key={b.badge_id} badge={b.badges} />
+              {displayBadges.map((badge) => (
+                <BadgeChip key={badge.id} badge={badge} />
               ))}
             </div>
             {member.relationship && (
@@ -162,18 +187,23 @@ const MemberCard: React.FC<{ member: MemberWithBadges }> = ({ member }) => {
 
 const MembersPage: React.FC = () => {
   const [members, setMembers] = useState<MemberWithBadges[]>([]);
+  const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMembers = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await dbService.getCommunityMembers();
-        setMembers(data as MemberWithBadges[]);
-      } catch (err) { console.error('Failed to fetch members:', err); }
+        const [memberData, badgeData] = await Promise.all([
+          dbService.getCommunityMembers(),
+          dbService.getBadges()
+        ]);
+        setMembers(memberData as MemberWithBadges[]);
+        setBadges(badgeData);
+      } catch (err) { console.error('Failed to fetch data:', err); }
       finally { setLoading(false); }
     };
-    fetchMembers();
+    fetchData();
   }, []);
 
   const sortedMembers = [...members].sort((a, b) => {
@@ -225,7 +255,7 @@ const MembersPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
           {sortedMembers.map(member => (
-            <MemberCard key={member.id} member={member} />
+            <MemberCard key={member.id} member={member} allBadges={badges} />
           ))}
         </div>
       )}

@@ -103,7 +103,7 @@ const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Assign Badges to ${userProfile?.username || 'Member'}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Assign Badges to ${userProfile?.username || 'Member'}`} size="md">
       {loading ? (
         <div className="flex justify-center items-center py-8">
           <Loader2 className="animate-spin text-strawberry-600" size={24} />
@@ -114,7 +114,12 @@ const AssignBadgesModal: React.FC<AssignBadgesModalProps> = ({
             <p className="text-center text-neutral-500">No badges available to assign.</p>
           ) : (
             <div className="grid grid-cols-1 gap-3">
-              {sortBadges(allBadges).map(badge => (
+              {sortBadges(allBadges).filter(b => {
+                const name = b.name.toLowerCase();
+                if (name.includes('owner') || name.includes('unbreaking') || name.includes('salingkikit')) return true;
+                if (name.includes('berry') || name.includes('loyalty')) return false;
+                return true;
+              }).map(badge => (
                 <div
                   key={badge.id}
                   className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer

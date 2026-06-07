@@ -7,9 +7,16 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'lg' }) => {
+  const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg'
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -27,10 +34,10 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl shadow-neutral-900/20 w-full max-w-lg pointer-events-auto overflow-hidden"
+              className={`bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl shadow-neutral-900/20 w-full ${sizeClasses[size]} pointer-events-auto overflow-hidden`}
             >
-              <div className="flex items-center justify-between p-8 pb-4">
-                <h3 className="text-2xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
+              <div className="flex items-center justify-between p-7 pb-4">
+                <h3 className="text-xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white">
                   {title}
                 </h3>
                 <button 
@@ -40,7 +47,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
                   <X size={20} />
                 </button>
               </div>
-              <div className="p-8 pt-4">
+              <div className="p-7 pt-2">
                 {children}
               </div>
             </motion.div>

@@ -83,66 +83,77 @@ const AddEditBadgeModal: React.FC<AddEditBadgeModalProps> = ({ isOpen, onClose, 
       isOpen={isOpen}
       onClose={onClose}
       title={editingBadge ? 'Edit Badge' : 'Create New Badge'}
+      size="md"
     >
-      <form onSubmit={handleSave} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">Badge Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="e.g., Owner, Java Player"
-            required
-            className={inputCls}
-          />
+      <form onSubmit={handleSave} className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="col-span-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Badge Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="e.g., Owner, Java Player"
+              required
+              className={inputCls}
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Description (Optional)</label>
+            <textarea
+              name="description"
+              value={formData.description || ''}
+              onChange={handleChange}
+              placeholder="A short description..."
+              className={`${inputCls} h-20 py-2.5`}
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Badge Color</label>
+            <div className="flex gap-2">
+              <input
+                type="color"
+                name="color"
+                value={formData.color}
+                onChange={handleChange}
+                required
+                className="w-10 h-10 p-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                name="color"
+                value={formData.color}
+                onChange={handleChange}
+                className={`${inputCls} text-[10px] uppercase`}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Priority</label>
+            <input
+              type="number"
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              className={inputCls}
+              min="0"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Icon URL (Optional)</label>
+            <input
+              type="text"
+              name="icon_url"
+              value={formData.icon_url || ''}
+              onChange={handleChange}
+              placeholder="https://..."
+              className={inputCls}
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">Description (Optional)</label>
-          <textarea
-            name="description"
-            value={formData.description || ''}
-            onChange={handleChange}
-            placeholder="A short description of the badge"
-            className={`${inputCls} h-24`}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">Badge Color</label>
-          <input
-            type="color"
-            name="color"
-            value={formData.color}
-            onChange={handleChange}
-            required
-            className="w-full h-12 p-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl cursor-pointer"
-            title="Choose badge color"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">Icon URL (Optional)</label>
-          <input
-            type="text"
-            name="icon_url"
-            value={formData.icon_url || ''}
-            onChange={handleChange}
-            placeholder="URL to an icon image"
-            className={inputCls}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">Priority</label>
-          <input
-            type="number"
-            name="priority"
-            value={formData.priority}
-            onChange={handleChange}
-            className={inputCls}
-            min="0"
-          />
-          <p className="text-xs text-neutral-500 mt-1">Higher number means higher priority (displayed first).</p>
-        </div>
-        <label className={checkboxRowCls}>
+
+        <label className={`${checkboxRowCls} py-2`}>
           <input
             type="checkbox"
             name="is_visible"
@@ -151,8 +162,7 @@ const AddEditBadgeModal: React.FC<AddEditBadgeModalProps> = ({ isOpen, onClose, 
             className="accent-strawberry-600 w-4 h-4"
           />
           <div>
-            <p className="text-sm font-bold text-neutral-900 dark:text-white">Visible to users</p>
-            <p className="text-xs text-neutral-500">If unchecked, badge will not be displayed.</p>
+            <p className="text-[11px] font-black uppercase tracking-tight text-neutral-900 dark:text-white leading-none">Visible to users</p>
           </div>
         </label>
         <button

@@ -18,7 +18,7 @@ import {
   Tag, Hash
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { sortBadges } from '../../../utils/badgeUtils';
+import { sortBadges, LOYALTY_BADGES } from '../../../utils/badgeUtils';
 import { getMinecraftItemImageUrl } from '../../../utils/minecraftItemApi';
 import Select from 'react-select';
 import { useTheme } from '../../../components/ThemeProvider';
@@ -1300,6 +1300,8 @@ const BadgesTab = memo(({ badges, onRefresh, onAdd, onEdit }: {
 }) => {
   const [deleteTarget, setDeleteTarget] = useState<Badge | null>(null);
   const sorted = useMemo(() => sortBadges(badges), [badges]);
+  
+  const autoBadges = useMemo(() => Object.values(LOYALTY_BADGES), []);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -1307,21 +1309,68 @@ const BadgesTab = memo(({ badges, onRefresh, onAdd, onEdit }: {
     catch { toast.error('Failed to delete badge'); }
   };
 
+  const filteredManualBadges = useMemo(() => {
+    return sorted.filter(b => {
+      const name = b.name.toLowerCase();
+      // Keep special ones
+      if (name.includes('owner') || name.includes('unbreaking') || name.includes('salingkikit')) return true;
+      // Filter out loyalty/berry ones
+      if (name.includes('berry') || name.includes('loyalty')) return false;
+      return true;
+    });
+  }, [sorted]);
+
   return (
-    <>
-      <SectionHeader icon={Award} title="Badges" count={badges.length} onAdd={onAdd} addLabel="New Badge" />
-      {badges.length === 0 ? <EmptyState icon={Award} label="No badges created" /> : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {sorted.map(b => (
-            <div key={b.id} className={`${cardCls} flex items-center justify-between gap-3`}>
-              <BadgeChip badge={b} />
-              <RowActions onEdit={() => onEdit(b)} onDelete={() => setDeleteTarget(b)} />
-            </div>
-          ))}
+    <div className="space-y-8">
+      {/* Manual Badges */}
+      <section>
+        <SectionHeader icon={Award} title="Manual Badges" count={filteredManualBadges.length} onAdd={onAdd} addLabel="New Badge" />
+        {filteredManualBadges.length === 0 ? <EmptyState icon={Award} label="No manual badges found" /> : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {filteredManualBadges.map(b => (
+              <div key={b.id} className={`${cardCls} flex items-center justify-between gap-3`}>
+                <BadgeChip badge={b} />
+                <RowActions onEdit={() => onEdit(b)} onDelete={() => setDeleteTarget(b)} />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Automatic Loyalty Badges */}
+      <section>
+        <div className="flex items-center gap-3 mb-4">
+          <Sparkle size={18} className="text-strawberry-600 shrink-0" />
+          <h2 className="text-xl font-black italic uppercase tracking-tighter">Automatic Loyalty Badges</h2>
+          <span className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 bg-strawberry-500/10 px-2.5 py-1 rounded-lg">4</span>
         </div>
-      )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 opacity-80">
+          {autoBadges.map(b => {
+            // Find if this automatic badge already has a DB entry
+            const dbEntry = badges.find(db => db.name.toLowerCase().trim() === b.name.toLowerCase().trim());
+            return (
+              <div key={b.id} className={`${cardCls} flex items-center justify-between gap-3 border-dashed`}>
+                <BadgeChip badge={dbEntry || b} />
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 italic">Automatic</span>
+                  <button 
+                    onClick={() => onEdit(dbEntry || { ...b, id: undefined as any })} 
+                    className="p-1.5 rounded-lg bg-neutral-100 dark:bg-white/5 text-neutral-400 hover:text-strawberry-600 hover:bg-strawberry-500/10 transition-all"
+                  >
+                    <Edit2 size={11} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <p className="mt-4 text-[10px] text-neutral-400 font-bold uppercase tracking-widest italic">
+          * These badges are assigned automatically based on join date. Editing their color here will create/update a theme override in the database.
+        </p>
+      </section>
+
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={(deleteTarget as any)?.name || 'badge'} />
-    </>
+    </div>
   );
 });
 
