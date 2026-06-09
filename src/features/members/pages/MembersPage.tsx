@@ -189,6 +189,7 @@ const MembersPage: React.FC = () => {
   const [members, setMembers] = useState<MemberWithBadges[]>([]);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'default' | 'age' | 'birthmonth'>('default');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -206,7 +207,45 @@ const MembersPage: React.FC = () => {
     fetchData();
   }, []);
 
+  const getMemberAge = (member: CommunityMember) => {
+    if (member.birthday) {
+      const birthDate = new Date(member.birthday);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+    return member.age || 0;
+  };
+
+  const monthOrder = [
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december'
+  ];
+
+  const getMonthIndex = (month: string | null) => {
+    if (!month) return 12;
+    const index = monthOrder.indexOf(month.toLowerCase());
+    return index === -1 ? 12 : index;
+  };
+
   const sortedMembers = [...members].sort((a, b) => {
+    if (sortBy === 'age') {
+      const ageA = getMemberAge(a);
+      const ageB = getMemberAge(b);
+      if (ageA !== ageB) return ageB - ageA; // Oldest first
+      return a.username.localeCompare(b.username);
+    }
+    if (sortBy === 'birthmonth') {
+      const monthA = getMonthIndex(a.birth_month);
+      const monthB = getMonthIndex(b.birth_month);
+      if (monthA !== monthB) return monthA - monthB;
+      return a.username.localeCompare(b.username);
+    }
+
     // Treat 0 or null as 999 (last)
     const orderA = (a.sort_order === 0 || a.sort_order === null) ? 999 : a.sort_order;
     const orderB = (b.sort_order === 0 || b.sort_order === null) ? 999 : b.sort_order;
@@ -228,6 +267,41 @@ const MembersPage: React.FC = () => {
       <div className="text-center space-y-4">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-neutral-900 dark:text-white"><span className='text-strawberry-600'>Berry</span>List</h1>
         <p className="text-neutral-500 font-bold uppercase tracking-widest text-xs">Our little strawberry garden.</p>
+
+        <div className="flex flex-wrap justify-center gap-2 pt-4">
+          <button
+            onClick={() => setSortBy('default')}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              sortBy === 'default'
+                ? 'bg-strawberry-500 text-white shadow-lg shadow-strawberry-500/25'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+            }`}
+          >
+            Default
+          </button>
+          <button
+            onClick={() => setSortBy('age')}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+              sortBy === 'age'
+                ? 'bg-strawberry-500 text-white shadow-lg shadow-strawberry-500/25'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+            }`}
+          >
+            <Timer size={14} />
+            By Age
+          </button>
+          <button
+            onClick={() => setSortBy('birthmonth')}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+              sortBy === 'birthmonth'
+                ? 'bg-strawberry-500 text-white shadow-lg shadow-strawberry-500/25'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+            }`}
+          >
+            <Cake size={14} />
+            By Birthmonth
+          </button>
+        </div>
       </div>
 
       {/* Browse Grid */}
