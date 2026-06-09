@@ -10,7 +10,6 @@ import type { Rule } from '../../../types/database.types';
 // ─── Section Card ───────────────────────────────────────────────────────────
 
 const SectionCard = ({
-  id: _id,
   icon: Icon,
   title,
   count,
@@ -239,41 +238,52 @@ const HelpPage = () => {
           ) : data.commands.map((cmd: any) => (
             <div
               key={cmd.id}
-              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-5 border border-neutral-100 dark:border-white/5 hover:border-red-500/30 transition-all"
+              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-3xl p-6 border border-neutral-100 dark:border-white/5 hover:border-red-500/30 transition-all flex flex-col"
             >
-              {/* Command name */}
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
-                  <Terminal size={14} className="text-red-500" />
-                </div>
-                <code className="text-strawberry-600 font-black bg-strawberry-500/10 px-2.5 py-1 rounded-lg text-sm tracking-tight">
-                  {cmd.name}
-                </code>
+              {/* Plugin Title */}
+              <div className="flex items-center justify-between mb-2">
+                {cmd.plugin_title ? (
+                  <span className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 bg-strawberry-500/10 px-2.5 py-1 rounded-lg">
+                    {cmd.plugin_title}
+                  </span>
+                ) : <div />}
               </div>
 
-              {cmd.syntax && (
-                <div className="mb-2">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 mr-1.5">Syntax:</span>
-                  <code className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
-                    {cmd.syntax}
-                  </code>
+              {/* Plugin Image */}
+              {cmd.url && (
+                <div className="mb-4 rounded-xl overflow-hidden border border-neutral-200 dark:border-white/5">
+                  <img src={cmd.url} alt={cmd.plugin_title} className="w-full h-auto max-h-40 object-cover" />
                 </div>
               )}
 
-              <div className="h-px bg-neutral-200 dark:bg-white/5 mb-3" />
-
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed line-clamp-3">
-                {cmd.description}
-              </p>
-
-              {cmd.permission && (
-                <div className="mt-3 flex items-center gap-1.5">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400">Permission:</span>
-                  <code className="text-[9px] font-bold text-neutral-400 dark:text-neutral-500 font-mono">
-                    {cmd.permission}
-                  </code>
-                </div>
+              {/* Plugin Description */}
+              {cmd.plugin_description && (
+                <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-5 italic opacity-70">
+                  {cmd.plugin_description}
+                </p>
               )}
+
+              {/* Commands List */}
+              <div className="space-y-4">
+                {(Array.isArray(cmd.commands_data) && cmd.commands_data.length > 0 ? cmd.commands_data : [{ command: cmd.name, description: cmd.description }]).map((cd: any, idx: number) => (
+                  <div key={idx} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+                        <Terminal size={12} className="text-red-500" />
+                      </div>
+                      <code className="text-strawberry-600 font-black bg-strawberry-500/10 px-2 py-0.5 rounded-md text-xs tracking-tight">
+                        {cd.command}
+                      </code>
+                    </div>
+                    <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed pl-9">
+                      {cd.description}
+                    </p>
+                    {idx < (Array.isArray(cmd.commands_data) ? cmd.commands_data.length - 1 : 0) && (
+                      <div className="h-px bg-neutral-200 dark:bg-white/5 mx-9 my-3" />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -340,18 +350,18 @@ const HelpPage = () => {
       color: '#10b981',
       count: data.guides.length,
       content: (
-        <div className="flex flex-col gap-4 mt-4">
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
           {data.guides.length === 0 ? (
-            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest py-8 text-center italic">
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest col-span-2 py-8 text-center italic">
               No guides published yet.
             </p>
           ) : data.guides.map((guide: any) => (
             <div
               key={guide.id}
-              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-5 border border-neutral-100 dark:border-white/5 hover:border-emerald-500/30 transition-all"
+              className="bg-neutral-50 dark:bg-neutral-800/60 rounded-3xl p-6 border border-neutral-100 dark:border-white/5 hover:border-emerald-500/30 transition-all flex flex-col"
             >
               {/* Guide header */}
-              <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
                     <BookOpen size={14} className="text-emerald-500" />
@@ -360,16 +370,15 @@ const HelpPage = () => {
                     {guide.title}
                   </h3>
                 </div>
-                {guide.category && (
-                  <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-600 px-2 py-1 rounded-lg uppercase tracking-widest shrink-0">
-                    {guide.category}
-                  </span>
-                )}
               </div>
 
-              <div className="h-px bg-neutral-200 dark:bg-white/5 mb-3" />
-
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed whitespace-pre-line">
+              {/* Guide Image */}
+              {guide.url && (
+                <div className="mb-4 rounded-xl overflow-hidden border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-white/5">
+                  <img src={guide.url} alt={guide.title} className="w-full h-auto max-h-40 object-cover object-center" />
+                </div>
+              )}
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed whitespace-pre-line flex-grow">
                 {guide.content}
               </p>
             </div>
@@ -377,103 +386,102 @@ const HelpPage = () => {
         </div>
       ),
     },
+
   ];
 
   return (
-    <div className="h-[calc(100vh-6rem)] w-full flex flex-col gap-4">
-      {/* Header */}
-      <div className="flex items-center justify-between px-2 mb-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600">
-            <HelpCircle size={32} />
-          </div>
-          <div>
-            <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
-              Help
-            </h1>
-            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
-              A harvest of helpful knowledge!
-            </p>
+    <div className="h-[calc(100vh-6rem)] w-full overflow-y-auto pr-2">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between px-2 mb-4">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-strawberry-600/10 rounded-3xl flex items-center justify-center border border-strawberry-600/20 text-strawberry-600">
+              <HelpCircle size={32} />
+            </div>
+            <div>
+              <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
+                Help
+              </h1>
+              <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mt-1">
+                A harvest of helpful knowledge!
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto w-full pr-2">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-          {/* The 5 accordion section cards */}
-          <div className="space-y-3">
-            {SECTIONS.map((section, i) => (
-              <motion.div
-                key={section.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 }}
-              >
-                <SectionCard
-                  id={section.id}
-                  icon={section.icon}
-                  title={section.title}
-                  count={section.count}
-                  color={section.color}
-                  isOpen={openSection === section.id}
-                  onToggle={() => toggle(section.id)}
-                >
-                  {section.content}
-                </SectionCard>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Help request form */}
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white dark:bg-neutral-900 p-10 rounded-[2.5rem] border border-neutral-200 dark:border-white/5 shadow-sm space-y-6"
-          >
-            <div>
-              <h2 className="text-2xl font-black italic uppercase tracking-tighter">Need more help?</h2>
-              <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">Send us a request and we'll get back to you.</p>
-            </div>
-            <div>
-              <label htmlFor="subject" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
-                Subject
-              </label>
-              <input
-                type="text"
-                id="subject"
-                value={subject}
-                onChange={e => setSubject(e.target.value)}
-                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all"
-                required
-                placeholder="What do you need help with?"
-              />
-            </div>
-            <div>
-              <label htmlFor="message" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
-                Message
-              </label>
-              <textarea
-                id="message"
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                rows={5}
-                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all resize-none"
-                required
-                placeholder="Describe your issue in detail..."
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-4 bg-strawberry-600 text-white rounded-2xl font-black italic uppercase tracking-widest shadow-lg shadow-strawberry-600/20 hover:bg-strawberry-700 active:scale-[0.99] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+        {/* The 5 accordion section cards */}
+        <div className="space-y-3">
+          {SECTIONS.map((section, i) => (
+            <motion.div
+              key={section.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07 }}
             >
-              {isSubmitting
-                ? <Loader2 className="animate-spin" size={18} />
-                : <><Send size={16} /> Send Request</>
-              }
-            </button>
-          </form>
-        </motion.div>
-      </div>
+              <SectionCard
+                id={section.id}
+                icon={section.icon}
+                title={section.title}
+                count={section.count}
+                color={section.color}
+                isOpen={openSection === section.id}
+                onToggle={() => toggle(section.id)}
+              >
+                {section.content}
+              </SectionCard>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Help request form */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-neutral-900 p-10 rounded-[2.5rem] border border-neutral-200 dark:border-white/5 shadow-sm space-y-6"
+        >
+          <div>
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter">Need more help?</h2>
+            <p className="text-xs text-neutral-400 font-bold uppercase tracking-widest mt-1">Send us a request and we'll get back to you.</p>
+          </div>
+          <div>
+            <label htmlFor="subject" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
+              Subject
+            </label>
+            <input
+              type="text"
+              id="subject"
+              value={subject}
+              onChange={e => setSubject(e.target.value)}
+              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all"
+              required
+              placeholder="What do you need help with?"
+            />
+          </div>
+          <div>
+            <label htmlFor="message" className="block text-[10px] font-black text-neutral-500 mb-1.5 uppercase tracking-widest">
+              Message
+            </label>
+            <textarea
+              id="message"
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              rows={5}
+              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl text-sm font-bold placeholder:text-neutral-400 focus:outline-none focus:border-strawberry-500/50 focus:ring-2 focus:ring-strawberry-500/10 transition-all resize-none"
+              required
+              placeholder="Describe your issue in detail..."
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-4 bg-strawberry-600 text-white rounded-2xl font-black italic uppercase tracking-widest shadow-lg shadow-strawberry-600/20 hover:bg-strawberry-700 active:scale-[0.99] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+          >
+            {isSubmitting
+              ? <Loader2 className="animate-spin" size={18} />
+              : <><Send size={16} /> Send Request</>
+            }
+          </button>
+        </form>
+      </motion.div>
     </div>
   );
 };

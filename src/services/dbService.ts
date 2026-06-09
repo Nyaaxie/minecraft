@@ -380,7 +380,16 @@ export const dbService = {
     if (error) throw error;
     return data;
   },
-  async createCommand(command: { name: string; description: string }) {
+  async createCommand(command: { 
+    name: string; 
+    description: string; 
+    plugin_title?: string; 
+    plugin_description?: string; 
+    url?: string;
+    syntax?: string;
+    permission?: string;
+    commands_data?: { command: string; description: string }[];
+  }) {
     const { data, error } = await supabase.from('commands').insert({
       ...command,
       created_at: new Date().toISOString()
@@ -388,7 +397,16 @@ export const dbService = {
     if (error) throw error;
     return data;
   },
-  async updateCommand(id: string, updates: { name: string; description: string }) {
+  async updateCommand(id: string, updates: { 
+    name?: string; 
+    description?: string; 
+    plugin_title?: string; 
+    plugin_description?: string; 
+    url?: string;
+    syntax?: string;
+    permission?: string;
+    commands_data?: { command: string; description: string }[];
+  }) {
     const { data, error } = await supabase.from('commands').update(updates).eq('id', id).select().single();
     if (error) throw error;
     return data;
@@ -405,7 +423,7 @@ export const dbService = {
     if (error) throw error;
     return data;
   },
-  async createGuide(guide: { title: string; content: string }) {
+  async createGuide(guide: any) {
     const { data, error } = await supabase.from('guides').insert({
       ...guide,
       created_at: new Date().toISOString()
@@ -413,7 +431,7 @@ export const dbService = {
     if (error) throw error;
     return data;
   },
-  async updateGuide(id: string, updates: { title: string; content: string }) {
+  async updateGuide(id: string, updates: any) {
     const { data, error } = await supabase.from('guides').update(updates).eq('id', id).select().single();
     if (error) throw error;
     return data;
@@ -422,6 +440,21 @@ export const dbService = {
     const { error } = await supabase.from('guides').delete().eq('id', id);
     if (error) throw error;
     return true;
+  },
+
+  async uploadGuideImage(file: File) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `guides/${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars') // Using existing 'avatars' bucket for simplicity if it's general purpose
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    return data.publicUrl;
   },
 
   // --- Minecraft Versions ---

@@ -312,6 +312,14 @@ export interface ServerInfo {
   created_at: string
 }
 
+export interface Guide {
+  id: string
+  title: string
+  content: string
+  url: string | null
+  created_at: string
+}
+
 export interface UserBadge {
   user_id: string
   badge_id: string
@@ -474,6 +482,11 @@ export interface Database {
         Row: UserBadge
         Insert: Omit<UserBadge, 'assigned_at'> & Partial<Pick<UserBadge, 'assigned_at'>>
         Update: Partial<UserBadge>
+      }
+      guides: {
+        Row: Guide
+        Insert: Omit<Guide, 'id' | 'created_at'> & Partial<Pick<Guide, 'id' | 'created_at'>>
+        Update: Partial<Guide>
       }
       community_members: {
         Row: CommunityMember

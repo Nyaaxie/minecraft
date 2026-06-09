@@ -15,7 +15,7 @@ import {
   Users, CheckSquare, Bell, BookOpen, Puzzle, Terminal,
   Shield, Plus, Edit2, X, Save, Search, RefreshCw,
   Info, MessageSquare, Sparkle, UsersRound, Store, User,
-  Tag, Hash
+  Tag, Hash, Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sortBadges, LOYALTY_BADGES } from '../../../utils/badgeUtils';
@@ -256,8 +256,8 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
   const players = useMemo(() => filtered.filter(p => p.role !== 'admin'), [filtered]);
 
   const openEdit = useCallback((p: Profile) => {
-    setForm({ 
-      role: p.role || 'player', 
+    setForm({
+      role: p.role || 'player',
       username: p.username || '',
       avatar_url: p.avatar_url || ''
     });
@@ -268,8 +268,8 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
     if (!editTarget) return;
     setSaving(true);
     try {
-      await dbService.updateProfile(editTarget.id, { 
-        role: form.role as UserRole, 
+      await dbService.updateProfile(editTarget.id, {
+        role: form.role as UserRole,
         username: form.username,
         avatar_url: form.avatar_url
       });
@@ -542,22 +542,97 @@ const CommandsTab = memo(({ commands, onRefresh }: { commands: any[]; onRefresh:
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
-  const [form, setForm] = useState({ name: '', description: '', syntax: '', permission: '' });
+  const [form, setForm] = useState({
+    plugin_title: '',
+    plugin_description: '',
+    url: '',
+    commands_data: [{ command: '', description: '' }]
+  });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const filtered = useMemo(
-    () => commands.filter(c => c.name?.toLowerCase().includes(search.toLowerCase()) || c.description?.toLowerCase().includes(search.toLowerCase())),
+    () => commands.filter(c =>
+      c.plugin_title?.toLowerCase().includes(search.toLowerCase()) ||
+      c.plugin_description?.toLowerCase().includes(search.toLowerCase()) ||
+      (c.commands_data as any[])?.some(cd => 
+        cd.command?.toLowerCase().includes(search.toLowerCase()) || 
+        cd.description?.toLowerCase().includes(search.toLowerCase())
+      )
+    ),
     [commands, search]
   );
 
-  const openAdd = useCallback(() => { setForm({ name: '', description: '', syntax: '', permission: '' }); setEditTarget(null); setModalOpen(true); }, []);
-  const openEdit = useCallback((c: any) => { setForm({ name: c.name || '', description: c.description || '', syntax: c.syntax || '', permission: c.permission || '' }); setEditTarget(c); setModalOpen(true); }, []);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await dbService.uploadGuideImage(file); // Reusing upload function
+      setForm(f => ({ ...f, url }));
+      toast.success('Image uploaded');
+    } catch { toast.error('Upload failed'); }
+    finally { setUploading(false); }
+  };
+
+  const openAdd = useCallback(() => {
+    setForm({
+      plugin_title: '',
+      plugin_description: '',
+      url: '',
+      commands_data: [{ command: '', description: '' }]
+    });
+    setEditTarget(null);
+    setModalOpen(true);
+  }, []);
+
+  const openEdit = useCallback((c: any) => {
+    setForm({
+      plugin_title: c.plugin_title || '',
+      plugin_description: c.plugin_description || '',
+      url: c.url || '',
+      commands_data: Array.isArray(c.commands_data) && c.commands_data.length > 0 
+        ? c.commands_data 
+        : [{ command: c.name || '', description: c.description || '' }]
+    });
+    setEditTarget(c);
+    setModalOpen(true);
+  }, []);
+
+  const addCommandField = () => {
+    setForm(f => ({
+      ...f,
+      commands_data: [...f.commands_data, { command: '', description: '' }]
+    }));
+  };
+
+  const removeCommandField = (index: number) => {
+    if (form.commands_data.length <= 1) return;
+    setForm(f => ({
+      ...f,
+      commands_data: f.commands_data.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateCommandField = (index: number, field: 'command' | 'description', value: string) => {
+    setForm(f => ({
+      ...f,
+      commands_data: f.commands_data.map((cd, i) => i === index ? { ...cd, [field]: value } : cd)
+    }));
+  };
 
   const handleSave = async () => {
     setSaving(true);
+    // Prepare payload, setting primary name/description from first command for compatibility
+    const payload = {
+      ...form,
+      name: form.commands_data[0]?.command || '',
+      description: form.commands_data[0]?.description || ''
+    };
+
     try {
-      if (editTarget) { await dbService.updateCommand(editTarget.id, form); toast.success('Command updated'); }
-      else { await dbService.createCommand(form); toast.success('Command created'); }
+      if (editTarget) { await dbService.updateCommand(editTarget.id, payload); toast.success('Command updated'); }
+      else { await dbService.createCommand(payload); toast.success('Command created'); }
       setModalOpen(false); onRefresh();
     } catch { toast.error('Failed to save command'); }
     finally { setSaving(false); }
@@ -575,20 +650,70 @@ const CommandsTab = memo(({ commands, onRefresh }: { commands: any[]; onRefresh:
       {filtered.length === 0 ? <EmptyState icon={Terminal} label="No commands registered" /> : filtered.map(cmd => (
         <div key={cmd.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0 font-black text-sm text-strawberry-600">/</div>
+            <div className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0 font-black text-sm text-strawberry-600">
+              {cmd.url ? (
+                <img src={cmd.url} alt="" className="w-full h-full object-cover rounded-xl" />
+              ) : (
+                '/'
+              )}
+            </div>
             <div className="min-w-0">
-              <p className="text-sm font-black italic uppercase tracking-tight truncate">{cmd.name}</p>
-              <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest truncate">{cmd.description}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-black italic uppercase tracking-tight truncate">{cmd.plugin_title || 'Untitled Plugin'}</p>
+                <span className="text-[9px] bg-strawberry-100 dark:bg-strawberry-500/10 text-strawberry-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-widest">
+                  {(cmd.commands_data as any[])?.length || 1} Commands
+                </span>
+              </div>
+              <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest truncate">{cmd.plugin_description || 'No description'}</p>
             </div>
           </div>
           <RowActions onEdit={() => openEdit(cmd)} onDelete={() => setDeleteTarget(cmd)} />
         </div>
       ))}
       <CrudModal open={modalOpen} onClose={() => setModalOpen(false)} title={editTarget ? 'Edit Command' : 'New Command'} icon={Terminal} onSubmit={handleSave} submitting={saving}>
-        <div><label className={labelCls}>Command Name</label><input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="/command" /></div>
-        <div><label className={labelCls}>Syntax</label><input className={inputCls} value={form.syntax} onChange={e => setForm(f => ({ ...f, syntax: e.target.value }))} placeholder="/command [args]" /></div>
-        <div><label className={labelCls}>Permission</label><input className={inputCls} value={form.permission} onChange={e => setForm(f => ({ ...f, permission: e.target.value }))} placeholder="plugin.command.use" /></div>
-        <div><label className={labelCls}>Description</label><textarea className={`${inputCls} resize-none`} rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="What this command does..." /></div>
+        <div><label className={labelCls}>Plugin Title</label><input className={inputCls} value={form.plugin_title} onChange={e => setForm(f => ({ ...f, plugin_title: e.target.value }))} placeholder="EssentialsX" /></div>
+        <div>
+          <label className={labelCls}>Image URL or Upload</label>
+          <div className="flex gap-2">
+            <input className={inputCls} value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} placeholder="https://..." />
+            <label className="flex items-center justify-center px-4 bg-neutral-100 dark:bg-white/5 rounded-xl cursor-pointer hover:bg-neutral-200 dark:hover:bg-white/10 transition-all">
+              {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} className="text-neutral-400" />}
+              <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+            </label>
+          </div>
+        </div>
+        <div><label className={labelCls}>Plugin Description</label><input className={inputCls} value={form.plugin_description} onChange={e => setForm(f => ({ ...f, plugin_description: e.target.value }))} placeholder="Core utility plugin" /></div>
+        
+        <div className="h-px bg-neutral-100 dark:bg-white/5 my-2" />
+        
+        <div className="flex items-center justify-between mb-2">
+          <label className={labelCls + " mb-0"}>Commands</label>
+          <button type="button" onClick={addCommandField} className="text-[10px] font-black uppercase tracking-widest text-strawberry-600 hover:text-strawberry-700 flex items-center gap-1 transition-colors">
+            <Plus size={12} /> Add Command
+          </button>
+        </div>
+
+        <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+          {form.commands_data.map((cd, index) => (
+            <div key={index} className="p-4 rounded-2xl bg-neutral-50 dark:bg-white/[0.02] border border-neutral-100 dark:border-white/5 relative group">
+              {form.commands_data.length > 1 && (
+                <button type="button" onClick={() => removeCommandField(index)} className="absolute top-2 right-2 p-1.5 text-neutral-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                  <X size={14} />
+                </button>
+              )}
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest mb-1 block">Command {index + 1}</label>
+                  <input className={inputCls} value={cd.command} onChange={e => updateCommandField(index, 'command', e.target.value)} placeholder="/command" />
+                </div>
+                <div>
+                  <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest mb-1 block">Description</label>
+                  <textarea className={`${inputCls} resize-none`} rows={2} value={cd.description} onChange={e => updateCommandField(index, 'description', e.target.value)} placeholder="What this command does..." />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </CrudModal>
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.name || 'command'} />
     </>
@@ -600,13 +725,26 @@ const GuidesTab = memo(({ guides, onRefresh }: { guides: any[]; onRefresh: () =>
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
-  const [form, setForm] = useState({ title: '', content: '', category: '' });
+  const [form, setForm] = useState({ title: '', content: '', url: '' });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const filtered = useMemo(() => guides.filter(g => g.title?.toLowerCase().includes(search.toLowerCase())), [guides, search]);
 
-  const openAdd = useCallback(() => { setForm({ title: '', content: '', category: '' }); setEditTarget(null); setModalOpen(true); }, []);
-  const openEdit = useCallback((g: any) => { setForm({ title: g.title || '', content: g.content || '', category: g.category || '' }); setEditTarget(g); setModalOpen(true); }, []);
+  const openAdd = useCallback(() => { setForm({ title: '', content: '', url: '' }); setEditTarget(null); setModalOpen(true); }, []);
+  const openEdit = useCallback((g: any) => { setForm({ title: g.title || '', content: g.content || '', url: g.url || '' }); setEditTarget(g); setModalOpen(true); }, []);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await dbService.uploadGuideImage(file);
+      setForm(f => ({ ...f, url }));
+      toast.success('Image uploaded');
+    } catch { toast.error('Upload failed'); }
+    finally { setUploading(false); }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -630,10 +768,16 @@ const GuidesTab = memo(({ guides, onRefresh }: { guides: any[]; onRefresh: () =>
       {filtered.length === 0 ? <EmptyState icon={BookOpen} label="No guides published" /> : filtered.map(g => (
         <div key={g.id} className={`${cardCls} flex items-center justify-between gap-4 mb-3`}>
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-strawberry-500/10 flex items-center justify-center shrink-0"><BookOpen size={13} className="text-strawberry-600" /></div>
+            <div className="w-8 h-8 rounded-xl bg-strawberry-500/10 flex items-center justify-center shrink-0">
+              {g.url ? (
+                <img src={g.url} alt="" className="w-full h-full object-cover rounded-xl" />
+              ) : (
+                <BookOpen size={13} className="text-strawberry-600" />
+              )}
+            </div>
             <div className="min-w-0">
               <p className="text-sm font-black italic uppercase tracking-tight truncate">{g.title}</p>
-              {g.category && <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">{g.category}</p>}
+              {g.url && <p className="text-[9px] text-neutral-400 font-bold truncate italic">{g.url}</p>}
             </div>
           </div>
           <RowActions onEdit={() => openEdit(g)} onDelete={() => setDeleteTarget(g)} />
@@ -641,7 +785,18 @@ const GuidesTab = memo(({ guides, onRefresh }: { guides: any[]; onRefresh: () =>
       ))}
       <CrudModal open={modalOpen} onClose={() => setModalOpen(false)} title={editTarget ? 'Edit Guide' : 'New Guide'} icon={BookOpen} onSubmit={handleSave} submitting={saving}>
         <div><label className={labelCls}>Title</label><input className={inputCls} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Guide title" /></div>
-        <div><label className={labelCls}>Category</label><input className={inputCls} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} placeholder="e.g. Survival, Redstone, Economy" /></div>
+        
+        <div>
+          <label className={labelCls}>Image URL or Upload</label>
+          <div className="flex gap-2">
+            <input className={inputCls} value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} placeholder="https://..." />
+            <label className="flex items-center justify-center px-4 bg-neutral-100 dark:bg-white/5 rounded-xl cursor-pointer hover:bg-neutral-200 dark:hover:bg-white/10 transition-all">
+              {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} className="text-neutral-400" />}
+              <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+            </label>
+          </div>
+        </div>
+
         <div><label className={labelCls}>Content</label><textarea className={`${inputCls} resize-none`} rows={6} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Guide content (Markdown supported)..." /></div>
       </CrudModal>
       <ConfirmDelete open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.title || 'guide'} />
@@ -1300,7 +1455,7 @@ const BadgesTab = memo(({ badges, onRefresh, onAdd, onEdit }: {
 }) => {
   const [deleteTarget, setDeleteTarget] = useState<Badge | null>(null);
   const sorted = useMemo(() => sortBadges(badges), [badges]);
-  
+
   const autoBadges = useMemo(() => Object.values(LOYALTY_BADGES), []);
 
   const handleDelete = async () => {
@@ -1353,8 +1508,8 @@ const BadgesTab = memo(({ badges, onRefresh, onAdd, onEdit }: {
                 <BadgeChip badge={dbEntry || b} />
                 <div className="flex items-center gap-2">
                   <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 italic">Automatic</span>
-                  <button 
-                    onClick={() => onEdit(dbEntry || { ...b, id: undefined as any })} 
+                  <button
+                    onClick={() => onEdit(dbEntry || { ...b, id: undefined as any })}
                     className="p-1.5 rounded-lg bg-neutral-100 dark:bg-white/5 text-neutral-400 hover:text-strawberry-600 hover:bg-strawberry-500/10 transition-all"
                   >
                     <Edit2 size={11} />
