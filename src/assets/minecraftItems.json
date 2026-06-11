@@ -6058,5 +6058,13 @@
   {
     "label": "Netherite Nautilus Armor",
     "value": "netherite_nautilus_armor"
+  },
+  {
+    "label": "Harness",
+    "value": "white_harness"
+  },
+  {
+    "label": "Bone Block",
+    "value": "bone_block"
   }
 ]
