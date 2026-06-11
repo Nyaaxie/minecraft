@@ -46,7 +46,7 @@ const ShopsPage: React.FC = () => {
   }, [shops, searchTerm]);
 
   return (
-    <div className="h-[calc(100vh-6rem)] w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between px-2 mb-4">
         <div className="flex items-center gap-4">
@@ -73,7 +73,7 @@ const ShopsPage: React.FC = () => {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto w-full pr-2 space-y-8">
+      <div className="w-full pr-2 space-y-8">
         {/* Search & Sort */}
         <div className="bg-white dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-xl shadow-neutral-900/5 backdrop-blur-sm flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">

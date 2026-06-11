@@ -1,8 +1,8 @@
 import { Map as MapIcon } from 'lucide-react';
 
-const DynaMapPage = () => {
+const LiveMapPage = () => {
   const PROXY_MAP_URL = import.meta.env.DEV
-    ? "http://strawberrysmp.mcplay.fun:25709/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442"
+    ? import.meta.env.VITE_LIVE_MAP_URL
     : `${import.meta.env.VITE_MAP_PROXY_URL}/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442`;
 
   return (
@@ -38,4 +38,4 @@ const DynaMapPage = () => {
   );
 };
 
-export default DynaMapPage;
+export default LiveMapPage;

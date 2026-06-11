@@ -53,7 +53,7 @@ const LandingPage = lazy(() => import('./features/landing/pages/LandingPage'));
 const EventsPage = lazy(() => import('./features/events/pages/EventsPage'));
 const ProfilePage = lazy(() => import('./features/profile/pages/ProfilePage'));
 const AdminPanel = lazy(() => import('./features/admin/pages/AdminPanel'));
-const DynaMapPage = lazy(() => import('./features/dynamap/pages/DynaMapPage'));
+const LiveMapPage = lazy(() => import('./features/livemap/pages/LiveMapPage'));
 const AdminPluginsPage = lazy(() => import('./features/admin/pages/AdminPluginsPage'));
 const ShopsPage = lazy(() => import('./features/shops/pages/ShopsPage'));
 const AdminShopPage = lazy(() => import('./features/admin/pages/AdminShopPage'));
@@ -125,7 +125,7 @@ function App() {
 
                 <Route path="/dashboard" element={<Navigate to="/help" replace />} />
 
-                <Route path="/dynamap" element={<ProtectedRoute><DashboardLayout><DynaMapPage /></DashboardLayout></ProtectedRoute>} />
+                <Route path="/livemap" element={<ProtectedRoute><DashboardLayout><LiveMapPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/members" element={<DashboardLayout><MembersPage /></DashboardLayout>} />
                 <Route path="/admin/plugins/new" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />
                 <Route path="/admin/plugins/:id" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPluginsPage /></DashboardLayout></ProtectedRoute>} />

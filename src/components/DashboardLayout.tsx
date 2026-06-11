@@ -64,7 +64,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     {
       title: 'Explore',
       items: [
-        { icon: MapIcon, label: 'Live Map', to: '/dynamap' },
+        { icon: MapIcon, label: 'Live Map', to: '/livemap' },
         { icon: Calendar, label: 'Events', to: '/events' },
         { icon: Info, label: 'Help', to: '/help' },
       ]
