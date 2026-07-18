@@ -1,9 +1,14 @@
 import { Map as MapIcon } from 'lucide-react';
 
 const LiveMapPage = () => {
-  const PROXY_MAP_URL = import.meta.env.DEV
-    ? import.meta.env.VITE_LIVE_MAP_URL
-    : `${import.meta.env.VITE_MAP_PROXY_URL}/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442`;
+  const DEFAULT_LIVE_MAP_URL = 'http://strawberrysmp.mcplay.fun:25709/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442';
+  const DEFAULT_PROXY_MAP_URL = 'https://minecraft-map-proxy.jamesbrizuela513.workers.dev/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442';
+
+  const mapUrl = import.meta.env.DEV
+    ? import.meta.env.VITE_LIVE_MAP_URL?.trim() || DEFAULT_LIVE_MAP_URL
+    : import.meta.env.VITE_MAP_PROXY_URL?.trim()
+      ? `${import.meta.env.VITE_MAP_PROXY_URL.trim()}/?world=world&renderer=vintage_story&zoom=2&x=-1004&z=442`
+      : DEFAULT_PROXY_MAP_URL;
 
   return (
     <div className="h-[calc(100vh-6rem)] w-full flex flex-col gap-4">
@@ -27,7 +32,7 @@ const LiveMapPage = () => {
       {/* Map iframe */}
       <div className="flex-1 w-full bg-neutral-900 rounded-[2.5rem] border border-neutral-200 dark:border-white/5 overflow-hidden shadow-2xl relative">
         <iframe
-          src={PROXY_MAP_URL}
+          src={mapUrl}
           className="w-full h-full border-none"
           title="Minecraft Live Map"
           allowFullScreen
