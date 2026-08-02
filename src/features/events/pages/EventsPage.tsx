@@ -9,8 +9,6 @@ import {
   Clock,
   X,
   Loader2,
-  Trash2,
-  Users,
   AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,7 +29,6 @@ const EventsPage = () => {
   const { profile } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -61,30 +58,7 @@ const EventsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this event?')) return;
-    setDeletingId(id);
-    try {
-      await dbService.deleteEvent(id);
-      refetch();
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to delete event');
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
-  const handleRSVP = async (eventId: string, status: 'joined' | 'maybe' | 'declined') => {
-    if (!profile) return;
-    try {
-      await dbService.upsertRSVP(eventId, profile.id, status);
-      toast.success('RSVP updated!');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to update RSVP');
-    }
-  };
 
   return (
     <div className="h-[calc(100vh-6rem)] w-full flex flex-col gap-4">
@@ -161,14 +135,10 @@ const EventsPage = () => {
                   <p className="text-sm text-neutral-600 dark:text-neutral-400 italic line-clamp-3 leading-relaxed">"{event.description || 'Accessing mission brief...'}"</p>
 
                   <div className="space-y-3 pt-4 border-t border-neutral-100 dark:border-white/5">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center">
                       <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
                         <Clock size={16} className="text-strawberry-600" />
                         <span>{new Date(event.start_time).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
-                        <Users size={16} className="text-strawberry-600" />
-                        <span>{(event as any).rsvpCount} Joined</span>
                       </div>
                     </div>
                     {event.location && (
@@ -179,33 +149,6 @@ const EventsPage = () => {
                     )}
                   </div>              </div>
 
-                <div className="bg-neutral-50 dark:bg-white/5 p-6 border-t border-neutral-100 dark:border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleRSVP(event.id, 'joined')}
-                      className="px-5 py-2.5 bg-strawberry-600 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-strawberry-700 transition-all active:scale-95 shadow-lg shadow-strawberry-600/20"
-                    >
-                      Join
-                    </button>
-                    <button
-                      onClick={() => handleRSVP(event.id, 'maybe')}
-                      className="px-5 py-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all active:scale-95"
-                    >
-                      Maybe
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {profile?.role === 'admin' && (
-                      <button
-                        onClick={() => handleDelete(event.id)}
-                        disabled={deletingId === event.id}
-                        className="p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl text-neutral-500 hover:text-red-600 dark:hover:text-red-500 transition-all active:scale-90"
-                      >
-                        {deletingId === event.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
-                      </button>
-                    )}
-                  </div>
-                </div>
               </motion.div>
             ))}
           </div>
