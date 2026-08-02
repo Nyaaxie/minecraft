@@ -20,10 +20,17 @@ export const useEvents = () => {
 
       if (error) throw error;
       
-      const processedEvents = (data || []).map(event => ({
-        ...event,
-        rsvpCount: (event as any).event_rsvps?.[0]?.count || 0
-      }));
+      const processedEvents = (data || []).map(event => {
+        let status = event.status;
+        if (status === 'upcoming' && new Date(event.start_time).getTime() < Date.now()) {
+          status = 'completed';
+        }
+        return {
+          ...event,
+          status,
+          rsvpCount: (event as any).event_rsvps?.[0]?.count || 0
+        };
+      });
 
       setEvents(processedEvents);
     } catch (err: any) {
