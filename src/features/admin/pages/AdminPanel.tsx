@@ -243,15 +243,21 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
   profiles: Profile[]; onRefresh: () => void; onAssignBadges: (p: Profile) => void;
 }) => {
   const [search, setSearch] = useState('');
+  const [onlineFirst, setOnlineFirst] = useState(false);
   const [editTarget, setEditTarget] = useState<Profile | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
   const [form, setForm] = useState({ role: '', username: '', avatar_url: '' });
   const [saving, setSaving] = useState(false);
 
-  const filtered = useMemo(
-    () => profiles.filter(p => p.username?.toLowerCase().includes(search.toLowerCase())),
-    [profiles, search]
-  );
+  const filtered = useMemo(() => {
+    const matchingProfiles = profiles.filter(p => p.username?.toLowerCase().includes(search.toLowerCase()));
+    if (!onlineFirst) return matchingProfiles;
+
+    return [...matchingProfiles].sort((a, b) => {
+      if (a.status !== b.status) return a.status === 'online' ? -1 : 1;
+      return (a.username || '').localeCompare(b.username || '');
+    });
+  }, [profiles, search, onlineFirst]);
   const admins = useMemo(() => filtered.filter(p => p.role === 'admin'), [filtered]);
   const players = useMemo(() => filtered.filter(p => p.role !== 'admin'), [filtered]);
 
@@ -321,7 +327,20 @@ const UsersTab = memo(({ profiles, onRefresh, onAssignBadges }: {
 
   return (
     <>
-      <SectionHeader icon={Users} title="Users" count={filtered.length} search={search} onSearch={setSearch} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <SectionHeader icon={Users} title="Users" count={filtered.length} search={search} onSearch={setSearch} />
+        <button
+          onClick={() => setOnlineFirst(value => !value)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest italic transition-all ${onlineFirst
+            ? 'bg-green-500/10 border-green-500/30 text-green-600'
+            : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-white/5 text-neutral-500 dark:text-neutral-400 hover:text-strawberry-600 hover:border-strawberry-500/30'
+            }`}
+          aria-pressed={onlineFirst}
+        >
+          <span className={`w-2 h-2 rounded-full ${onlineFirst ? 'bg-green-500' : 'bg-neutral-400'}`} />
+          Online first
+        </button>
+      </div>
       {filtered.length === 0 ? <EmptyState icon={Users} label="No users found" /> : (
         <>
           <div className="mb-6">
